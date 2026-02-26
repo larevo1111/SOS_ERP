@@ -29,10 +29,12 @@ El equipo de agentes opera bajo la siguiente jerarquía:
 | Elemento | Convención | Ejemplo |
 |---|---|---|
 | Archivos PHP | PascalCase | `CrearVenta.php` |
-| Tablas SQL | snake_case plural | `ordenes_de_venta` |
+| Tablas SQL | prefijo_snake_case plural | `ven_ordenes_venta` |
 | Endpoints | snake_case | `/api/ventas/crear_cotizacion` |
 | Archivos Vue | PascalCase | `PantallaVentas.vue` |
 | Archivos JS | camelCase | `useVentas.js` |
+
+> Los prefijos por módulo están definidos en la sección 6.1.
 
 ---
 
@@ -285,7 +287,7 @@ Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se ne
 
 ---
 
-## 7. Infraestructura y ambientes
+## 11. Infraestructura y ambientes
 
 ### 7.1 Ambientes de trabajo
 
@@ -384,7 +386,7 @@ Cuando se agrega una empresa nueva al sistema, se crea automáticamente su carpe
 
 ---
 
-## 11. Política de Calidad y Orden (5S)
+## 12. Política de Calidad y Orden (5S)
 
 Para que el proyecto crezca de forma limpia y los agentes no se confundan, aplicamos estas reglas:
 
