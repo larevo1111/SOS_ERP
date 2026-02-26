@@ -154,3 +154,230 @@ Antes de proponer o ejecutar cualquier cosa, leer en este orden:
 2. `CONTEXTO_ACTIVO.md`
 3. El plan de la tarea asignada (`PLAN_nombre.md`)
 4. Los archivos del repositorio relevantes a la tarea
+---
+
+## 6.1 Prefijos de tablas por módulo
+
+Toda tabla debe tener un prefijo que identifique a qué módulo pertenece.
+Si hay duda sobre qué prefijo usar, el agente propone y Santi aprueba antes de crear la tabla.
+
+| Prefijo | Módulo |
+|---|---|
+| `sys_` | Sistema (usuarios, empresas, permisos, roles) |
+| `com_` | Comercial (productos, marcas, multimedia) |
+| `inv_` | Inventario |
+| `ven_` | Ventas |
+| `crm_` | CRM |
+| `compras_` | Compras |
+| `log_` | Logística |
+| `tar_` | Tareas |
+| `din_` | Dinero / Finanzas |
+| `costos_` | Costos (solo AppSheet, no modificar) |
+| `prod_` | Producción (solo AppSheet, no modificar) |
+
+> Si un módulo nuevo no tiene prefijo definido aquí, el agente propone uno y espera aprobación de Santi antes de usarlo.
+
+---
+
+## 6.2 Convención de nombres de campos
+
+- Siempre en `snake_case` minúscula. Sin excepción.
+- El campo `empresa` siempre en minúscula. Las tablas heredadas de AppSheet pueden tenerlo como `Empresa` (con mayúscula), pero las tablas nuevas del ERP usan siempre `empresa` en minúscula.
+- Cuando se vaya a crear una tabla nueva, el agente propone los nombres de los campos y Santi los aprueba o modifica antes de ejecutar el SQL.
+
+---
+
+## 6.3 Tablas protegidas (no modificar estructura)
+
+Estas tablas están enlazadas con AppSheet o son parte del sistema heredado.
+**Ningún agente puede modificar su estructura (agregar, quitar o renombrar campos).**
+Los registros se pueden leer desde el ERP pero no modificar sin autorización explícita de Santi.
+
+**Módulo Costos (`costos_`)**
+costos_categorias, costos_consumibles, costos_encabezados_productos, costos_etiquetas, costos_fases, costos_formulas, costos_grupos_productos, costos_herramientas, costos_mp_insumos, costos_procedimientos, costos_procedimientos_consumibles, costos_procedimientos_herramientas, costos_procedimientos_imag_vid, costos_procedimientos_mp_insumos, costos_procedimientos_pp, costos_procedimientos_servicios_mo, costos_producto_procedimientos, costos_recursos_ambientales, costos_residuos, costos_residuos_destinos, costos_rutas_producto, costos_servicios_mo, costos_tipos_procedimientos, costos_tipos_residuos, costos_unidades, costos_unidades_tipos
+
+**Módulo Producción (`prod_`)**
+prod_estados_op, prod_ordenes_consumos, prod_ordenes_detalles, prod_ordenes_encabezados, prod_ordenes_lotes, prod_ordenes_residuos, prod_ordenes_resultantes, prod_ordenes_trazabilidad, prod_tipos_orden
+
+**Módulo Dinero (`din_`)**
+din_categorias_egresos, din_categorias_ingresos, din_cuentas, din_egresos, din_filtro_egresos, din_filtro_ingresos, din_ingresos, din_traslados
+
+**Inventario (`inv_`)**
+inv_bodegas, inv_tipos_pp
+
+**Sistema (`sys_`)**
+sys_acciones, sys_areas, sys_banderas, sys_empresa, sys_permisos, sys_permisos_acciones, sys_permisos_campos, sys_roles, sys_usuarios, sys_usuarios_empresas
+
+**Otras heredadas**
+menu_ppal *(estructura intocable, contenido puede actualizarse)*
+Ensayoski *(tabla de pruebas, ignorar)*
+
+---
+
+## 6.4 Tablas modificables por el ERP
+
+Solo las tablas `com_` existentes y todas las tablas nuevas que cree el ERP pueden modificarse libremente.
+
+**Módulo Comercial (`com_`)**
+com_marcas, com_productos, com_productos_multimedia
+
+---
+
+## 6.5 Campos obligatorios en tablas nuevas
+
+Toda tabla nueva debe incluir estos campos sin excepción:
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | BIGINT UNSIGNED, AUTO_INCREMENT, PRIMARY KEY | Llave interna de MySQL |
+| `uid` | VARCHAR(100), UNIQUE NOT NULL | Identificador único. Empieza con las siglas de la empresa (campo `siglas` en `sys_empresa`) seguido de guion y código único. Ejemplo: `OS-20240301-001` |
+| `empresa` | VARCHAR(50), NOT NULL | Siglas de la empresa, siempre en minúscula |
+| `usuario_creador` | VARCHAR(150), NOT NULL | Email del usuario que creó el registro (referencia a `sys_usuarios.Email`) |
+| `usuario_ult_modificacion` | VARCHAR(150), NOT NULL | Email del último usuario que modificó el registro |
+| `fecha_creacion` | DATETIME, DEFAULT current_timestamp() | Fecha y hora de creación |
+| `fecha_ult_modificacion` | DATETIME, DEFAULT current_timestamp() ON UPDATE current_timestamp() | Fecha y hora de última modificación |
+
+> `fecha_ult_modificacion` es la base para sincronización offline futura. No eliminarlo ni renombrarlo en ninguna tabla nueva.
+
+---
+
+## 6.6 Soporte offline futuro
+
+El sistema está diseñado para soportar modo offline en el futuro.
+`fecha_ult_modificacion` permite saber qué registro es más reciente al sincronizar entre dispositivo y servidor. Regla de conflicto: el último en modificar gana.
+
+Al diseñar cualquier módulo, no implementar lógicas que dependan de conexión en tiempo real para calcular o validar datos críticos.
+
+---
+
+## 6.7 Backup de base de datos
+
+Antes de cualquier modificación a la estructura de la BD (crear tabla, agregar campo, modificar tipo de dato), se debe generar un backup.
+
+**Nombre del archivo:** `backup_YYYYMMDD_HHMMSS_descripcion_corta.sql`
+Ejemplo: `backup_20240315_143022_agregar_tabla_clientes.sql`
+
+**Dónde se guarda:** En el servidor Hostinger en `/backups/bd/`. Nunca se sube a GitHub. Agregar `/backups/` al `.gitignore`.
+
+**Protocolo:** El agente le indica a Santi el comando exacto para hacer el backup. Santi lo ejecuta y confirma. Solo después el agente procede con el cambio.
+
+---
+
+## 6.8 Conexión a la base de datos
+
+La conexión se maneja mediante un archivo `.env` que **nunca se sube a GitHub**.
+
+**Ubicación:** raíz del proyecto en `/erp/.env`. Debe estar en `.gitignore`.
+
+**Variables requeridas:**
+```
+DB_HOST=
+DB_PORT=3306
+DB_NAME=
+DB_USER=
+DB_PASS=
+DB_CHARSET=utf8mb4
+```
+
+**Cómo se usa:** El archivo `infraestructura/base_datos/Conexion.php` lee estas variables con `getenv()`. Ningún otro archivo puede contener credenciales directamente.
+
+Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se necesita validar la conexión, pedirle a Santi que ejecute la prueba localmente.
+
+---
+
+## 7. Infraestructura y ambientes
+
+### 7.1 Ambientes de trabajo
+
+El proyecto opera en dos ambientes separados. Nunca se trabaja directo en producción.
+
+**Ambiente local (desarrollo)**
+Donde se construye y prueba todo. Nadie externo lo ve.
+- Máquina: PC de Santi (Ubuntu)
+- Código: `/home/osserver/.gemini/antigravity/scratch/SOS_ERP/`
+- Archivos subidos por usuarios: `/home/osserver/SOS_ERP_archivos/`
+- BD: `sos_erp_local` en MySQL local
+- URL: `http://localhost/erp`
+- `.env` ubicado en: `/home/osserver/.gemini/antigravity/scratch/SOS_ERP/.env`
+
+**Ambiente de producción (servidor)**
+Solo recibe código probado y aprobado por Santi.
+- Servidor: Hostinger Shared Hosting
+- Código: `/home/u768061575/domains/oscomunidad.com/public_html/erp/`
+- Archivos subidos por usuarios: `/home/u768061575/SOS_ERP_archivos/`
+- BD: `u768061575_os_comunidad` en MySQL de Hostinger
+- URL: `https://erp.oscomunidad.com`
+- `.env` ubicado en: `/home/u768061575/domains/oscomunidad.com/public_html/erp/.env`
+
+> El archivo `.env` existe en cada ambiente por separado. Nunca se sube a GitHub. Está protegido por `.gitignore`. Cada ambiente tiene sus propias credenciales.
+
+---
+
+### 7.2 Acceso SSH al servidor
+
+Para conectarse al servidor de producción desde la terminal:
+
+```
+ssh u768061575@109.106.250.195 -p 65002
+```
+
+Cuando pida la contraseña, la ingresa Santi. El agente nunca la maneja.
+
+---
+
+### 7.3 Flujo de despliegue
+
+```
+Código local → prueba → Santi aprueba → push a GitHub → despliega en Hostinger
+```
+
+**Paso a paso:**
+1. El agente construye y prueba en local
+2. Santi revisa y aprueba
+3. Se hace commit y push al repo `SOS_ERP` en GitHub
+4. Santi se conecta al servidor por SSH y ejecuta el pull
+5. El servidor queda actualizado
+
+El comando para actualizar el servidor desde SSH es:
+```bash
+cd ~/domains/oscomunidad.com/public_html/erp && git pull
+```
+
+---
+
+### 7.4 Regla de contraseñas
+
+Cuando una tarea requiere ingresar una contraseña (SSH, MySQL, etc.), el agente **nunca la maneja directamente**. En cambio:
+
+1. Le indica a Santi el comando exacto a ejecutar
+2. Le avisa que cuando el sistema pida la contraseña, la ingrese él
+3. Espera confirmación de Santi para continuar
+
+El agente **nunca bloquea una tarea** diciendo que no puede por falta de contraseña. Siempre encuentra la forma de delegarle ese paso a Santi con instrucciones claras.
+
+Ejemplo correcto:
+> "Ejecuta este comando. Cuando te pida la contraseña, ingresa la de tu MySQL local y presiona Enter."
+
+Ejemplo incorrecto:
+> "No puedo completar esta tarea porque requiere una contraseña."
+
+---
+
+### 7.5 Archivos del sistema
+
+Los archivos subidos por usuarios (imágenes, documentos, facturas) se guardan fuera de `public_html` para que no sean accesibles directamente por URL. El ERP los sirve a través de PHP con control de permisos.
+
+**Estructura de carpetas de archivos:**
+```
+SOS_ERP_archivos/
+└── empresas/
+    └── OS/              → una carpeta por siglas de empresa
+        ├── CARPETA NOMBRE 1 (Se les asigna el nombre en cada caso, según el modulo o el contenido, debes preguntar sobre el nombre de estas carpetas)
+        ├── CARPETA NOMBRE 2
+        ├── CARPETA NOMBRE 3
+        └── CARPETA NOMBRE 4
+```
+
+Cuando se agrega una empresa nueva al sistema, se crea automáticamente su carpeta con sus siglas.
+
+**Almacenamiento futuro:** cuando el proyecto escale a muchos clientes, los archivos migrarán a Cloudflare R2 (~$15 USD/TB/mes, sin costo de transferencia). El código no cambiará porque todo se lee desde variables del `.env`.
