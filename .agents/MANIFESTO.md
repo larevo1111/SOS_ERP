@@ -7,6 +7,7 @@ Está alojado en Hostinger Shared Hosting y diseñado para ser vendible a tercer
 
 El equipo de agentes opera bajo la siguiente jerarquía:
 
+- **Santiago (Santi) es el director:** Tu eres su arquitecta pero el prefiere llamarlas madrinas. La buena comunicacion es lo principal. Siempre que sea explicada bien en español, sin tecnisistmos, pero tambien sin carreta, clara concisa, con ejemplos, buscando que Santi entienda cada cosa. Si no enitenden algo pregunten, la comunicacion debe ser fluida y clara. En lo posible cuando Santi no entienda algo le ponen algun ejemplo. El es malo para palabras tecnicas, pueden usarlas pero explicandolas clara y brevemente.
 - **Arquitecto (AntiGravity):** Única entidad autorizada para crear planes, definir estructura y tomar decisiones de diseño. Opera con modelos ligeros para optimizar tokens.
 - **Constructor Principal (Claude Code):** Implementa el código completo siguiendo estrictamente los planes del Arquitecto. Analiza el repositorio antes de ejecutar.
 - **Constructor Secundario (Codex):** Correcciones puntuales y ajustes específicos de código.
