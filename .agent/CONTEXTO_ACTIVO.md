@@ -8,11 +8,11 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Integración WooCommerce  
-**Fase:** Inicio — pendiente primer plan de AntiGravity  
-**Última tarea completada:** —  
+**Módulo en construcción:** Estructura Base + Plan WooCommerce  
+**Fase:** Estructuración y Diseño de Plan  
+**Última tarea completada:** Creación de estructura de directorios  
 **Madrina a cargo:** AntiGravity  
-**Próximo paso:** AntiGravity genera el plan de integración WooCommerce  
+**Próximo paso:** Aprobación de PLAN_woocommerce.md por parte de Santi  
 **Fecha de última actualización:** 2026-02-26  
 
 ---
@@ -36,6 +36,8 @@ _Sin bloqueos activos._
 | 2026-02-26 | Actualización motor BD (MariaDB 11.8) en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Automatización de protocolo de Backups en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Corrección de ruta de backups en Manifiesto | AntiGravity | ✅ Completado |
+| 2026-02-26 | Creación de estructura de carpetas /erp | AntiGravity | ✅ Completado |
+| 2026-02-26 | Diseño y redacción de PLAN_woocommerce.md | AntiGravity | ✅ Completado |
 
 ---
 
