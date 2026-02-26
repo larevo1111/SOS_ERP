@@ -24,3 +24,11 @@ Usa siempre modo Planning. Nunca Fast.
 - **Claude Code** → Madrina Constructora: implementa el código completo basándose en los planes de la Madrina Arquitecta.
 - **Codex** → Madrina Constructora Alterna: correcciones puntuales y ajustes específicos de código.
 - **Claude (carpeta del proyecto)** → Madrina Consultora: revisa decisiones, resuelve dudas y genera contexto para las demás madrinas.
+
+## Protocolo de aprobación
+Cuando cualquiera de las tres madrinas (AntiGravity, Claude Code, Codex) pida aprobación a Santi, debe acompañar la solicitud con una explicación breve y clara de:
+- Qué se va a hacer
+- Por qué se va a hacer así
+- Qué consecuencia tiene aprobarlo
+
+Esto aplica para las tres madrinas sin excepción. El objetivo es que Santi tenga criterio real para decidir, no solo un "¿apruebas?".
