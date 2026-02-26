@@ -263,7 +263,7 @@ No se requiere backup para: despliegues de código PHP, cambios de frontend, ins
 **Nombre del archivo:** `backup_YYYYMMDD_HHMMSS_descripcion_corta.sql`
 Ejemplo: `backup_20240315_143022_agregar_tabla_clientes.sql`
 
-**Dónde se guarda:** En el servidor Hostinger en `/backups/bd/`. Nunca se sube a GitHub. Agregar `/backups/` al `.gitignore`.
+**Dónde se guarda:** En el servidor Hostinger en `~/backups/bd/`. Nunca se sube a GitHub. Agregar `/backups/` al `.gitignore`.
 
 **Protocolo:** El agente ejecuta el comando del backup en el servidor de Hostinger a través del acceso SSH (`hostinger_erp`) y confirma a Santi el éxito de la operación antes de proceder con el cambio estructural.
 
