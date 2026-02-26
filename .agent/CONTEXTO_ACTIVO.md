@@ -33,6 +33,8 @@ _Sin bloqueos activos._
 | 2026-02-26 | Corrección subnumeración e Identificación de Agentes | AntiGravity | ✅ Completado |
 | 2026-02-26 | Documentación de protocolo de acceso SSH en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Simplificación sección 11.2 (SSH) en Manifiesto | AntiGravity | ✅ Completado |
+| 2026-02-26 | Actualización motor BD (MariaDB 11.8) en Manifiesto | AntiGravity | ✅ Completado |
+| 2026-02-26 | Automatización de protocolo de Backups en Manifiesto | AntiGravity | ✅ Completado |
 
 ---
 

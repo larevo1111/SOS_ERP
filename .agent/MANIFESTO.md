@@ -89,7 +89,7 @@ El equipo de agentes opera bajo la siguiente jerarquía:
 
 ## 6. Base de datos
 
-- MySQL único central.
+- MariaDB 11.8 único central. Tanto el servidor de Hostinger como el ambiente local deben usar MariaDB 11.8 para evitar conflictos de collation.
 - Todas las tablas incluyen: `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
 - Multiempresa lógica por campo, no física.
 
@@ -265,7 +265,7 @@ Ejemplo: `backup_20240315_143022_agregar_tabla_clientes.sql`
 
 **Dónde se guarda:** En el servidor Hostinger en `/backups/bd/`. Nunca se sube a GitHub. Agregar `/backups/` al `.gitignore`.
 
-**Protocolo:** El agente indica a Santi el comando exacto para hacer el backup. Santi lo ejecuta en el servidor por SSH y confirma. Solo después el agente procede con el cambio.
+**Protocolo:** El agente ejecuta el comando del backup en el servidor de Hostinger a través del acceso SSH (`hostinger_erp`) y confirma a Santi el éxito de la operación antes de proceder con el cambio estructural.
 
 ---
 
@@ -288,6 +288,8 @@ DB_CHARSET=utf8mb4
 **Cómo se usa:** El archivo `infraestructura/base_datos/Conexion.php` lee estas variables con `getenv()`. Ningún otro archivo puede contener credenciales directamente.
 
 Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se necesita validar la conexión, pedirle a Santi que ejecute la prueba localmente.
+
+Nota: el motor de base de datos es MariaDB 11.8, no MySQL. Usar MySQL en local causa conflictos de collation con las tablas heredadas de AppSheet.
 
 ---
 
