@@ -403,3 +403,39 @@ Para que el proyecto crezca de forma limpia y los agentes no se confundan, aplic
     1.  **Requiere "Aprobado" explícito de Santi:** Planes nuevos de módulos, cambios a la estructura de la base de datos, cambios en tablas protegidas y modificaciones a este Manifiesto.
     2.  **Flujo Libre (No requiere aprobación nueva):** Correcciones de errores dentro de una tarea, creación de archivos definidos en un plan ya aprobado y ajustes de código menores dentro del alcance.
 *   **Disciplina de Contexto:** El paso cero de todo agente es leer `MANIFESTO.md` y `CONTEXTO_ACTIVO.md`. La Arquitecta auditará el orden antes de proponer nuevos planes.
+
+---
+
+## 13. Protocolo de Acceso SSH a Producción (Hostinger)
+
+Para acceder al servidor de producción desde la PC local (usuario `osserver`), se debe seguir este protocolo de llaves:
+
+### 13.1 Precondiciones
+*   Ejecutar comandos en la PC local, no dentro del servidor.
+*   Llaves existentes: `~/.ssh/sos_erp` (privada) y `~/.ssh/sos_erp.pub` (pública).
+*   Alias configurado: `hostinger_erp` en `~/.ssh/config`.
+
+### 13.2 Configuración del Alias (`~/.ssh/config`)
+```text
+Host hostinger_erp
+    HostName 109.106.250.195
+    Port 65002
+    User u768061575
+    IdentityFile ~/.ssh/sos_erp
+```
+
+### 13.3 Permisos de seguridad obligatorios
+```bash
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/sos_erp ~/.ssh/config
+chmod 644 ~/.ssh/sos_erp.pub
+```
+
+### 13.4 Comandos de acceso
+*   **Acceso directo (con alias):** `ssh hostinger_erp`
+*   **Prueba rápida:** `ssh hostinger_erp "echo conectado_ok"`
+*   **Conexión manual (respaldo):** `ssh -i ~/.ssh/sos_erp -p 65002 u768061575@109.106.250.195`
+
+### 13.5 Notas de seguridad
+*   Si SSH pide contraseña, revisar los permisos de los archivos y el contenido del alias.
+*   El agente nunca maneja contraseñas; si se requiere, se pide a Santi que la ingrese en el comando indicado.

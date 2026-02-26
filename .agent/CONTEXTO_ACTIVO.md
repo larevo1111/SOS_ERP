@@ -31,6 +31,7 @@ _Sin bloqueos activos._
 | 2026-02-26 | Implementación de Política 5S en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Actualización de Política de Backups en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Corrección subnumeración e Identificación de Agentes | AntiGravity | ✅ Completado |
+| 2026-02-26 | Documentación de protocolo de acceso SSH en Manifiesto | AntiGravity | ✅ Completado |
 
 ---
 
