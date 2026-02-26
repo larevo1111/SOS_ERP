@@ -254,14 +254,18 @@ Al diseñar cualquier módulo, no implementar lógicas que dependan de conexión
 
 ## 6.7 Backup de base de datos
 
-Antes de cualquier modificación a la estructura de la BD (crear tabla, agregar campo, modificar tipo de dato), se debe generar un backup.
+Los cambios de estructura de BD se desarrollan y prueban primero en local. Solo cuando Santi aprueba, se aplican en Hostinger. El backup es obligatorio únicamente antes de aplicar cambios de estructura en el servidor de Hostinger, nunca en local.
+
+Se requiere backup antes de: crear una tabla nueva, agregar o quitar campos, modificar tipo de datos de un campo.
+
+No se requiere backup para: despliegues de código PHP, cambios de frontend, inserción o modificación de registros normales.
 
 **Nombre del archivo:** `backup_YYYYMMDD_HHMMSS_descripcion_corta.sql`
 Ejemplo: `backup_20240315_143022_agregar_tabla_clientes.sql`
 
 **Dónde se guarda:** En el servidor Hostinger en `/backups/bd/`. Nunca se sube a GitHub. Agregar `/backups/` al `.gitignore`.
 
-**Protocolo:** El agente le indica a Santi el comando exacto para hacer el backup. Santi lo ejecuta y confirma. Solo después el agente procede con el cambio.
+**Protocolo:** El agente indica a Santi el comando exacto para hacer el backup. Santi lo ejecuta en el servidor por SSH y confirma. Solo después el agente procede con el cambio.
 
 ---
 

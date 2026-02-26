@@ -28,6 +28,7 @@ _Sin bloqueos activos._
 |---|---|---|
 | 2025-02-25 | Configuración inicial de carpeta `.agents/` | ✅ Completado |
 | 2026-02-26 | Implementación de Política 5S en Manifiesto | ✅ Completado |
+| 2026-02-26 | Actualización de Política de Backups en Manifiesto | ✅ Completado |
 
 ---
 
