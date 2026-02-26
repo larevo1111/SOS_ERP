@@ -321,13 +321,7 @@ Solo recibe código probado y aprobado por Santi.
 
 ### 11.2 Acceso SSH al servidor
 
-Para conectarse al servidor de producción desde la terminal:
-
-```
-ssh u768061575@109.106.250.195 -p 65002
-```
-
-Cuando pida la contraseña, la ingresa Santi. El agente nunca la maneja.
+La conexión al servidor usa llave SSH sin contraseña. Ver protocolo completo en la sección 13.
 
 ---
 
