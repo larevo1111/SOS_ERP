@@ -11,6 +11,7 @@
 **Módulo en construcción:** Integración WooCommerce  
 **Fase:** Inicio — pendiente primer plan de AntiGravity  
 **Última tarea completada:** —  
+**Madrina a cargo:** AntiGravity  
 **Próximo paso:** AntiGravity genera el plan de integración WooCommerce  
 **Fecha de última actualización:** 2026-02-26  
 
@@ -24,11 +25,12 @@ _Sin bloqueos activos._
 
 ## Historial reciente
 
-| Fecha | Tarea | Estado |
-|---|---|---|
-| 2025-02-25 | Configuración inicial de carpeta `.agents/` | ✅ Completado |
-| 2026-02-26 | Implementación de Política 5S en Manifiesto | ✅ Completado |
-| 2026-02-26 | Actualización de Política de Backups en Manifiesto | ✅ Completado |
+| Fecha | Tarea | Agente | Estado |
+|---|---|---|---|
+| 2025-02-25 | Configuración inicial de carpeta `.agents/` | Santi | ✅ Completado |
+| 2026-02-26 | Implementación de Política 5S en Manifiesto | AntiGravity | ✅ Completado |
+| 2026-02-26 | Actualización de Política de Backups en Manifiesto | AntiGravity | ✅ Completado |
+| 2026-02-26 | Corrección subnumeración e Identificación de Agentes | AntiGravity | ✅ Completado |
 
 ---
 

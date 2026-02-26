@@ -104,7 +104,7 @@ El equipo de agentes opera bajo la siguiente jerarquía:
 3. **Claude Code** lee el plan, revisa el repositorio y construye el código.
 4. Al completar cada tarea, Claude Code:
    - Marca el checkbox como `- [x]`
-   - Actualiza `CONTEXTO_ACTIVO.md`
+   - Actualiza `CONTEXTO_ACTIVO.md` (incluyendo su nombre en el historial y en 'Madrina a cargo')
    - Entrega: archivo principal + SQL si aplica + rutas actualizadas
 
 ### Estados de tarea
@@ -397,7 +397,7 @@ Para que el proyecto crezca de forma limpia y los agentes no se confundan, aplic
 *   **Selección y Descarte:** Solo los planes `PLAN_nombre.md` que estén en ejecución permanecen en la raíz. Al terminar una tarea o plan, el Constructor lo mueve a la carpeta `.agent/historial/`.
 *   **Lugar para cada cosa:** 
     *   **Carpetas de archivos:** Se crean siempre en minúsculas, con guión bajo y sin espacios, siguiendo el formato: `siglas_modulo_descripcion` (ejemplo: `os_ven_fotos`).
-    *   **Contexto:** El archivo `CONTEXTO_ACTIVO.md` es sagrado. Al terminar una tarea, se debe limpiar cualquier nota temporal y dejar solo el estado real y el próximo paso claro.
+    *   **Contexto:** El archivo `CONTEXTO_ACTIVO.md` es sagrado. Al terminar una tarea, se debe limpiar cualquier nota temporal, dejar solo el estado real, el próximo paso claro e identificar al agente responsable tanto en el historial como en el campo 'Madrina a cargo'.
 *   **Limpieza de Información:** Prohibido dejar "carreta" o explicaciones técnicas innecesarias. Si algo ya se resolvió o se decidió, se borra del contexto activo para mantenerlo corto.
 *   **Estandarización de Aprobación (Niveles):**
     1.  **Requiere "Aprobado" explícito de Santi:** Planes nuevos de módulos, cambios a la estructura de la base de datos, cambios en tablas protegidas y modificaciones a este Manifiesto.
