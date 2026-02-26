@@ -293,7 +293,7 @@ Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se ne
 
 ## 11. Infraestructura y ambientes
 
-### 7.1 Ambientes de trabajo
+### 11.1 Ambientes de trabajo
 
 El proyecto opera en dos ambientes separados. Nunca se trabaja directo en producción.
 
@@ -319,7 +319,7 @@ Solo recibe código probado y aprobado por Santi.
 
 ---
 
-### 7.2 Acceso SSH al servidor
+### 11.2 Acceso SSH al servidor
 
 Para conectarse al servidor de producción desde la terminal:
 
@@ -331,7 +331,7 @@ Cuando pida la contraseña, la ingresa Santi. El agente nunca la maneja.
 
 ---
 
-### 7.3 Flujo de despliegue
+### 11.3 Flujo de despliegue
 
 ```
 Código local → prueba → Santi aprueba → push a GitHub → despliega en Hostinger
@@ -351,7 +351,7 @@ cd ~/domains/oscomunidad.com/public_html/erp && git pull
 
 ---
 
-### 7.4 Regla de contraseñas
+### 11.4 Regla de contraseñas
 
 Cuando una tarea requiere ingresar una contraseña (SSH, MySQL, etc.), el agente **nunca la maneja directamente**. En cambio:
 
@@ -369,7 +369,7 @@ Ejemplo incorrecto:
 
 ---
 
-### 7.5 Archivos del sistema
+### 11.5 Archivos del sistema
 
 Los archivos subidos por usuarios (imágenes, documentos, facturas) se guardan fuera de `public_html` para que no sean accesibles directamente por URL. El ERP los sirve a través de PHP con control de permisos.
 
