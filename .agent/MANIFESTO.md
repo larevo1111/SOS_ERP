@@ -381,3 +381,19 @@ SOS_ERP_archivos/
 Cuando se agrega una empresa nueva al sistema, se crea automáticamente su carpeta con sus siglas.
 
 **Almacenamiento futuro:** cuando el proyecto escale a muchos clientes, los archivos migrarán a Cloudflare R2 (~$15 USD/TB/mes, sin costo de transferencia). El código no cambiará porque todo se lee desde variables del `.env`.
+
+---
+
+## 11. Política de Calidad y Orden (5S)
+
+Para que el proyecto crezca de forma limpia y los agentes no se confundan, aplicamos estas reglas:
+
+*   **Selección y Descarte:** Solo los planes `PLAN_nombre.md` que estén en ejecución permanecen en la raíz. Al terminar una tarea o plan, el Constructor lo mueve a la carpeta `.agent/historial/`.
+*   **Lugar para cada cosa:** 
+    *   **Carpetas de archivos:** Se crean siempre en minúsculas, con guión bajo y sin espacios, siguiendo el formato: `siglas_modulo_descripcion` (ejemplo: `os_ven_fotos`).
+    *   **Contexto:** El archivo `CONTEXTO_ACTIVO.md` es sagrado. Al terminar una tarea, se debe limpiar cualquier nota temporal y dejar solo el estado real y el próximo paso claro.
+*   **Limpieza de Información:** Prohibido dejar "carreta" o explicaciones técnicas innecesarias. Si algo ya se resolvió o se decidió, se borra del contexto activo para mantenerlo corto.
+*   **Estandarización de Aprobación (Niveles):**
+    1.  **Requiere "Aprobado" explícito de Santi:** Planes nuevos de módulos, cambios a la estructura de la base de datos, cambios en tablas protegidas y modificaciones a este Manifiesto.
+    2.  **Flujo Libre (No requiere aprobación nueva):** Correcciones de errores dentro de una tarea, creación de archivos definidos en un plan ya aprobado y ajustes de código menores dentro del alcance.
+*   **Disciplina de Contexto:** El paso cero de todo agente es leer `MANIFESTO.md` y `CONTEXTO_ACTIVO.md`. La Arquitecta auditará el orden antes de proponer nuevos planes.
