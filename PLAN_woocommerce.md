@@ -24,9 +24,13 @@ Este plan define la hoja de ruta para la integración con WooCommerce y la estru
     - **Campos Protegidos**: Metadatos (`empresa`, fechas, autores) en un panel colapsable inferior de solo lectura.
     - **Relación con Marcas**: Selector dinámico cargado desde `com_marcas`.
 - [ ] **Galería Multimedia 5S**:
-    - Implementar zona de "Dropzone" para carga masiva.
-    - Sincronización en tiempo real con la tabla `com_productos_multimedia`.
-    - Ordenamiento por drag-and-drop (campo `orden` en BD).
+    - **Automatización**: El backend detectará el tipo de archivo (Imagen/Video) por MIME type al subir.
+    - **Selector de Uso Intelectual**: Cada miniatura tendrá un badge de estado interactivo:
+        - `Principal`: (Una sola por producto) Se guarda con `uso = 'Principal'`.
+        - `Galería`: (Por defecto) Para el carrusel de WooCommerce.
+        - `Variación`: Para asignar a tallas/colores específicos (integración futura).
+    - **UI intuitiva**: La imagen "Principal" resaltada con borde Verde Bosque (#2D5A27).
+    - **Persistencia**: Sincronización inmediata con `com_productos_multimedia` usando `producto_uid`.
 - [ ] **Vista de Catálogo**: Tabla limpia con miniaturas de imágenes y estados (badge).
 
 ## 4. Integración con WooCommerce
