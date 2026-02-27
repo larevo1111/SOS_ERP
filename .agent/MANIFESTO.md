@@ -74,7 +74,30 @@ El equipo de agentes opera bajo la siguiente jerarquía:
 
 ---
 
-## 5. Estructura de respuesta API (siempre igual)
+## 5. Estructura de APIs y Respuestas
+
+Adoptamos el principio de **"Una API por Área de Negocio / Pantalla Principal"**. 
+
+### 5.1 Estructura de Endpoints
+Cada área funcional dentro de un módulo tiene un único punto de entrada (Controller) que gestiona múltiples acciones.
+- `/api/modulo/area` → Ejemplo: `/api/comercial/productos`
+
+### 5.2 Formato de Petición (Request)
+Toda comunicación desde el frontend hacia el backend se realiza vía `POST` (incluso para lecturas por seguridad de datos) y debe incluir el parámetro `accion`.
+
+```json
+{
+  "token": "token_de_seguridad_desde_env",
+  "accion": "guardar_producto",
+  "datos": {
+    "uid": "OS-...",
+    "nombre": "Miel..."
+  }
+}
+```
+
+### 5.3 Formato de Respuesta (Response)
+El backend siempre responde con un JSON uniforme:
 
 ```json
 {
@@ -84,6 +107,8 @@ El equipo de agentes opera bajo la siguiente jerarquía:
   "errores": []
 }
 ```
+
+---
 
 ---
 

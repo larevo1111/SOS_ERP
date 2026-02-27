@@ -8,12 +8,12 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Comercial — Formulario de Producto
-**Fase:** Ejecución — Frontend
-**Última tarea completada:** FormularioProducto.vue con lógica Variación Representante
+**Módulo en construcción:** Comercial — Capa API & Multimedia
+**Fase:** Ejecución — Backend (Fase 2 completada)
+**Última tarea completada:** Implementación Backend API — ProductoController, GuardarProducto, SubirMultimedia
 **Madrina a cargo:** Claude Code
-**Próximo paso:** Conectar formulario con API backend (casos de uso PHP)
-**Fecha de última actualización:** 2026-02-26
+**Próximo paso:** Conectar FormularioProducto.vue con el backend (reemplazar los TODO del frontend) + crear .htaccess para enrutar /api/*
+**Fecha de última actualización:** 2026-02-27
 
 ---
 
@@ -41,6 +41,11 @@ _Sin bloqueos activos._
 | 2026-02-26 | Creación de estructura de carpetas /erp | AntiGravity | ✅ Completado |
 | 2026-02-26 | Diseño y redacción de PLAN_woocommerce.md | AntiGravity | ✅ Completado |
 | 2026-02-26 | Scaffolding Quasar + FormularioProducto.vue (Variación Representante) | Claude Code | ✅ Completado |
+| 2026-02-27 | Planificación API "Una por Pantalla" & Configuración Cloudflare R2 | AntiGravity | ✅ Completado |
+| 2026-02-27 | Implementación Backend API: ProductoController, GuardarProducto, SubirMultimedia, rutas.php | Claude Code | ✅ Completado |
+| 2026-02-27 | Rediseño FormularioProducto.vue: maquetación, tabs custom, card-productor, merge Contenido+Historia | Claude Code | ✅ Completado |
+| 2026-02-27 | Ajuste tab Contenido: sección Origen 3ra, Propuesta de valor, quitar resaltado verde | Claude Code | ✅ Completado |
+| 2026-02-27 | Actualizar skill_frontend_quasar.md con learnings del primer módulo frontend | Claude Code | ✅ Completado |
 
 ---
 

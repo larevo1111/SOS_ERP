@@ -3,14 +3,14 @@
 Este plan define la hoja de ruta para la integración con WooCommerce y la estructura inicial del módulo comercial, tomando como referencia un diseño moderno y limpio.
 
 ## 1. Diseño y Estética: "Sistema Orígenes"
-- [ ] **Mantra Visual**: Minimalismo elegante, 5S (Orden absoluto), Luz y Amigabilidad.
-- [ ] **Paleta de Colores**:
+- [x] **Mantra Visual**: Minimalismo elegante, 5S (Orden absoluto), Luz y Amigabilidad.
+- [x] **Paleta de Colores**:
     - `Fondo`: Off-White (#FDFDFB) para evitar fatiga visual.
     - `Primario`: Verde Bosque (#2D5A27) para botones de éxito y marca.
     - `Secundario`: Naranja Terracota (#D2691E) para acciones de WooCommerce y alertas.
     - `Estructura`: Dark Charcoal (#1A1C19) para sidebar y textos de alta jerarquía.
-- [ ] **Tipografía**: Inter o Geist (Modernas y de alta legibilidad).
-- [ ] **Componentes**: Glassmorphism sutil para tarjetas y micro-interacciones fluidas (hovers suaves).
+- [x] **Tipografía**: Inter o Geist (Modernas y de alta legibilidad).
+- [x] **Componentes**: Glassmorphism sutil para tarjetas y micro-interacciones fluidas (hovers suaves).
 
 ## 2. Configuración y Seguridad
 - [ ] Implementar pantalla de "Ajustes de Sistema".
@@ -19,11 +19,11 @@ Este plan define la hoja de ruta para la integración con WooCommerce y la estru
 - [ ] Verificación de protocolos HTTPS/SSL para comunicación segura.
 
 ## 3. Gestión de Inventario y Variaciones (5S Japonés)
-- [ ] **Arquitectura de Variación Representante**:
+- [x] **Arquitectura de Variación Representante**:
     - **Registro Maestro (Principal)**: Es una variación real (ej: 640g) que porta el `nombre_grupo_catalogo`. `producto_principal_variacion = NULL`.
     - **Variaciones (Hijas)**: Registros reales que apuntan al `uid` del Maestro. `nombre_grupo_catalogo` ignorado.
     - **Vínculo de Costos**: Todo producto "real" (Maestro o Hijo) debe tener su `uid_producto_padre` vinculado a Costos.
-- [ ] **Formulario Dinámico "Orígenes"**:
+- [x] **Formulario Dinámico "Orígenes"**:
     - **Detección de Patrones**: Campo `nombre_grupo_catalogo` asistido por IA (sugerencia basada en el nombre del artículo).
     - **Gestión de Variaciones**: Panel lateral para añadir variaciones rápidas vinculadas al Maestro actual.
 - [ ] **Galería Multimedia Avanzada**:
