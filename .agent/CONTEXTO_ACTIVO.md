@@ -8,11 +8,11 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Comercial — Capa API & Multimedia
-**Fase:** Ejecución — Backend (Fase 2 completada)
-**Última tarea completada:** Implementación Backend API — ProductoController, GuardarProducto, SubirMultimedia
-**Madrina a cargo:** Claude Code
-**Próximo paso:** Conectar FormularioProducto.vue con el backend (reemplazar los TODO del frontend) + crear .htaccess para enrutar /api/*
+**Módulo en construcción:** Comercial — Catálogo & Listados
+**Fase:** Ejecución — Visualización (Fase 4)
+**Última tarea completada:** Fase 3 (Cableado Backend) auditada y validada por AntiGravity
+**Madrina a cargo:** AntiGravity (Arquitecta) → Delegando a Claude (Backend) y Codex (Frontend UI)
+**Próximo paso:** [CODEX] Crear CatalogoProductos.vue | [CLAUDE] Implementar accion: listar en ProductoController
 **Fecha de última actualización:** 2026-02-27
 
 ---
@@ -46,6 +46,7 @@ _Sin bloqueos activos._
 | 2026-02-27 | Rediseño FormularioProducto.vue: maquetación, tabs custom, card-productor, merge Contenido+Historia | Claude Code | ✅ Completado |
 | 2026-02-27 | Ajuste tab Contenido: sección Origen 3ra, Propuesta de valor, quitar resaltado verde | Claude Code | ✅ Completado |
 | 2026-02-27 | Actualizar skill_frontend_quasar.md con learnings del primer módulo frontend | Claude Code | ✅ Completado |
+| 2026-02-27 | Conexión Frontend↔API: apiService.js, guardar_producto, subir_multimedia, .env.example | Claude Code | ✅ Completado |
 
 ---
 
