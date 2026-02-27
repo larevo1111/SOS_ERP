@@ -403,29 +403,6 @@ Para que el proyecto crezca de forma limpia y los agentes no se confundan, aplic
 
 ---
 
-## 14. Guías de Estilo: "Sistema Orígenes"
-
-El ERP debe transmitir elegancia, modernidad y orden absoluto (5S), alineado con la esencia de Origen Silvestre.
-
-### 14.1 Mantra Visual
-*   **Minimalismo Funcional**: Si un elemento no ayuda a la tarea, estorba.
-*   **Luz y Aire**: Uso generoso de espacios en blanco/off-white para evitar fatiga.
-*   **Profesionalismo Orgánico**: Equilibrio entre tecnología (Stripe/Linear) y naturaleza.
-
-### 14.2 Paleta de Colores Oficial
-*   **Fondo Base**: `#FDFDFB` (Off-White/Hueso).
-*   **Primario (Éxito/Marca)**: `#2D5A27` (Verde Bosque).
-*   **Secundario (Acción/WooCommerce)**: `#D2691E` (Naranja Terracota).
-*   **Texto/Sidebar**: `#1A1C19` (Dark Charcoal).
-*   **Superficies**: Blanco puro con bordes sutiles o Glassmorphism leve.
-
-### 14.3 Tipografía y UI
-*   **Fuente Principal**: `Inter` o `Geist` para interfaces de datos.
-*   **Micro-interacciones**: Transiciones suaves de opacidad y `spring` sutil en botones.
-*   **Buscador**: Centralizado (estilo Command+K) para acceso rápido.
-
----
-
 ## 13. Protocolo de Acceso SSH a Producción (Hostinger)
 
 Para acceder al servidor de producción desde la PC local (usuario `osserver`), se debe seguir este protocolo de llaves:
@@ -459,3 +436,21 @@ chmod 644 ~/.ssh/sos_erp.pub
 ### 13.5 Notas de seguridad
 *   Si SSH pide contraseña, revisar los permisos de los archivos y el contenido del alias.
 *   El agente nunca maneja contraseñas; si se requiere, se pide a Santi que la ingrese en el comando indicado.
+
+---
+
+## 14. Guías de Estilo: "Sistema Orígenes"
+
+El ERP debe transmitir elegancia, modernidad y orden absoluto (5S), alineado con la esencia de Origen Silvestre.
+
+### 14.1 Mantra Visual
+*   **Minimalismo Funcional**: Si un elemento no ayuda a la tarea, estorba.
+*   **Luz y Aire**: Uso generoso de espacios en blanco y tonos crema suaves para evitar fatiga.
+*   **Profesionalismo Orgánico**: Inspiración en el diseño de Stripe y Linear, pero con el alma de Origen Silvestre (verdes y naranjas tierra).
+
+### 14.2 Referencia Técnica Obligatoria
+Toda la especificación técnica de colores (hex), tipografías, espaciados y componentes se encuentra en:
+👉 **[.agent/diseno/GUIA_ESTILOS.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)**
+
+Cualquier duda visual sobre el resultado esperado se debe consultar en el mockup:
+👉 **[.agent/diseno/dashboard_ref.html](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/dashboard_ref.html)**
