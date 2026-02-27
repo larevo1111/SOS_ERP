@@ -18,12 +18,12 @@ class SubirMultimedia
 
     // Tipos MIME permitidos y su extensión esperada
     private const TIPOS_PERMITIDOS = [
-        'image/jpeg'  => 'jpg',
-        'image/png'   => 'png',
-        'image/webp'  => 'webp',
-        'image/gif'   => 'gif',
-        'video/mp4'   => 'mp4',
-        'video/webm'  => 'webm',
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/gif' => 'gif',
+        'video/mp4' => 'mp4',
+        'video/webm' => 'webm',
     ];
 
     // Tamaño máximo: 20 MB
@@ -46,8 +46,8 @@ class SubirMultimedia
 
         // ── Validar datos mínimos ─────────────────────────────────
         $uidProducto = trim($datos['uid_producto'] ?? '');
-        $empresa     = strtolower(trim($datos['empresa'] ?? ''));
-        $usuario     = trim($datos['usuario_creador'] ?? 'sistema');
+        $empresa = strtolower(trim($datos['empresa'] ?? ''));
+        $usuario = trim($datos['usuario_creador'] ?? 'sistema');
 
         if ($uidProducto === '') {
             return $this->respuesta(false, null, 'El uid_producto es obligatorio.', ['uid_producto_requerido']);
@@ -76,48 +76,50 @@ class SubirMultimedia
 
         // ── Generar nombre y ruta dentro del bucket ───────────────
         // Ruta: empresas/{empresa}/productos/{uid_producto}/{timestamp}-{random}.{ext}
-        $ext          = self::TIPOS_PERMITIDOS[$mimeType];
-        $nombreUnico  = date('YmdHis') . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $ext = self::TIPOS_PERMITIDOS[$mimeType];
+        $nombreUnico = date('YmdHis') . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
         $rutaEnBucket = "empresas/{$empresa}/productos/{$uidProducto}/{$nombreUnico}";
 
         // ── Subir a Cloudflare R2 ─────────────────────────────────
         try {
             $urlPublica = $this->subirAR2($archivo['tmp_name'], $mimeType, $rutaEnBucket);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return $this->respuesta(false, null, 'Error al subir el archivo: ' . $e->getMessage(), ['error_r2']);
         }
 
         // ── Registrar en com_productos_multimedia ─────────────────
-        $uid    = $this->generarUid($empresa);
-        $orden  = (int)($datos['orden'] ?? 0);
+        $uid = $this->generarUid($empresa);
+        $orden = (int)($datos['orden'] ?? 0);
 
         $sql = '
             INSERT INTO com_productos_multimedia (
                 uid, empresa, uid_producto, tipo_archivo,
                 nombre_archivo, ruta_archivo, url_publica,
-                orden, estado,
+                uso, orden, estado,
                 usuario_creador, usuario_ult_modificacion
             ) VALUES (
                 :uid, :empresa, :uid_producto, :tipo_archivo,
                 :nombre_archivo, :ruta_archivo, :url_publica,
-                :orden, :estado,
+                :uso, :orden, :estado,
                 :usuario_creador, :usuario_ult_modificacion
             )
         ';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':uid'                     => $uid,
-            ':empresa'                 => $empresa,
-            ':uid_producto'            => $uidProducto,
-            ':tipo_archivo'            => $tipoArchivo,
-            ':nombre_archivo'          => $archivo['name'],
-            ':ruta_archivo'            => $rutaEnBucket,
-            ':url_publica'             => $urlPublica,
-            ':orden'                   => $orden,
-            ':estado'                  => 'Activo',
-            ':usuario_creador'         => $usuario,
-            ':usuario_ult_modificacion'=> $usuario,
+            ':uid' => $uid,
+            ':empresa' => $empresa,
+            ':uid_producto' => $uidProducto,
+            ':tipo_archivo' => $tipoArchivo,
+            ':nombre_archivo' => $archivo['name'],
+            ':ruta_archivo' => $rutaEnBucket,
+            ':url_publica' => $urlPublica,
+            ':uso' => $datos['uso'] ?? 'Galeria',
+            ':orden' => $orden,
+            ':estado' => 'Activo',
+            ':usuario_creador' => $usuario,
+            ':usuario_ult_modificacion' => $usuario,
         ]);
 
         $registro = $this->buscarPorUid($uid);
@@ -131,43 +133,43 @@ class SubirMultimedia
         $accountId = getenv('R2_ACCOUNT_ID');
         $accessKey = getenv('R2_ACCESS_KEY');
         $secretKey = getenv('R2_SECRET_KEY');
-        $bucket    = getenv('R2_BUCKET');
+        $bucket = getenv('R2_BUCKET');
         $urlPublica = rtrim(getenv('R2_URL_PUBLICA') ?: '', '/');
 
         if (!$accountId || !$accessKey || !$secretKey || !$bucket) {
             throw new \RuntimeException('Faltan variables R2 en el archivo .env.');
         }
 
-        $contenido     = file_get_contents($rutaTmp);
+        $contenido = file_get_contents($rutaTmp);
         $hashContenido = hash('sha256', $contenido);
 
         // Fecha y hora en formato requerido por AWS Sig V4
-        $ahora     = new \DateTime('now', new \DateTimeZone('UTC'));
-        $fechaHora = $ahora->format('Ymd\THis\Z');  // 20260227T143055Z
-        $fecha     = $ahora->format('Ymd');          // 20260227
+        $ahora = new \DateTime('now', new \DateTimeZone('UTC'));
+        $fechaHora = $ahora->format('Ymd\THis\Z'); // 20260227T143055Z
+        $fecha = $ahora->format('Ymd'); // 20260227
 
-        $host     = "{$accountId}.r2.cloudflarestorage.com";
+        $host = "{$accountId}.r2.cloudflarestorage.com";
         $claveUri = rawurlencode($clave);
         // Preservar las barras del path sin codificarlas
         $claveUri = str_replace('%2F', '/', $claveUri);
-        $uri      = "/{$bucket}/{$claveUri}";
+        $uri = "/{$bucket}/{$claveUri}";
 
         // Cabeceras ordenadas alfabéticamente (requisito del algoritmo)
-        $region   = 'auto';
+        $region = 'auto';
         $servicio = 's3';
 
         $cabecerasOrdenadas = [
-            'content-type'          => $mimeType,
-            'host'                  => $host,
-            'x-amz-content-sha256'  => $hashContenido,
-            'x-amz-date'            => $fechaHora,
+            'content-type' => $mimeType,
+            'host' => $host,
+            'x-amz-content-sha256' => $hashContenido,
+            'x-amz-date' => $fechaHora,
         ];
 
         $cabecerasCanonicas = '';
-        $cabecerasFirmadas  = '';
+        $cabecerasFirmadas = '';
         foreach ($cabecerasOrdenadas as $nombre => $valor) {
             $cabecerasCanonicas .= "{$nombre}:{$valor}\n";
-            $cabecerasFirmadas  .= "{$nombre};";
+            $cabecerasFirmadas .= "{$nombre};";
         }
         $cabecerasFirmadas = rtrim($cabecerasFirmadas, ';');
 
@@ -175,14 +177,14 @@ class SubirMultimedia
         $peticionCanonica = implode("\n", [
             'PUT',
             $uri,
-            '',                  // query string vacío
+            '', // query string vacío
             $cabecerasCanonicas,
             $cabecerasFirmadas,
             $hashContenido,
         ]);
 
         // Cadena para firmar
-        $alcance        = "{$fecha}/{$region}/{$servicio}/aws4_request";
+        $alcance = "{$fecha}/{$region}/{$servicio}/aws4_request";
         $cadenaParaFirmar = implode("\n", [
             'AWS4-HMAC-SHA256',
             $fechaHora,
@@ -191,11 +193,11 @@ class SubirMultimedia
         ]);
 
         // Derivar clave de firma (HMAC en cadena)
-        $claveF = hash_hmac('sha256', $fecha,          'AWS4' . $secretKey, true);
-        $claveF = hash_hmac('sha256', $region,         $claveF,             true);
-        $claveF = hash_hmac('sha256', $servicio,       $claveF,             true);
-        $claveF = hash_hmac('sha256', 'aws4_request',  $claveF,             true);
-        $firma  = hash_hmac('sha256', $cadenaParaFirmar, $claveF);
+        $claveF = hash_hmac('sha256', $fecha, 'AWS4' . $secretKey, true);
+        $claveF = hash_hmac('sha256', $region, $claveF, true);
+        $claveF = hash_hmac('sha256', $servicio, $claveF, true);
+        $claveF = hash_hmac('sha256', 'aws4_request', $claveF, true);
+        $firma = hash_hmac('sha256', $cadenaParaFirmar, $claveF);
 
         // Cabecera Authorization final
         $autorizacion = "AWS4-HMAC-SHA256 Credential={$accessKey}/{$alcance}, SignedHeaders={$cabecerasFirmadas}, Signature={$firma}";
@@ -204,10 +206,10 @@ class SubirMultimedia
         $endpoint = "https://{$host}{$uri}";
         $ch = curl_init($endpoint);
         curl_setopt_array($ch, [
-            CURLOPT_CUSTOMREQUEST  => 'PUT',
+            CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS     => $contenido,
-            CURLOPT_HTTPHEADER     => [
+            CURLOPT_POSTFIELDS => $contenido,
+            CURLOPT_HTTPHEADER => [
                 "Authorization: {$autorizacion}",
                 "Content-Type: {$mimeType}",
                 "Host: {$host}",
@@ -218,7 +220,7 @@ class SubirMultimedia
         ]);
 
         $respuesta = curl_exec($ch);
-        $codigo    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $codigo = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
         curl_close($ch);
 
@@ -254,7 +256,7 @@ class SubirMultimedia
     // La "M" distingue los UIDs de multimedia de los de producto.
     private function generarUid(string $empresa): string
     {
-        $ts  = date('YmdHis');
+        $ts = date('YmdHis');
         $hex = bin2hex(random_bytes(3));
         return strtoupper($empresa) . '-M-' . $ts . '-' . $hex;
     }
@@ -263,21 +265,21 @@ class SubirMultimedia
     private function mensajeErrorSubida(int $codigo): string
     {
         return match ($codigo) {
-            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'El archivo supera el tamaño máximo permitido.',
-            UPLOAD_ERR_PARTIAL                        => 'El archivo se subió parcialmente. Intenta de nuevo.',
-            UPLOAD_ERR_NO_FILE                        => 'No se recibió ningún archivo.',
-            UPLOAD_ERR_NO_TMP_DIR                     => 'Error del servidor: carpeta temporal no disponible.',
-            UPLOAD_ERR_CANT_WRITE                     => 'Error del servidor: sin permiso de escritura.',
-            default                                   => 'Error desconocido al subir el archivo.',
-        };
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'El archivo supera el tamaño máximo permitido.',
+                UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente. Intenta de nuevo.',
+                UPLOAD_ERR_NO_FILE => 'No se recibió ningún archivo.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Error del servidor: carpeta temporal no disponible.',
+                UPLOAD_ERR_CANT_WRITE => 'Error del servidor: sin permiso de escritura.',
+                default => 'Error desconocido al subir el archivo.',
+            };
     }
 
     // ── Estructura estándar de respuesta (Manifiesto § 5.3) ───────
     private function respuesta(bool $exito, $datos, string $mensaje, array $errores = []): array
     {
         return [
-            'exito'   => $exito,
-            'datos'   => $datos ?? (object)[],
+            'exito' => $exito,
+            'datos' => $datos ?? (object)[],
             'mensaje' => $mensaje,
             'errores' => $errores,
         ];
