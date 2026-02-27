@@ -159,6 +159,7 @@ Antes de proponer o ejecutar cualquier cosa, leer en este orden:
 3. El plan de la tarea asignada (`PLAN_nombre.md`)
 4. Los archivos del repositorio relevantes a la tarea
 5. `.agent/diseno/GUIA_ESTILOS.md` → obligatorio antes de tocar cualquier archivo del frontend
+6. **.agent/skills/** → Revisar si existe un skill relacionado con la tarea (Obligatorio)
 ---
 
 ## 6.1 Prefijos de tablas por módulo
@@ -463,3 +464,25 @@ Toda la especificación técnica de colores (hex), tipografías, espaciados y co
 
 Cualquier duda visual sobre el resultado esperado se debe consultar en el mockup:
 👉 **[.agent/diseno/dashboard_ref.html](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/dashboard_ref.html)**
+
+---
+
+## 15. Política de Skills (Memoria Técnica 5S)
+
+Para institucionalizar el conocimiento y evitar repetir errores, el ERP utiliza un sistema de "Skills".
+
+### 15.1 Ubicación y Nomenclatura
+Los archivos se guardan en `.agent/skills/` con el prefijo `skill_` seguido del tema (ej: `skill_frontend_vue.md`).
+
+### 15.2 Flujo de Creación
+- **Constructores (Claude Code/Codex)**: Aportan la materia prima. Al resolver un problema complejo o recurrente, deben anotar al final de su reporte: `SKILL PENDIENTE: [breve descripción del problema y solución]`.
+- **Arquitecta (AntiGravity)**: Crea el skill oficial cuando se acumulan **3 o más anotaciones** sobre el mismo tema. Ella analiza los patrones, redacta el skill y asegura que cumpla con el estándar 5S.
+
+### 15.3 Estructura de un Skill
+1. `# SKILL_NOMBRE.md`
+2. `## Para qué sirve`
+3. `## Reglas que nunca se rompen`
+4. `## Problemas conocidos y soluciones`
+5. `## Ejemplos de código correcto`
+
+> **Regla de Oro**: Ningún agente debe proponer soluciones técnicas que contradigan un Skill existente.
