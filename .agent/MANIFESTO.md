@@ -107,6 +107,8 @@ El equipo de agentes opera bajo la siguiente jerarquía:
    - Actualiza `CONTEXTO_ACTIVO.md` (incluyendo su nombre en el historial y en 'Madrina a cargo')
    - Entrega: archivo principal + SQL si aplica + rutas actualizadas
 
+5. **Confianza en la Arquitectura (Regla 5S)**: Si la Madrina Arquitecta ya detalló estructuras de tablas, estados del entorno o variables en el `PLAN_nombre.md` o `CONTEXTO_ACTIVO.md`, el Constructor debe confiar en esa investigación. Está prohibido ejecutar comandos de verificación redundantes que interrumpan al usuario con permisos de Bash innecesarios o consuman tokens repitiendo lo que ya se documentó.
+
 ### Estados de tarea
 
 - `- [ ]` → Pendiente, definida por el Arquitecto, esperando aprobación o ejecución.
