@@ -17,6 +17,13 @@
 
 ---
 
+## 📚 Referencias Obligatorias para esta Fase
+- 🎨 **Diseño**: [.agent/diseno/GUIA_ESTILOS.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)
+- ⚡ **Skills**: [.agent/skills/skill_frontend_quasar.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/skills/skill_frontend_quasar.md)
+- 📐 **Mockup**: [.agent/diseno/dashboard_ref.html](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/dashboard_ref.html)
+
+---
+
 ## Notas y bloqueos activos
 
 _Sin bloqueos activos._
