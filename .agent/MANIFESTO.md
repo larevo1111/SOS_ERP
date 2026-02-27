@@ -300,7 +300,14 @@ DB_CHARSET=utf8mb4
 
 Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se necesita validar la conexión, pedirle a Santi que ejecute la prueba localmente.
 
-Nota: el motor de base de datos es MariaDB 11.8, no MySQL. Usar MySQL en local causa conflictos de collation con las tablas heredadas de AppSheet.
+**Política por Estación:** Cada estación de trabajo (PC) es un ambiente independiente y requiere su propio archivo `.env` local, el cual no debe subirse a GitHub. Las variables deben ajustarse si el nombre o usuario de la base de datos local varía (ej: `sos_erp_local` en Windows vs `sos_erp` en Ubuntu).
+
+---
+
+## 6.9 Refinamiento Continuo y Errores
+- **Filosofía de Aprendizaje:** Cada error técnico encontrado (bloqueos de puerto, incompatibilidades de motor de BD, etc.) debe ser reportado a Santi para que la Madrina Arquitecta lo analice.
+- **Institucionalización:** Los errores de interés general deben ser anexados al **Manifiesto** (si es una regla) o a un **Skill** correspondiente (si es un procedimiento técnico) para evitar que se repitan en futuras estaciones o tareas.
+- **Actualización Proactiva:** Ante cada nuevo error resuelto, la Madrina preguntará si debe ser documentado permanentemente.
 
 ---
 
@@ -310,14 +317,12 @@ Nota: el motor de base de datos es MariaDB 11.8, no MySQL. Usar MySQL en local c
 
 El proyecto opera en dos ambientes separados. Nunca se trabaja directo en producción.
 
-**Ambiente local (desarrollo)**
-Donde se construye y prueba todo. Nadie externo lo ve.
-- Máquina: PC de Santi (Ubuntu)
-- Código: `/home/osserver/.gemini/antigravity/scratch/SOS_ERP/`
-- Archivos subidos por usuarios: `/home/osserver/SOS_ERP_archivos/`
-- BD: `sos_erp_local` en MySQL local
-- URL: `http://localhost/erp`
-- `.env` ubicado en: `/home/osserver/.gemini/antigravity/scratch/SOS_ERP/.env`
+**Ambientes locales (Estaciones de Trabajo)**
+Cada máquina (PC de Santi en Ubuntu, Windows 11, etc.) se considera un **Ambiente Espejo**.
+- **Principio de Espejo:** Todo lo que corre en el servidor debe tener un reflejo funcional en cada estación (Misma versión de MariaDB, mismos módulos PHP, misma estructura de base de datos).
+- Cada estación maneja su propio archivo `.env` local (protegido por `.gitignore`) donde residen las credenciales reales de BD y Cloudflare.
+- **Prohibición de Credenciales:** Las llaves de acceso (API Keys, Passwords) NUNCA se escriben en el código, planes o walkthroughs. Solo viven en los archivos `.env` respectivos.
+- Todos los ambientes acceden al mismo almacenamiento centralizado (Cloudflare R2).
 
 **Ambiente de producción (servidor)**
 Solo recibe código probado y aprobado por Santi.
@@ -393,7 +398,9 @@ SOS_ERP_archivos/
 
 Cuando se agrega una empresa nueva al sistema, se crea automáticamente su carpeta con sus siglas.
 
-**Almacenamiento futuro:** cuando el proyecto escale a muchos clientes, los archivos migrarán a Cloudflare R2 (~$15 USD/TB/mes, sin costo de transferencia). El código no cambiará porque todo se lee desde variables del `.env`.
+**Almacenamiento Centralizado Mandatorio:** Para garantizar el orden (5S) y evitar la redundancia de archivos (3 copias del mismo logo), se utiliza exclusivamente **Cloudflare R2**. 
+- Ninguna estación de trabajo debe guardar archivos permanentes del sistema localmente; todo debe fluir a través de R2.
+- Las llaves necesarias para R2 se configuran únicamente en el `.env` de cada ambiente siguiendo el manual de seguridad.
 
 ---
 
@@ -486,3 +493,5 @@ Los archivos se guardan en `.agent/skills/` con el prefijo `skill_` seguido del 
 5. `## Ejemplos de código correcto`
 
 > **Regla de Oro**: Ningún agente debe proponer soluciones técnicas que contradigan un Skill existente.
+### 15.4 Refinamiento por Errores
+- Si un error surge durante la conexión o despliegue y es causado por una configuración de entorno (ej: Cloudflare WARP, Firewall), se creará un Skill específico para ese entorno o se actualizará el protocolo de conexión.
