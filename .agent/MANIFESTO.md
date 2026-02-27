@@ -246,7 +246,14 @@ Toda tabla nueva debe incluir estos campos sin excepción:
 Para mantener la integridad de los datos (5S), se aplican las siguientes restricciones en los formularios:
 - **Campos No Editables**: `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
 - **Visibilidad**: Estos campos deben ser visibles en la "Vista de Detalle" o pestañas de "Información del Registro", pero deshabilitados (`readonly`) en los formularios de edición.
-- **Relaciones (UID)**: Se utiliza el campo `uid` como vínculo de negocio predominante (Join key). Internamente, la base de datos mantiene sus llaves primarias (`id`), pero la lógica de navegación y referencia externa se basa en el `uid`.
+- **Relaciones (UID)**: 
+    - Se utiliza `uid_producto_padre` para vincular cada artículo real con su correspondiente en la tabla `costos_encabezados_productos`.
+    - Se utiliza `producto_principal_variacion` para la jerarquía interna del ERP (Hijo -> Maestro).
+- **Lógica de Variación Representante (Catálogo)**:
+    - En grupos de productos (Variables), se elige una **Variación Principal** (ej: la de 640g) para que actúe como "Dueña" de la identidad del grupo.
+    - Se utiliza el campo `nombre_grupo_catalogo` (solo activo en la Variación Principal) para definir el nombre que aparecerá en el catálogo de WooCommerce (ej: "Miel Silvestre Cruda").
+    - Las variaciones "Hijas" mantienen su nombre real de producción (ej: "Miel Silvestre Cruda 150g") y apuntan al `uid` de la Variación Principal.
+    - **Inteligencia 5S**: El ERP sugerirá automáticamente el `nombre_grupo_catalogo` basándose en el nombre de la Variación Principal para evitar errores.
 
 ---
 

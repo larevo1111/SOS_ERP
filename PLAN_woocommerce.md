@@ -19,14 +19,13 @@ Este plan define la hoja de ruta para la integración con WooCommerce y la estru
 - [ ] Verificación de protocolos HTTPS/SSL para comunicación segura.
 
 ## 3. Gestión de Inventario y Variaciones (5S Japonés)
-- [ ] **Arquitectura de Producto**:
-    - **Productos Simples**: Registros base con `producto_principal_variacion = NULL`.
-    - **Productos Variables (Padre)**: Registro maestro que agrupa variaciones.
-    - **Variaciones (Hijo)**: Registros dependientes vinculados mediante `producto_principal_variacion` (apunta al `uid` del padre).
-    - **Vínculo de Costos**: Mantenimiento del campo `uid_padre` para sincronización con `costos_encabezados_productos`.
+- [ ] **Arquitectura de Variación Representante**:
+    - **Registro Maestro (Principal)**: Es una variación real (ej: 640g) que porta el `nombre_grupo_catalogo`. `producto_principal_variacion = NULL`.
+    - **Variaciones (Hijas)**: Registros reales que apuntan al `uid` del Maestro. `nombre_grupo_catalogo` ignorado.
+    - **Vínculo de Costos**: Todo producto "real" (Maestro o Hijo) debe tener su `uid_producto_padre` vinculado a Costos.
 - [ ] **Formulario Dinámico "Orígenes"**:
-    - **Modo Inteligente**: Switch para alternar entre "Simple" y "Variable".
-    - **Gestión de Atributos**: Campos dinámicos para `nombre_atributo_variacion` y `valor_atributo_variacion`.
+    - **Detección de Patrones**: Campo `nombre_grupo_catalogo` asistido por IA (sugerencia basada en el nombre del artículo).
+    - **Gestión de Variaciones**: Panel lateral para añadir variaciones rápidas vinculadas al Maestro actual.
 - [ ] **Galería Multimedia Avanzada**:
     - **Detección Automática**: Backend identifica Tipo (Imagen/Video) vía MIME.
     - **Selector de Uso**:
