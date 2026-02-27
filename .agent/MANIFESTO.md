@@ -271,10 +271,10 @@ Se requiere backup antes de: crear una tabla nueva, agregar o quitar campos, mod
 
 No se requiere backup para: despliegues de código PHP, cambios de frontend, inserción o modificación de registros normales.
 
-**Nombre del archivo:** `backup_YYYYMMDD_HHMMSS_descripcion_corta.sql`
-Ejemplo: `backup_20240315_143022_agregar_tabla_clientes.sql`
+**Ubicación Mandatoria:** El backup es obligatorio únicamente antes de aplicar cambios de estructura en el servidor de Hostinger. El archivo SQL resultante debe guardarse exclusivamente en el servidor Hostinger en `~/backups/bd/`. 
 
-**Dónde se guarda:** En el servidor Hostinger en `~/backups/bd/`. Nunca se sube a GitHub. Agregar `/backups/` al `.gitignore`.
+> [!IMPORTANT]
+> Queda terminantemente prohibido subir archivos de volcado de base de datos (`.sql`) al repositorio de GitHub o incluirlos en el historial de Git por razones de seguridad y peso del repositorio.
 
 **Protocolo:** El agente ejecuta el comando del backup en el servidor de Hostinger a través del acceso SSH (`hostinger_erp`) y confirma a Santi el éxito de la operación antes de proceder con el cambio estructural.
 
@@ -298,7 +298,7 @@ DB_CHARSET=utf8mb4
 
 **Cómo se usa:** El archivo `infraestructura/base_datos/Conexion.php` lee estas variables con `getenv()`. Ningún otro archivo puede contener credenciales directamente.
 
-Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se necesita validar la conexión, pedirle a Santi que ejecute la prueba localmente.
+Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se necesita validar la conexión, pedirle a Santi que ejecute la prueba localmente. Todas las credenciales de conexión (DB, R2, APIs) residen exclusivamente en este archivo.
 
 **Política por Estación:** Cada estación de trabajo (PC) es un ambiente independiente y requiere su propio archivo `.env` local, el cual no debe subirse a GitHub. Las variables deben ajustarse si el nombre o usuario de la base de datos local varía (ej: `sos_erp_local` en Windows vs `sos_erp` en Ubuntu).
 
@@ -417,6 +417,8 @@ Para que el proyecto crezca de forma limpia y los agentes no se confundan, aplic
     1.  **Requiere "Aprobado" explícito de Santi:** Planes nuevos de módulos, cambios a la estructura de la base de datos, cambios en tablas protegidas y modificaciones a este Manifiesto.
     2.  **Flujo Libre (No requiere aprobación nueva):** Correcciones de errores dentro de una tarea, creación de archivos definidos en un plan ya aprobado y ajustes de código menores dentro del alcance.
 *   **Disciplina de Contexto:** El paso cero de todo agente es leer `MANIFESTO.md` y `CONTEXTO_ACTIVO.md`. La Arquitecta auditará el orden antes de proponer nuevos planes.
+*   **Archivos Temporales y de Prueba:** Los archivos creados para realizar pruebas puntuales de conexión o depuración (ej: `test_conexion.php`) deben ser eliminados inmediatamente después de cumplir su función. Nunca deben ser comiteados al repositorio.
+*   **Autorización de Archivos de Configuración:** Cualquier nuevo archivo de configuración permanente debe ser autorizado explícitamente por Santi y registrado en este Manifiesto como parte de la estructura oficial.
 
 ---
 
