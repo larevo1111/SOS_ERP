@@ -18,19 +18,22 @@ Este plan define la hoja de ruta para la integración con WooCommerce y la estru
 - [ ] Configuración de servicios en la nube y llaves de otros agentes.
 - [ ] Verificación de protocolos HTTPS/SSL para comunicación segura.
 
-## 3. Gestión de Inventario (Módulo Comercial)
-- [ ] **Formulario "Orígenes" (Edición de Producto)**:
-    - Layout de doble columna: Datos principales (izq) vs Media/Galería (der).
-    - **Campos Protegidos**: Metadatos (`empresa`, fechas, autores) en un panel colapsable inferior de solo lectura.
-    - **Relación con Marcas**: Selector dinámico cargado desde `com_marcas`.
-- [ ] **Galería Multimedia 5S**:
-    - **Automatización**: El backend detectará el tipo de archivo (Imagen/Video) por MIME type al subir.
-    - **Selector de Uso Intelectual**: Cada miniatura tendrá un badge de estado interactivo:
-        - `Principal`: (Una sola por producto) Se guarda con `uso = 'Principal'`.
-        - `Galería`: (Por defecto) Para el carrusel de WooCommerce.
-        - `Variación`: Para asignar a tallas/colores específicos (integración futura).
-    - **UI intuitiva**: La imagen "Principal" resaltada con borde Verde Bosque (#2D5A27).
-    - **Persistencia**: Sincronización inmediata con `com_productos_multimedia` usando `producto_uid`.
+## 3. Gestión de Inventario y Variaciones (5S Japonés)
+- [ ] **Arquitectura de Producto**:
+    - **Productos Simples**: Registros base con `producto_principal_variacion = NULL`.
+    - **Productos Variables (Padre)**: Registro maestro que agrupa variaciones.
+    - **Variaciones (Hijo)**: Registros dependientes vinculados mediante `producto_principal_variacion` (apunta al `uid` del padre).
+    - **Vínculo de Costos**: Mantenimiento del campo `uid_padre` para sincronización con `costos_encabezados_productos`.
+- [ ] **Formulario Dinámico "Orígenes"**:
+    - **Modo Inteligente**: Switch para alternar entre "Simple" y "Variable".
+    - **Gestión de Atributos**: Campos dinámicos para `nombre_atributo_variacion` y `valor_atributo_variacion`.
+- [ ] **Galería Multimedia Avanzada**:
+    - **Detección Automática**: Backend identifica Tipo (Imagen/Video) vía MIME.
+    - **Selector de Uso**:
+        - `Principal`: Imagen única de portada (Resaltada en UI).
+        - `Galería`: Carrusel general de producto.
+        - `Variación`: Imagen específica vinculada a una variación del producto.
+    - **Orden e Integridad**: Arrastrar para reordenar (campo `orden`) con persistencia en `com_productos_multimedia`.
 - [ ] **Vista de Catálogo**: Tabla limpia con miniaturas de imágenes y estados (badge).
 
 ## 4. Integración con WooCommerce
