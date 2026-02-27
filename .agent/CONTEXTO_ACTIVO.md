@@ -36,6 +36,7 @@ _Sin bloqueos activos._
 | 2026-02-26 | Actualización motor BD (MariaDB 11.8) en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Automatización de protocolo de Backups en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Corrección de ruta de backups en Manifiesto | AntiGravity | ✅ Completado |
+| 2026-02-26 | Integración de Guías de Estilo "Orígenes" en Manifiesto | AntiGravity | ✅ Completado |
 | 2026-02-26 | Creación de estructura de carpetas /erp | AntiGravity | ✅ Completado |
 | 2026-02-26 | Diseño y redacción de PLAN_woocommerce.md | AntiGravity | ✅ Completado |
 
