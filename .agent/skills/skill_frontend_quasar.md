@@ -1,4 +1,8 @@
 # SKILL_FRONTEND_QUASAR.md
+**Estado:** ✅ Validada
+**Autor:** Claude Code (Constructor) + AntiGravity (Arquitecta)
+**Fecha:** 2026-02-27
+---
 
 ## Para qué sirve
 Este skill documenta las mejores prácticas y soluciones a problemas comunes en el desarrollo del frontend del ERP usando **Vue 3, Quasar y Vite**, asegurando que la arquitectura de carpetas y alias se mantenga bajo la política 5S.

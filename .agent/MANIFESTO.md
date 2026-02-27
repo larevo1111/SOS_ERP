@@ -511,16 +511,27 @@ Para institucionalizar el conocimiento y evitar repetir errores, el ERP utiliza 
 ### 15.1 Ubicación y Nomenclatura
 Los archivos se guardan en `.agent/skills/` con el prefijo `skill_` seguido del tema (ej: `skill_frontend_vue.md`).
 
-### 15.2 Flujo de Creación
-- **Constructores (Claude Code/Codex)**: Aportan la materia prima. Al resolver un problema complejo o recurrente, deben anotar al final de su reporte: `SKILL PENDIENTE: [breve descripción del problema y solución]`.
-- **Arquitecta (AntiGravity)**: Crea el skill oficial cuando se acumulan **3 o más anotaciones** sobre el mismo tema. Ella analiza los patrones, redacta el skill y asegura que cumpla con el estándar 5S.
+### 15.2 Flujo de Trabajo Descentralizado
+Para no perder el conocimiento "en caliente", adoptamos el siguiente flujo:
+- **Creación/Edición Directa**: Cualquier agente (Constructor o Arquitecta) puede crear o actualizar un Skill al resolver un reto técnico.
+- **Estado de Revisión**: Cada Skill debe iniciar con un bloque de metadatos indicando su estado.
+- **Validación**: La Arquitecta (AntiGravity) debe revisar periódicamente las Skills creadas por Constructores para asegurar que cumplen el estándar 5S y no contradicen la visión global. Una vez revisada, cambia su estado a `Validada`.
 
-### 15.3 Estructura de un Skill
-1. `# SKILL_NOMBRE.md`
-2. `## Para qué sirve`
-3. `## Reglas que nunca se rompen`
-4. `## Problemas conocidos y soluciones`
-5. `## Ejemplos de código correcto`
+### 15.3 Estructura de un Skill (Formato Obligatorio)
+Cada archivo debe empezar con este bloque:
+
+```markdown
+# SKILL_NOMBRE.md
+**Estado:** [🚧 En Revisión | ✅ Validada]
+**Autor:** [Nombre del Agente]
+**Fecha:** [YYYY-MM-DD]
+---
+```
+
+1. `## Para qué sirve`
+2. `## Reglas que nunca se rompen`
+3. `## Problemas conocidos y soluciones`
+4. `## Ejemplos de código correcto`
 
 > **Regla de Oro**: Ningún agente debe proponer soluciones técnicas que contradigan un Skill existente.
 ### 15.4 Refinamiento por Errores
