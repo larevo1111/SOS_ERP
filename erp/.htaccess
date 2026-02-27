@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /erp/
+    RewriteBase /erp/erp/
 
     # Redirigir todas las peticiones a /api/* hacia el enrutador principal en infraestructura
     RewriteCond %{REQUEST_FILENAME} !-f
