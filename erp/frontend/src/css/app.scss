@@ -1,0 +1,57 @@
+// Estilos globales — SOS ERP
+// Referencia: .agent/diseno/GUIA_ESTILOS.md
+
+@import 'quasar.variables.scss';
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #F8F7F5;
+  color: #1A1A1A;
+}
+
+// ── Cards estilo Sistema Orígenes ──────────────────────────────
+.card-origenes {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+// ── Badges de estado ───────────────────────────────────────────
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.badge-activo      { background: #E8F5E5; color: #2E7A2A; }
+.badge-inactivo    { background: #F3F1EE; color: #7A7A7A; }
+.badge-borrador    { background: #F3F1EE; color: #7A7A7A; }
+.badge-publicado   { background: #E8F5E5; color: #2E7A2A; }
+.badge-pendiente   { background: #FEF8E0; color: #9A7200; }
+.badge-privado     { background: #E5F0FF; color: #1A5ACC; }
+
+// ── Campos de auditoría (solo lectura) ─────────────────────────
+.campo-auditoria {
+  background: #F8F7F5;
+  border-radius: 8px;
+  padding: 10px 14px;
+
+  &__label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #AAAAAA;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+
+  &__valor {
+    font-size: 12px;
+    color: #6A6A6A;
+    font-weight: 500;
+    word-break: break-all;
+  }
+}

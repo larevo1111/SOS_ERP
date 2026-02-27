@@ -8,12 +8,12 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Estructura Base + Plan WooCommerce  
-**Fase:** Estructuración y Diseño de Plan  
-**Última tarea completada:** Creación de estructura de directorios  
-**Madrina a cargo:** AntiGravity  
-**Próximo paso:** Aprobación de PLAN_woocommerce.md por parte de Santi  
-**Fecha de última actualización:** 2026-02-26  
+**Módulo en construcción:** Comercial — Formulario de Producto
+**Fase:** Ejecución — Frontend
+**Última tarea completada:** FormularioProducto.vue con lógica Variación Representante
+**Madrina a cargo:** Claude Code
+**Próximo paso:** Conectar formulario con API backend (casos de uso PHP)
+**Fecha de última actualización:** 2026-02-26
 
 ---
 
@@ -40,6 +40,7 @@ _Sin bloqueos activos._
 | 2026-02-26 | Unificación de guías estéticas (Claude + AntiGravity) | AntiGravity | ✅ Completado |
 | 2026-02-26 | Creación de estructura de carpetas /erp | AntiGravity | ✅ Completado |
 | 2026-02-26 | Diseño y redacción de PLAN_woocommerce.md | AntiGravity | ✅ Completado |
+| 2026-02-26 | Scaffolding Quasar + FormularioProducto.vue (Variación Representante) | Claude Code | ✅ Completado |
 
 ---
 
