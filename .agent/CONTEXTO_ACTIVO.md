@@ -21,6 +21,8 @@
 - 🎨 **Diseño**: [.agent/diseno/GUIA_ESTILOS.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)
 - ⚡ **Skills**: [.agent/skills/skill_frontend_quasar.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/skills/skill_frontend_quasar.md)
 - 📐 **Mockup**: [.agent/diseno/dashboard_ref.html](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/dashboard_ref.html)
+- 📜 **Plan Conexión**: [.agent/planes/implementation_plan_conexion.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/implementation_plan_conexion.md)
+- 📜 **Plan Vistas**: [.agent/planes/implementation_plan_vistas.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/implementation_plan_vistas.md)
 
 ---
 
