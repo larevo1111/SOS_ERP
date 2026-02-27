@@ -1,4 +1,5 @@
 import { defineConfig } from '#q-app/wrappers'
+import { fileURLToPath } from 'url'
 
 export default defineConfig((_ctx) => {
   return {
@@ -13,7 +14,14 @@ export default defineConfig((_ctx) => {
         browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
         node: 'node20'
       },
-      vueRouterMode: 'hash'
+      vueRouterMode: 'hash',
+
+      // Alias para que las rutas puedan importar con 'modulos/...'
+      extendViteConf (viteConf) {
+        Object.assign(viteConf.resolve.alias, {
+          modulos: fileURLToPath(new URL('./src/modulos', import.meta.url))
+        })
+      }
     },
 
     devServer: {
