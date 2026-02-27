@@ -21,6 +21,7 @@ El equipo de agentes opera bajo la siguiente jerarquía:
 - Ningún módulo accede directamente a la base de datos de otro. Toda interacción pasa por casos de uso.
 - Sin sobreingeniería: solo la complejidad que el problema requiere.
 - Estructura modular: cada módulo es autosuficiente.
+- **Protocolo de Asignación**: Siempre que la **Arquitecta (AntiGravity)** asigne una misión o plan a un Constructor (especialmente en Frontend), es obligatorio referenciar la **GUIA_ESTILOS.md** y las **Skills** relevantes cargadas en el repositorio.
 
 ---
 
