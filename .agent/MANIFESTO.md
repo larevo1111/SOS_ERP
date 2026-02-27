@@ -242,6 +242,12 @@ Toda tabla nueva debe incluir estos campos sin excepción:
 
 > `fecha_ult_modificacion` es la base para sincronización offline futura. No eliminarlo ni renombrarlo en ninguna tabla nueva.
 
+### 6.5.1 Reglas de Edición en el Frontend
+Para mantener la integridad de los datos (5S), se aplican las siguientes restricciones en los formularios:
+- **Campos No Editables**: `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
+- **Visibilidad**: Estos campos deben ser visibles en la "Vista de Detalle" o pestañas de "Información del Registro", pero deshabilitados (`readonly`) en los formularios de edición.
+- **Relaciones (UID)**: Se utiliza el campo `uid` como vínculo de negocio predominante (Join key). Internamente, la base de datos mantiene sus llaves primarias (`id`), pero la lógica de navegación y referencia externa se basa en el `uid`.
+
 ---
 
 ## 6.6 Soporte offline futuro

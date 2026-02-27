@@ -19,9 +19,15 @@ Este plan define la hoja de ruta para la integración con WooCommerce y la estru
 - [ ] Verificación de protocolos HTTPS/SSL para comunicación segura.
 
 ## 3. Gestión de Inventario (Módulo Comercial)
-- [ ] **Formulario de Productos**: Crear interfaz para agregar productos manualmente al ERP.
-- [ ] **Vista de Catálogo**: Tabla/Lista para visualizar productos existentes.
-- [ ] Base de datos: Implementar tabla `com_productos` con los campos obligatorios del manifiesto.
+- [ ] **Formulario "Orígenes" (Edición de Producto)**:
+    - Layout de doble columna: Datos principales (izq) vs Media/Galería (der).
+    - **Campos Protegidos**: Metadatos (`empresa`, fechas, autores) en un panel colapsable inferior de solo lectura.
+    - **Relación con Marcas**: Selector dinámico cargado desde `com_marcas`.
+- [ ] **Galería Multimedia 5S**:
+    - Implementar zona de "Dropzone" para carga masiva.
+    - Sincronización en tiempo real con la tabla `com_productos_multimedia`.
+    - Ordenamiento por drag-and-drop (campo `orden` en BD).
+- [ ] **Vista de Catálogo**: Tabla limpia con miniaturas de imágenes y estados (badge).
 
 ## 4. Integración con WooCommerce
 - [ ] Implementar cliente de conexión a la API de WC.
