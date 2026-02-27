@@ -273,6 +273,9 @@ No se requiere backup para: despliegues de código PHP, cambios de frontend, ins
 
 **Ubicación Mandatoria:** El backup es obligatorio únicamente antes de aplicar cambios de estructura en el servidor de Hostinger. El archivo SQL resultante debe guardarse exclusivamente en el servidor Hostinger en `~/backups/bd/`. 
 
+**Formato de nombre:** `backup_YYYYMMDD_HHMMSS_descripcion_corta.sql`
+Ejemplo: `backup_20240315_143022_agregar_tabla_clientes.sql`
+
 > [!IMPORTANT]
 > Queda terminantemente prohibido subir archivos de volcado de base de datos (`.sql`) al repositorio de GitHub o incluirlos en el historial de Git por razones de seguridad y peso del repositorio.
 
