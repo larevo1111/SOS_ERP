@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERP · Origen Silvestre</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #FFFFFF;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    color: #1A1A1A;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 230px;
+    flex-shrink: 0;
+    background: rgba(141, 184, 154, 0.08);
+    border-right: 1px solid rgba(141, 184, 154, 0.2);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px 20px;
+    border-bottom: 1px solid rgba(141,184,154,0.15);
+    margin-bottom: 12px;
+  }
+  .logo-mark {
+    width: 38px; height: 38px;
+    background: #2C2C28;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .logo-name { font-size: 13px; font-weight: 700; color: #1A1A1A; line-height: 1.3; }
+  .logo-tag  { font-size: 10px; color: #8A8A8A; }
+
+  .nav-group { padding: 0 10px; margin-bottom: 4px; }
+  .nav-group-label {
+    font-size: 9.5px; font-weight: 700; color: #AAAAAA;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 12px 10px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 11px; border-radius: 10px;
+    font-size: 13px; font-weight: 500; color: #3A3A3A;
+    cursor: pointer; margin-bottom: 1px;
+    transition: background 0.15s, color 0.15s;
+    position: relative;
+  }
+  .nav-item:hover { background: rgba(141,184,154,0.12); color: #1A1A1A; }
+  .nav-item.active {
+    background: rgba(232,117,10,0.08);
+    color: #C55E00;
+    font-weight: 600;
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 20%; bottom: 20%;
+    width: 3px;
+    background: #E8750A;
+    border-radius: 0 3px 3px 0;
+  }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+  .nav-arrow { margin-left: auto; font-size: 10px; color: #CCC; }
+  .nav-badge {
+    margin-left: auto;
+    background: #E8750A;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 14px 18px 0;
+    border-top: 1px solid rgba(141,184,154,0.15);
+  }
+  .user-row { display: flex; align-items: center; gap: 10px; }
+  .user-av {
+    width: 34px; height: 34px;
+    background: #2C3D2E;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #8DB89A; font-size: 11px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; font-weight: 700; color: #1A1A1A; }
+  .user-role { font-size: 10px; color: #8A8A8A; }
+  .user-out  { margin-left: auto; font-size: 14px; cursor: pointer; opacity: 0.4; }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    background: #F8F7F5;
+    padding: 28px 30px;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 26px;
+  }
+  .topbar h1 { font-size: 22px; font-weight: 800; color: #1A1A1A; }
+  .topbar-sub { font-size: 13px; color: #6A6A6A; margin-top: 3px; font-weight: 400; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    padding: 9px 18px; border-radius: 10px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-primary {
+    background: #E8750A; color: #fff;
+    box-shadow: 0 4px 14px rgba(232,117,10,0.28);
+  }
+  .btn-primary:hover { background: #C55E00; }
+  .btn-outline {
+    background: #fff; color: #3A3A3A;
+    border: 1px solid #E0DDD8;
+  }
+  .icon-btn {
+    width: 38px; height: 38px;
+    background: #fff; border: 1px solid #E0DDD8;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; cursor: pointer;
+  }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .kpi {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .kpi-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 14px;
+  }
+  .kpi-label { font-size: 11px; font-weight: 600; color: #7A7A7A; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 800; color: #1A1A1A; line-height: 1; margin-bottom: 8px; }
+  .kpi-delta { font-size: 12px; font-weight: 600; }
+  .kpi-delta.up   { color: #3A7A35; }
+  .kpi-delta.down { color: #C55E00; }
+  .kpi-delta .muted { color: #9A9A9A; font-weight: 400; }
+
+  /* ROW 2 */
+  .row2 { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 14px; margin-bottom: 20px; }
+
+  /* ROW 3 */
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 0.7fr; gap: 14px; }
+
+  /* CARD */
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 13px; font-weight: 700; color: #1A1A1A; }
+  .card-action {
+    font-size: 11px; color: #8A8A8A;
+    background: #F3F1EE; padding: 4px 10px;
+    border-radius: 6px; cursor: pointer; font-weight: 500;
+  }
+
+  /* TABLA PRODUCTOS */
+  .prod-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid #F3F1EE;
+  }
+  .prod-row:last-child { border: none; }
+  .prod-num { font-size: 11px; color: #C0BDB8; font-weight: 700; width: 14px; }
+  .prod-name { font-size: 12px; color: #2A2A2A; font-weight: 500; flex: 1; }
+  .prod-val  { font-size: 12px; font-weight: 700; color: #C55E00; width: 56px; text-align: right; }
+  .prod-bar-bg { flex: 1; height: 5px; background: #F0EDE8; border-radius: 3px; overflow: hidden; }
+  .prod-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#E8750A,#F0B822); }
+  .prod-em { font-size: 14px; }
+
+  /* ÓRDENES */
+  .orden-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid #F3F1EE;
+  }
+  .orden-row:last-child { border: none; }
+  .orden-id   { font-size: 11px; font-weight: 700; color: #AAAAAA; width: 60px; }
+  .orden-name { font-size: 12px; color: #2A2A2A; font-weight: 500; flex: 1; }
+  .badge {
+    font-size: 10px; font-weight: 700; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .b-green  { background: #E8F5E5; color: #2E7A2A; }
+  .b-orange { background: #FFF0E5; color: #C55E00; }
+  .b-yellow { background: #FEF8E0; color: #9A7200; }
+  .b-gray   { background: #F3F1EE; color: #7A7A7A; }
+  .b-blue   { background: #E5F0FF; color: #1A5ACC; }
+
+  /* ACTIVIDAD */
+  .act-row {
+    display: flex; gap: 11px; padding: 9px 0;
+    border-bottom: 1px solid #F3F1EE; align-items: flex-start;
+  }
+  .act-row:last-child { border: none; }
+  .act-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    margin-top: 5px; flex-shrink: 0;
+  }
+  .act-text { font-size: 12px; color: #3A3A3A; line-height: 1.5; flex: 1; }
+  .act-text strong { color: #1A1A1A; }
+  .act-time { font-size: 11px; color: #AAAAAA; flex-shrink: 0; margin-top: 2px; }
+
+  /* MINI STATS */
+  .mini-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 0; border-bottom: 1px solid #F3F1EE;
+  }
+  .mini-row:last-child { border: none; }
+  .mini-ico {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .mini-lbl  { font-size: 11px; color: #7A7A7A; font-weight: 500; }
+  .mini-val  { font-size: 16px; font-weight: 800; color: #1A1A1A; }
+  .mini-chip {
+    margin-left: auto;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<div class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-mark">🌿</div>
+    <div>
+      <div class="logo-name">Origen Silvestre</div>
+      <div class="logo-tag">ERP · Panel de control</div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Principal</div>
+    <div class="nav-item active">
+      <span class="nav-icon">✦</span> Dashboard
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🛒</span> Ventas
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">📦</span> Inventario
+      <span class="nav-arrow">›</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🏭</span> Compras
+      <span class="nav-arrow">›</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">👥</span> CRM
+      <span class="nav-arrow">›</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🚚</span> Logística
+      <span class="nav-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Gestión</div>
+    <div class="nav-item">
+      <span class="nav-icon">✅</span> Tareas
+      <span class="nav-badge">7</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">📊</span> Reportes
+      <span class="nav-arrow">›</span>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Sistema</div>
+    <div class="nav-item">
+      <span class="nav-icon">⚙</span> Configuración
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-av">SS</div>
+      <div>
+        <div class="user-name">Santiago Sierra</div>
+        <div class="user-role">Administrador</div>
+      </div>
+      <div class="user-out">→</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <h1>Buenos días, Santi 🌿</h1>
+      <div class="topbar-sub">Jueves, 26 de febrero de 2026 · Todo marcha bien hoy</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">🔍</div>
+      <button class="btn btn-outline">Exportar</button>
+      <button class="btn btn-primary">+ Nueva orden</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-icon" style="background:#FFF0E5">🛒</div>
+      <div class="kpi-label">Ventas del mes</div>
+      <div class="kpi-value">$4.2M</div>
+      <div class="kpi-delta up">↑ 18% <span class="muted">vs mes anterior</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:#E8F5E5">📦</div>
+      <div class="kpi-label">Órdenes activas</div>
+      <div class="kpi-value">48</div>
+      <div class="kpi-delta up">↑ 5 nuevas <span class="muted">hoy</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:#FEF8E0">🏭</div>
+      <div class="kpi-label">Stock disponible</div>
+      <div class="kpi-value">94%</div>
+      <div class="kpi-delta down">↓ 3 productos <span class="muted">por reponer</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:#F0EDE8">👥</div>
+      <div class="kpi-label">Clientes activos</div>
+      <div class="kpi-value">127</div>
+      <div class="kpi-delta up">↑ 12 <span class="muted">este mes</span></div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="row2">
+    <!-- TOP PRODUCTOS -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Top productos · ventas</span>
+        <span class="card-action">Este mes ›</span>
+      </div>
+      <div class="prod-row">
+        <span class="prod-num">1</span>
+        <span class="prod-em">🍯</span>
+        <span class="prod-name">Miel Silvestre 500g</span>
+        <span class="prod-val">$1.8M</span>
+        <div class="prod-bar-bg"><div class="prod-bar" style="width:100%"></div></div>
+      </div>
+      <div class="prod-row">
+        <span class="prod-num">2</span>
+        <span class="prod-em">🫘</span>
+        <span class="prod-name">Chocolate Puro 500g</span>
+        <span class="prod-val">$1.2M</span>
+        <div class="prod-bar-bg"><div class="prod-bar" style="width:67%"></div></div>
+      </div>
+      <div class="prod-row">
+        <span class="prod-num">3</span>
+        <span class="prod-em">🌱</span>
+        <span class="prod-name">Cacao granulado 250g</span>
+        <span class="prod-val">$890K</span>
+        <div class="prod-bar-bg"><div class="prod-bar" style="width:49%"></div></div>
+      </div>
+      <div class="prod-row">
+        <span class="prod-num">4</span>
+        <span class="prod-em">🍃</span>
+        <span class="prod-name">Miel de abejas 250g</span>
+        <span class="prod-val">$650K</span>
+        <div class="prod-bar-bg"><div class="prod-bar" style="width:36%"></div></div>
+      </div>
+      <div class="prod-row">
+        <span class="prod-num">5</span>
+        <span class="prod-em">✨</span>
+        <span class="prod-name">Kit Bienestar</span>
+        <span class="prod-val">$420K</span>
+        <div class="prod-bar-bg"><div class="prod-bar" style="width:23%"></div></div>
+      </div>
+    </div>
+
+    <!-- ÓRDENES RECIENTES -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Órdenes recientes</span>
+        <span class="card-action">Ver todas ›</span>
+      </div>
+      <div class="orden-row">
+        <span class="orden-id">#ORD-001</span>
+        <span class="orden-name">Tienda Verde</span>
+        <span class="badge b-green">Entregado</span>
+      </div>
+      <div class="orden-row">
+        <span class="orden-id">#ORD-002</span>
+        <span class="orden-name">Mercado Natural</span>
+        <span class="badge b-orange">En proceso</span>
+      </div>
+      <div class="orden-row">
+        <span class="orden-id">#ORD-003</span>
+        <span class="orden-name">EcoShop Medellín</span>
+        <span class="badge b-yellow">Pendiente</span>
+      </div>
+      <div class="orden-row">
+        <span class="orden-id">#ORD-004</span>
+        <span class="orden-name">Restaurante Alma</span>
+        <span class="badge b-green">Entregado</span>
+      </div>
+      <div class="orden-row">
+        <span class="orden-id">#ORD-005</span>
+        <span class="orden-name">Cliente directo</span>
+        <span class="badge b-gray">Borrador</span>
+      </div>
+      <div class="orden-row">
+        <span class="orden-id">#ORD-006</span>
+        <span class="orden-name">Orgánica SAS</span>
+        <span class="badge b-blue">Facturado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="row3">
+    <!-- ACTIVIDAD -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Actividad reciente</span>
+        <span class="card-action">Hoy ›</span>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#3A7A35"></div>
+        <div class="act-text"><strong>Orden #001</strong> marcada como entregada por Santiago</div>
+        <div class="act-time">10:32</div>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#E8750A"></div>
+        <div class="act-text"><strong>Stock bajo</strong> en Miel 500g — quedan 8 unidades</div>
+        <div class="act-time">09:15</div>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#F0B822"></div>
+        <div class="act-text"><strong>Cotización</strong> recibida de EcoShop por $340K</div>
+        <div class="act-time">08:50</div>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#8DB89A"></div>
+        <div class="act-text"><strong>Compra registrada</strong> — 50kg cacao crudo en bodega</div>
+        <div class="act-time">08:20</div>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#1A5ACC"></div>
+        <div class="act-text"><strong>Factura #F-089</strong> generada para Orgánica SAS</div>
+        <div class="act-time">07:55</div>
+      </div>
+    </div>
+
+    <!-- TAREAS -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Tareas pendientes</span>
+        <span class="card-action">Ver todas ›</span>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#E8750A"></div>
+        <div class="act-text">Confirmar pedido de cacao con proveedor San Carlos</div>
+        <span class="badge b-orange" style="flex-shrink:0">Hoy</span>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#F0B822"></div>
+        <div class="act-text">Revisar stock de envases 500g antes del despacho</div>
+        <span class="badge b-yellow" style="flex-shrink:0">Mañana</span>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#3A7A35"></div>
+        <div class="act-text">Actualizar precios en WooCommerce — miel y cacao</div>
+        <span class="badge b-green" style="flex-shrink:0">Esta semana</span>
+      </div>
+      <div class="act-row">
+        <div class="act-dot" style="background:#AAAAAA"></div>
+        <div class="act-text">Enviar cotización a nuevo cliente Restaurante Nativo</div>
+        <span class="badge b-gray" style="flex-shrink:0">Pendiente</span>
+      </div>
+    </div>
+
+    <!-- RESUMEN RÁPIDO -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Resumen</span>
+      </div>
+      <div class="mini-row">
+        <div class="mini-ico" style="background:#FFF0E5">🚚</div>
+        <div>
+          <div class="mini-lbl">Por despachar</div>
+          <div class="mini-val">12</div>
+        </div>
+        <div class="mini-chip b-orange">Urgente</div>
+      </div>
+      <div class="mini-row">
+        <div class="mini-ico" style="background:#E8F5E5">✅</div>
+        <div>
+          <div class="mini-lbl">Tareas hoy</div>
+          <div class="mini-val">7</div>
+        </div>
+        <div class="mini-chip b-yellow">3 vencen</div>
+      </div>
+      <div class="mini-row">
+        <div class="mini-ico" style="background:#FEF8E0">⚠️</div>
+        <div>
+          <div class="mini-lbl">Alertas stock</div>
+          <div class="mini-val">3</div>
+        </div>
+        <div class="mini-chip b-gray">Ver</div>
+      </div>
+      <div class="mini-row">
+        <div class="mini-ico" style="background:#E5F0FF">💬</div>
+        <div>
+          <div class="mini-lbl">Mensajes CRM</div>
+          <div class="mini-val">5</div>
+        </div>
+        <div class="mini-chip b-blue">Nuevo</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -156,6 +156,7 @@ Antes de proponer o ejecutar cualquier cosa, leer en este orden:
 2. `CONTEXTO_ACTIVO.md`
 3. El plan de la tarea asignada (`PLAN_nombre.md`)
 4. Los archivos del repositorio relevantes a la tarea
+5. `.agent/diseno/GUIA_ESTILOS.md` → obligatorio antes de tocar cualquier archivo del frontend
 ---
 
 ## 6.1 Prefijos de tablas por módulo
