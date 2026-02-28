@@ -307,9 +307,9 @@ Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se ne
 
 ---
 
-## 6.9 Refinamiento Continuo y Errores
-- **Filosofía de Aprendizaje:** Cada error técnico encontrado (bloqueos de puerto, incompatibilidades de motor de BD, etc.) debe ser reportado a Santi para que la Madrina Arquitecta lo analice.
-- **Institucionalización:** Los errores de interés general deben ser anexados al **Manifiesto** (si es una regla) o a un **Skill** correspondiente (si es un procedimiento técnico) para evitar que se repitan en futuras estaciones o tareas.
+## 6.9 Refinamiento Continuo y Bitácora
+- **Bitácora de Errores:** Todo incidente técnico (bloqueos, incompatibilidades, fallos de entorno) debe registrarse en **[.agent/bitacora_errores.md](file:///c:/Proyectos_code/SOS_ERP/.agent/bitacora_errores.md)** por el agente que lo resuelva.
+- **Flujo de Refinamiento:** La Madrina Arquitecta analizará semanalmente la bitácora para elevar soluciones recurrentes a este Manifiesto o a un Skill específico.
 - **Actualización Proactiva:** Ante cada nuevo error resuelto, la Madrina preguntará si debe ser documentado permanentemente.
 
 ---
@@ -498,5 +498,5 @@ Los archivos se guardan en `.agent/skills/` con el prefijo `skill_` seguido del 
 5. `## Ejemplos de código correcto`
 
 > **Regla de Oro**: Ningún agente debe proponer soluciones técnicas que contradigan un Skill existente.
-### 15.4 Refinamiento por Errores
-- Si un error surge durante la conexión o despliegue y es causado por una configuración de entorno (ej: Cloudflare WARP, Firewall), se creará un Skill específico para ese entorno o se actualizará el protocolo de conexión.
+### 15.4 Refinamiento por Bitácora
+- Todo error registrado en la bitácora que implique un cambio en el proceso de trabajo o una configuración de entorno obligatoria debe generar una actualización en el Skill correspondiente o la creación de uno nuevo.
