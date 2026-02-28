@@ -116,7 +116,7 @@ Antes de proponer o ejecutar cualquier cosa, leer en este orden:
 3. El plan de la tarea asignada (`PLAN_nombre.md`)
 4. Los archivos del repositorio relevantes a la tarea
 5. `.agent/diseno/GUIA_ESTILOS.md` → obligatorio antes de tocar cualquier archivo del frontend
-6. **.agent/skills/** → Revisar si existe un skill relacionado con la tarea (Obligatorio)
+6. **[.agent/skills/README_SKILLS.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/README_SKILLS.md)** → Catálogo Maestro de Skills (Obligatorio)
 ---
 
 ## 6.1 Prefijos de tablas por módulo
@@ -440,8 +440,9 @@ Cualquier duda visual sobre el resultado esperado se debe consultar en el mockup
 
 Para institucionalizar el conocimiento y evitar repetir errores, el ERP utiliza un sistema de "Skills".
 
-### 15.1 Ubicación y Nomenclatura
-Los archivos se guardan en `.agent/skills/` con el prefijo `skill_` seguido del tema (ej: `skill_frontend_vue.md`).
+### 15.1 Ubicación e Índice Maestro
+- Los archivos se guardan en `.agent/skills/` con el prefijo `skill_`.
+- El punto de entrada obligatorio es el **[README_SKILLS.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/README_SKILLS.md)**, que actúa como catálogo y guía de uso de toda la memoria técnica.
 
 ### 15.2 Flujo de Creación
 - **Constructores (Claude Code/Codex)**: Aportan la materia prima. Al resolver un problema complejo o recurrente, deben anotar al final de su reporte: `SKILL PENDIENTE: [breve descripción del problema y solución]`.
