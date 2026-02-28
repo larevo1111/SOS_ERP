@@ -1,7 +1,6 @@
 .DS_Store
 .thumbs.db
 node_modules/
-dist/
 .quasar/
 /src-pwa/register-service-worker.js
 *.local

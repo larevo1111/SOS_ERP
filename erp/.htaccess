@@ -1,22 +1,22 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /erp/erp/
+    RewriteBase /
 
-    # Redirigir todas las peticiones a /api/* hacia el enrutador principal en infraestructura
+    # 1. API - Redirigir /api/* al enrutador PHP
+    RewriteRule ^api/(.*)$ erp/infraestructura/rutas.php [QSA,L]
+
+    # 2. Archivos estaticos
+    # Si el archivo solicitado existe en la ruta del SPA, servirlo directamente
+    RewriteCond %{DOCUMENT_ROOT}/erp/frontend/dist/spa%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ erp/frontend/dist/spa/$1 [L]
+
+    # 3. Fallback para Rutas de Vue (SPA)
+    # Permite navegar a /productos y que cargue el index.html
+    RewriteCond %{REQUEST_URI} !^/api/
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^api/(.*)$ infraestructura/rutas.php [QSA,L]
+    RewriteRule ^(.*)$ erp/frontend/dist/spa/index.html [L]
+
+    # 4. Raiz vacia
+    RewriteRule ^$ erp/frontend/dist/spa/index.html [L]
 </IfModule>
-
-# Impedir el listado de directorios por seguridad
-Options -Indexes
-
-# Bloquear acceso a archivos sensibles
-<Files ".env">
-    Order allow,deny
-    Deny from all
-</Files>
-<Files "tablas_comercial.sql">
-    Order allow,deny
-    Deny from all
-</Files>
