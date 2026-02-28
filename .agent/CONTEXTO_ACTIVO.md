@@ -8,12 +8,12 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Comercial — Catálogo & Listados
-**Fase:** Ejecución — Visualización (Fase 4)
-**Última tarea completada:** Despliegue de Catálogo Real en Producción y Corrección de Quasar Expansion Item
-**Madrina a cargo:** AntiGravity (Arquitecta)
-**Próximo paso:** [CLAUDE / CODEX] Ejecución en paralelo Fases 7 y 8 según `PLAN_novedades.md`. Configurar Auth, Integrar Maestros de Costos. Además, Codex completará UI del Menú Dinámico (Fase 6).
-**Fecha de última actualización:** 2026-02-27 (Sesión Nocturna Novedades)
+**Módulo en construcción:** Comercial — Costos + WooCommerce + Auth JWT
+**Fase:** Fases 7 y 8 completadas (backend)
+**Última tarea completada:** CostosController, WooCommerceController, AuthController+JWT, composer.json
+**Madrina a cargo:** Claude Code
+**Próximo paso:** [SANTI] `cd erp && composer install` en local y Hostinger. Agregar JWT_SECRET y WC_* al .env. [CODEX] Activar middleware JWT en rutas.php + actualizar apiService.js con Bearer token.
+**Fecha de última actualización:** 2026-02-27 (Sesión Nocturna — Post Novedades)
 
 ---
 

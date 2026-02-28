@@ -14,8 +14,8 @@
 // ── Construir tabla de rutas cargando todos los módulos ──────────
 $rutas = [];
 $rutas = array_merge($rutas, require __DIR__ . '/../modulos/comercial/rutas_modulo.php');
-// Agregar nuevos módulos aquí cuando se creen:
-// $rutas = array_merge($rutas, require __DIR__ . '/../modulos/ventas/rutas_modulo.php');
+$rutas = array_merge($rutas, require __DIR__ . '/../modulos/sistema/rutas_modulo.php');
+
 
 // ── Resolver la ruta solicitada ───────────────────────────────────
 // Extraemos el segmento de la URL que viene después de /api/
@@ -48,5 +48,20 @@ if (!array_key_exists($uri, $rutas)) {
     exit;
 }
 
-// Despachar al controlador del módulo
+// ── Middleware JWT ────────────────────────────────────────────────
+// ESTADO: PENDIENTE DE ACTIVACIÓN
+//
+// Descomentar este bloque SOLO cuando Codex haya actualizado apiService.js
+// para enviar el header "Authorization: Bearer <token>" en cada petición.
+// Activar ambas líneas al mismo tiempo como un único commit.
+//
+// Endpoints exentos (sin token): sistema/login
+//
+// require_once __DIR__ . '/autenticacion/ValidarJwt.php';
+// use Infraestructura\Autenticacion\ValidarJwt;
+// if ($uri !== 'sistema/login') {
+//     ValidarJwt::verificar();
+// }
+
+// ── Despachar al controlador del módulo ──────────────────────────
 require $rutas[$uri];

@@ -10,9 +10,14 @@
 // en esta tabla y delega al controlador correspondiente.
 
 return [
-    // Área: Productos
-    // Acciones disponibles (vía parámetro 'accion' en el body):
-    //   guardar_producto   → GuardarProducto.php
-    //   subir_multimedia   → SubirMultimedia.php
-    'comercial/productos' => __DIR__ . '/controladores/ProductoController.php',
+    // Área: Productos — guardar_producto, subir_multimedia, obtener_producto, listar_productos
+    'comercial/productos'   => __DIR__ . '/controladores/ProductoController.php',
+
+    // Área: Costos (Fase 7) — listar_maestros_costo
+    // Lee costos_encabezados_productos (tabla protegida, solo lectura). Requiere JWT.
+    'comercial/costos'      => __DIR__ . '/controladores/CostosController.php',
+
+    // Área: WooCommerce (Fase 7) — listar_estado, sincronizar_producto (próxima fase)
+    // Requiere JWT.
+    'comercial/woocommerce' => __DIR__ . '/controladores/WooCommerceController.php',
 ];
