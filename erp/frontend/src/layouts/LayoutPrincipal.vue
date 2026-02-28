@@ -22,17 +22,23 @@
             </q-item>
           </div>
 
-          <div class="nav-grupo">
-            <div class="nav-grupo__label">Comercial</div>
+          <!-- Módulo Comercial — expandible -->
+          <q-expansion-item
+            icon="store"
+            label="Comercial"
+            default-opened
+            expand-separator
+            class="nav-expansion"
+          >
             <q-item clickable v-ripple :to="{ name: 'catalogo-productos' }" active-class="nav-item--activo" class="nav-item nav-item--sub">
-              <q-item-section avatar><q-icon name="inventory_2" size="18px" /></q-item-section>
+              <q-item-section avatar><q-icon name="inventory_2" size="16px" /></q-item-section>
               <q-item-section>Productos</q-item-section>
             </q-item>
             <q-item clickable v-ripple :to="{ name: 'woocommerce' }" active-class="nav-item--activo" class="nav-item nav-item--sub">
-              <q-item-section avatar><q-icon name="shopping_cart" size="18px" /></q-item-section>
+              <q-item-section avatar><q-icon name="shopping_cart" size="16px" /></q-item-section>
               <q-item-section>Integración WooCommerce</q-item-section>
             </q-item>
-          </div>
+          </q-expansion-item>
         </q-scroll-area>
 
         <!-- Usuario -->
@@ -173,6 +179,26 @@ const menuAbierto = ref(true)
   &--sub {
     font-size: 12.5px;
     padding-left: 6px;
+  }
+}
+
+.nav-expansion {
+  border-radius: 10px;
+  margin-bottom: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3A3A3A;
+
+  :deep(.q-expansion-item__container) {
+    border-radius: 10px;
+  }
+
+  :deep(.q-item) {
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3A3A3A;
+    min-height: 36px;
   }
 }
 </style>
