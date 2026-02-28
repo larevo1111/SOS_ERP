@@ -17,4 +17,7 @@ mkdir -p base_datos
 echo "Exportando base de datos: $DB_NAME..."
 mariadb-dump --single-transaction -u "$DB_USER" -p"$DB_PASS" -h "${DB_HOST:-localhost}" -P "${DB_PORT:-3306}" "$DB_NAME" > base_datos/sos_erp_sync.sql
 
+# Remover las directivas DEFINER para evitar conflictos de privilegios al importar en otros servidores (Hostinger)
+sed -i 's/DEFINER=[^*]*\*/\*/g' base_datos/sos_erp_sync.sql || true
+
 echo "¡Base de datos exportada! Ahora puedes hacer 'git add erp/base_datos/sos_erp_sync.sql', luego 'git commit' y 'git push' para que llegue a las otras terminales."

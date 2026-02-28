@@ -46,7 +46,7 @@ ssh hostinger_erp "cd ~/domains/oscomunidad.com/public_html/erp && git pull"
 7. **Sobrescribir Base de Datos en Producción**
 Integra la estructura que bajaste de Git a la base de datos oficial. Al ejecutar, puede pedirte nuevamente la contraseña *de la BD de Producción*.
 ```bash
-ssh -t hostinger_erp 'cd ~/domains/oscomunidad.com/public_html/erp && source .env && mysql -u "$DB_USER" -p"$DB_PASS" -h "${DB_HOST:-localhost}" -P "${DB_PORT:-3306}" "$DB_NAME" < base_datos/sos_erp_sync.sql'
+ssh -t hostinger_erp 'cd ~/domains/oscomunidad.com/public_html/erp && source .env && mysql -u "$DB_USER" -p"$DB_PASS" -h "${DB_HOST:-localhost}" -P "${DB_PORT:-3306}" "$DB_NAME" < erp/base_datos/sos_erp_sync.sql'
 ```
 
 🎉 ¡Listo! Si ejecutas estos 7 pasos (que yo puedo auto-ejecutar en cadena para ti), tu sistema en vivo se actualizará idéntico a tu local en menos de 1 minuto.
