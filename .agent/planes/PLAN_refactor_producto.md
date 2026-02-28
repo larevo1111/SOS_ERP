@@ -34,17 +34,24 @@ Este plan aborda la reestructuración de la vista de creación y edición de pro
 ### [Frontend - Componentes]
 
 #### [MODIFICAR] [FormularioProducto.vue](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/frontend/src/modulos/comercial/FormularioProducto.vue)
-*   **Limpieza de Pestañas**: Eliminar las pestañas `Variación` y `Precios`. Las pestañas quedarán reducidas a: **General, Contenido, Multimedia, Auditoría**.
-*   **Pestaña General Integrada**:
-    *   **Identificación Central**: Reubicar el buscador `q-select` de Maestro de Costos (`uid_producto_padre`). El selector de Quasar retendrá internamente el `UID` de AppSheet, pero visualmente mostrará la etiqueta ("Nombre del Miel de Costos").
-    *   **Sección Precios**: Traer los campos de `precio_regular` y `precio_oferta` (con sus fechas) a esta misma vista, justo debajo de la clasificación.
-    *   **Sección de Variaciones**: Insertar al fondo de la pestaña General un bloque expansible o apartado claro.
-        *   Si el producto cargado es una "Variación" (su campo `producto_principal_variacion` está lleno), esta sección se oculta (las variaciones no tienen meta-variaciones).
-        *   Tendrá una lista que lee las variaciones existentes (llamada API que busca productos cuyo `producto_principal_variacion` = UID_Actual).
-        *   Integra un componente `<q-dialog>` (Modal) para crear rápidamente un hijo-variación y asignarle de inmediato su enlace a Costos, Precio, y Atributos.
+*   **Alineamiento Estricto al Boceto Visual**:
+    *   **Pestañas Finales**: `General`, `Contenido`, `Galeria`, `Auditoria`. (Se elimina "Precios", e "Historia/Contenido" se fusiona).
+    *   **Pestaña General (Lado Izquierdo)**:
+        *   **Identificación**: `Producto costos` (Selector de Costos, muestra nombre, guarda UID). `Nombre del producto` (Input con botón "✨ Sugerir" mediante IA asumiendo contexto comercial). `Estado`, `Publicación`, y **`url_producto`** (Input).
+        *   **Precios**: `precio_regular`, `precio_oferta` y rango de fechas. Integrados nativamente bajo Identificación.
+        *   **Clasificación**: `Categoría`, `Marca` (Implementar selector que consulte la tabla `com_marcas`, guardando el `uid` pero mostrando el nombre de la marca), `Etiquetas`.
+    *   **Panel Lateral (Lado Derecho) - Variaciones**:
+        *   Lista visual de variaciones registradas.
+        *   Botón `[ + ]` para disparar el **"Popup Variación"** (Modal).
+
+*   **[NUEVO] Popup Variación (Modal)**:
+    *   **Bloque Principal**: `Nombre variacion`, `nombre_atributo_variacion`, `valor_atributo_variacion`.
+    *   **Bloque "Auditoria" (Precios propios de la variación)**: `precio_regular`, `precio_oferta` y fechas de oferta.
+    *   **Integración UX (IA Nativa)**: Botones de asistencia IA en los campos para autocorregir "grs" a "gramos", sugerir el nombre en base al atributo (Ej: "Miel 50g"), y prevenir que el usuario disocie el nombre del atributo padre si ya existen otras variaciones con "Peso".
 
 ### [Backend - API]
 
 #### [MODIFICAR] [ProductoController.php](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/modulos/comercial/controladores/ProductoController.php)
-*   **Nueva Acción `listar_variaciones`**: Acción súper ligera que reciba el `uid_maestro` y devuelva el listado de subproductos asociados (`SELECT id, uid, nombre, estado, precio_regular, nombre_atributo_variacion, valor_atributo_variacion FROM com_productos WHERE producto_principal_variacion = ?`). Esto alimenta la lista de Variaciones de la vista General.
-*   **Nueva Acción `guardar_variacion_express`**: Un endpoint simplificado (o reusar `guardar_producto`) que recibe Nombre, Precio, Atributo, Id de Costos y UID Padre Maestro, para guardar y asegurar la vinculación padre-hijo correctamente.
+*   **Nueva Acción `listar_variaciones`**: Acción súper ligera que reciba el `uid_maestro` y devuelva el listado de subproductos asociados (`SELECT id, uid, nombre, estado, precio_regular, nombre_atributo_variacion, valor_atributo_variacion FROM com_productos WHERE producto_principal_variacion = ?`). Esto alimenta el panel lateral.
+*   **Nueva Acción `guardar_variacion_express`**: Un endpoint simplificado (o reusar `guardar_producto`) que recibe los datos provenientes del "Popup Variación", guardando y asegurando la vinculación padre-hijo correctamente bajo la misma tabla `com_productos`.
+*   **[NUEVO] Controlador IA**: `AsistenteComercialController.php` (Acción: `sugerir_datos`). Recibe contexto parcial del frontend y llama a la API de **Gemini** mediante cURL para devolver sugerencias estructuradas (nombres comerciales o limpieza de atributos).
