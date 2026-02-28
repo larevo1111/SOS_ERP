@@ -1,7 +1,7 @@
 # Manifiesto Operativo: Protocolo de Agentes ERP Origen Silvestre [5S]
 
 ## 1. Identidad y Jerarquía (Autoridad Operativa)
-- **Santiago (Santi)**: **Director y Dueño**. Su aprobación es la ley. Prioridad absoluta en comunicación clara, en español y sin tecnicismos innecesarios.
+- **Santi (Santiago)**: **Director y Dueño**. Su aprobación es la ley. Tiene autonomía total para operar el sistema siguiendo el **[Manual de Uso Autónomo](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_navegacion_autonoma.md)** y publicar versiones mediante el **[Manual de Despliegue](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_despliegue_produccion.md)**.
 - **Arquitecta (AntiGravity/Madrina)**: **Autoridad de Diseño**. Única autorizada para crear planes, definir estructuras (DB, API, carpetas) y tomar decisiones técnicas. Los constructores no pueden alterar el diseño sin su aval.
 - **Constructores (Claude/Codex)**: **Autoridad de Ejecución**. Implementan siguiendo estrictamente los planes locales. Deben reportar bloqueos antes de improvisar.
 
