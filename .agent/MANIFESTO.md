@@ -2,64 +2,84 @@
 
 ## 1. Identidad y Jerarquía
 - **Santiago (Santi)**: Director. Prioridad absoluta en comunicación clara, en español y sin tecnicismos innecesarios.
-- **Arquitecta (AntiGravity/Madrina)**: Liderazgo estratégico. Única autorizada para crear planes, definir estructuras y tomar decisiones de diseño. Debe proveer planes ultra-claros y locales.
-- **Constructor Principal (Claude Code)**: Implementación experta. Sigue planes al pie de la letra.
-- **Constructor Secundario (Codex)**: Ajustes de UI y correcciones puntuales con alta fidelidad estética.
+- **Arquitecta (AntiGravity/Madrina)**: Liderazgo estratégico. Única autorizada para crear planes, definir estructuras y tomar decisiones de diseño.
+- **Constructor Principal (Claude Code)**: Implementación de lógica pesada y backend.
+- **Constructor Secundario (Codex)**: Implementación de UI/UX y fidelidad estética.
 
 ---
 
-## 2. Políticas de Seguridad y Blindaje 5S
-Estas reglas son de cumplimiento obligatorio para evitar daños y retrabajos:
-1. **Regla de Oro de Claridad (Stop & Ask)**: Si una instrucción, plan o situación técnica no es 100% clara, o si detectas una incoherencia, **DETENTE Y PREGUNTA A SANTI**. Está prohibido improvisar o actuar bajo suposiciones.
-2. **Protocolo de Asignación (5S)**: Toda tarea asignada por la Arquitecta debe:
-   - Referenciar la **GUIA_ESTILOS.md** y las **Skills** relevantes.
-   - Tener su plan técnico local en **`.agent/planes/`**.
-   - Ser autoexplicativa y no dejar margen a la invención.
-3. **Privacidad de Credenciales**: Passwords, API Keys y tokens viven **exclusivamente** en el archivo `.env` local de cada ambiente (Windows, Ubuntu, Hostinger). Nunca se escriben en el código ni en los planes.
+## 2. Reglas de Oro y Seguridad 5S
+1. **Regla de Oro de Claridad (Stop & Ask)**: Si algo no es 100% claro, o detectas incoherencia: **DETENTE Y PREGUNTA A SANTI**. Prohibida la suposición.
+2. **Protocolo de Asignación**: Todo plan debe estar en `.agent/planes/` y referenciar la `GUIA_ESTILOS.md` y `Skills` relevantes.
+3. **Privacidad de Credenciales**: Passwords y Tokens viven **exclusivamente** en el `.env` local. Nunca en código o planes.
+4. **Modo Espejo**: El ambiente local (Windows/Ubuntu) debe reflejar a producción (MariaDB 11.8).
 
 ---
 
-## 3. Convenciones y Estructura
-- **Idioma**: 100% Español (Código, comentarios, commits, documentación).
-- **Modularidad**: Ningún módulo accede directo a la BD de otro. Interacción vía Casos de Uso.
-- **Nomenclatura**:
-  - `PascalCase`: Archivos PHP (`CrearProducto.php`) y Vue (`Catalogo.vue`).
-  - `snake_case`: Tablas SQL (`com_productos`), Campos y Endpoints.
-  - `camelCase`: Archivos JS (`apiService.js`).
+## 3. Estándares Técnicos (API y Código)
+- **Idioma**: 100% Español (Código, Documentación, Commits).
+- **Convención**: `PascalCase` (PHP/Vue), `snake_case` (DB/Endpoints/Campos), `camelCase` (JS).
 
-### Estructura del Repositorio
-```
-/erp
-├── /nucleo          → Lógica global (Entidades, Reglas, Utilidades)
-├── /modulos         → Lógica modular (Dominio, Casos de Uso, Controladores, Base de Datos)
-├── /infraestructura → Servicios base (Conexión, Seguridad, Archivos)
-├── /frontend        → Código Quasar/Vue (modulos, compartido, nucleo)
-└── .agent           → Inteligencia (planes, diseno, skills, historial)
+### 3.1 Protocolo de API (JSON Uniforme)
+Toda comunicación Frontend-Backend usa `POST` con esta estructura:
+
+**Petición (Request):**
+```json
+{
+  "token": "VITE_API_TOKEN",
+  "accion": "nombre_accion",
+  "datos": { ... }
+}
 ```
 
+**Respuesta (Response):**
+```json
+{
+  "exito": true,
+  "datos": { ... },
+  "mensaje": "Feedback para el usuario",
+  "errores": []
+}
+```
+
 ---
 
-## 4. Base de Datos (MariaDB 11.8)
+## 4. Leyes de Base de Datos
 - **Prefijos Mandatorios**: `sys_` (Sistema), `com_` (Comercial), `inv_` (Inventario), `ven_` (Ventas), `din_` (Finanzas).
-- **Inviolables (AppSheet)**: No tocar estructura de `costos_`, `prod_`, `din_`, `inv_`, `sys_`.
-- **Modificables (ERP)**: `com_marcas`, `com_productos`, `com_multimedia` y tablas nuevas.
-- **Campos Obligatorios en Nuevas Tablas**: `id` (PK), `uid` (OS-...), `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
+- **Campos Audit (Obligatorios)**: `id` (PK), `uid` (OS-...), `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
+
+### 4.1 Tablas Protegidas (Inviolables)
+Prohibido modificar estructura de tablas AppSheet o Sistema:
+- `costos_...`, `prod_...`, `din_...`, `inv_bodegas`, `inv_tipos_pp`.
+- `sys_...`, `menu_ppal`.
+- **Modificables**: Solo tablas `com_` y tablas nuevas del ERP.
 
 ---
 
-## 5. Flujo de Trabajo y Despliegue
-1. **Planificación**: AntiGravity crea plan en `.agent/planes/`. Santi aprueba.
-2. **Ejecución**: Constructor implementa. Si hay conflicto entre plan y repo, **no ejecuta** y reporta a Santi con ejemplos.
-3. **Sincronización**: Al terminar, el Constructor marca checks, actualiza `CONTEXTO_ACTIVO.md` y commit/push.
-4. **Despliegue**: 
-   - **Local**: Prueba obligatoria en ambiente espejo.
-   - **Producción (Hostinger)**: Solo código aprobado. Backup estructural obligatorio en el servidor antes de cambios en BD (`~/backups/bd/`).
+## 5. Infraestructura y Despliegue
+### 5.1 Protocolo SSH (Hostinger)
+Acceso vía aliasing en `~/.ssh/config`:
+```text
+Host hostinger_erp
+    HostName 109.106.250.195
+    Port 65002
+    User u768061575
+    IdentityFile ~/.ssh/sos_erp
+```
+**Permisos**: `chmod 600 ~/.ssh/sos_erp ~/.ssh/config`.
+
+### 5.2 Backup Estratégico
+Backup obligatorio **solo** antes de cambios estructurales en Hostinger.
+- **Ubicación**: `~/backups/bd/` en el servidor. **NUNCA en GitHub**.
+- **Formato**: `backup_YYYYMMDD_HHMMSS_descripcion.sql`.
 
 ---
 
-## 6. Estética y Memoria Técnica
-- **Sistema Orígenes**: Fidelidad absoluta a `GUIA_ESTILOS.md` y `dashboard_ref.html`. Elegancia, verdes/naranjas tierra, minimalismo Linear/Stripe.
-- **Skills (Memoria 5S)**: Todo aprendizaje de error se graba en `.agent/skills/skill_tema.md`. 
-- **Orden (Seiri/Seiton)**: Al terminar un plan, se mueve a `.agent/historial/`. `CONTEXTO_ACTIVO.md` debe mantenerse corto y veraz.
+## 6. Gobernanza Técnica (Memoria 5S)
+- **Estética Orígenes**: Fidelidad a `GUIA_ESTILOS.md` (verdes/naranjas tierra, minimalismo premium).
+- **Skills (Memoria Técnica)**: Cada aprendizaje se graba en `.agent/skills/skill_tema.md`.
+  - **Formato obligatorio**: `Estado` (🚧 En Revisión | ✅ Validada), `Autor`, `Fecha`.
+- **Orden Seiton**: Planes terminados se mueven a `.agent/historial/`.
+- **Contexto Activo**: Mantener `CONTEXTO_ACTIVO.md` corto, veraz y con la "Madrina a cargo" actualizada.
 
-> **FILOSOFÍA 5S**: Menos basura, más precisión, cero suposiciones.
+> **FILOSOFÍA 5S**: Menos ruido, más precisión. Si no está en el Manifiesto, pregúntale a la Madrina.
