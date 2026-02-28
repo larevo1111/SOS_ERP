@@ -45,7 +45,7 @@ Este plan aborda la reestructuración de la vista de creación y edición de pro
         *   Botón `[ + ]` para disparar el **"Popup Variación"** (Modal).
 
 *   **[NUEVO] Popup Variación (Modal)**:
-    *   **Bloque Principal**: `Nombre variacion`, `nombre_atributo_variacion`, `valor_atributo_variacion`.
+    *   **Bloque Principal**: **`Producto de Costos` (Selector de `uid_producto_padre` que listará Costos. DEBE SER EL CAMPO 1)**, `Nombre variacion`, `nombre_atributo_variacion`, `valor_atributo_variacion`.
     *   **Bloque "Auditoria" (Precios propios de la variación)**: `precio_regular`, `precio_oferta` y fechas de oferta.
     *   **Integración UX (IA Nativa)**: Botones de asistencia IA en los campos para autocorregir "grs" a "gramos", sugerir el nombre en base al atributo (Ej: "Miel 50g"), y prevenir que el usuario disocie el nombre del atributo padre si ya existen otras variaciones con "Peso".
 
