@@ -451,9 +451,10 @@ Para institucionalizar el conocimiento y evitar repetir errores, el ERP utiliza 
 ### 15.3 Estructura de un Skill
 1. `# SKILL_NOMBRE.md`
 2. `## Para qué sirve`
-3. `## Reglas que nunca se rompen`
-4. `## Problemas conocidos y soluciones`
-5. `## Ejemplos de código correcto`
+3. **Regla de Especificidad (Obligatoria)**: Si el Skill es específico para un equipo (Windows 11, Ubuntu), una terminal (PowerShell, Bash) o un entorno particular, **DEBE** indicarse explícitamente al inicio con una alerta `> [!IMPORTANT]`.
+4. `## Reglas que nunca se rompen`
+5. `## Problemas conocidos y soluciones`
+6. `## Ejemplos de código correcto`
 
 > **Regla de Oro**: Ningún agente debe proponer soluciones técnicas que contradigan un Skill existente.
 ### 15.4 Refinamiento por Bitácora
