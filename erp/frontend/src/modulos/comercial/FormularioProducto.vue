@@ -359,6 +359,16 @@
         <div v-show="tabActiva === 'multimedia'">
           <div class="card-origenes q-pa-lg">
 
+            <!-- Input oculto: el botón "Agregar" lo dispara vía abrirSubida() -->
+            <input
+              ref="inputArchivo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+              multiple
+              style="display:none"
+              @change="procesarArchivos($event.target.files)"
+            />
+
             <div class="galeria__cabecera q-mb-lg">
               <div>
                 <div class="s-header__titulo" style="font-size:14px">Galería de archivos</div>
@@ -382,7 +392,7 @@
                 v-for="archivo in multimedia"
                 :key="archivo.uid"
                 class="galeria__item"
-                :class="{ 'galeria__item--principal': archivo.uso === 'Principal' }"
+                :class="{ 'galeria__item--principal': archivo.uso === 'Portada' }"
                 draggable="true"
                 @dragstart="alIniciarArrastre($event, archivo)"
                 @dragover.prevent
@@ -394,7 +404,7 @@
                   <div v-else class="galeria__preview-icono">
                     <q-icon name="videocam" size="32px" color="grey-5" />
                   </div>
-                  <div v-if="archivo.uso === 'Principal'" class="galeria__badge-principal">
+                  <div v-if="archivo.uso === 'Portada'" class="galeria__badge-principal">
                     ★ Portada
                   </div>
                 </div>
@@ -523,6 +533,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { llamar, subirArchivo } from '../../servicios/apiService.js'
 
 const route  = useRoute()
 const router = useRouter()
@@ -581,9 +592,10 @@ const producto = ref({
   fecha_ult_modificacion: null
 })
 
-const multimedia  = ref([])
-const variaciones = ref([])
+const multimedia        = ref([])
+const variaciones       = ref([])
 const archivoEnArrastre = ref(null)
+const inputArchivo      = ref(null)   // referencia al <input type="file"> oculto
 
 const esMaestro = computed(() => !producto.value.producto_principal_variacion)
 
@@ -605,7 +617,7 @@ const opcionesPublicacion = [
 ]
 
 const opcionesUso = [
-  { label: 'Principal (portada)', value: 'Principal' },
+  { label: 'Portada',            value: 'Portada' },
   { label: 'Galería',            value: 'Galeria' },
   { label: 'Variación',          value: 'Variacion' },
   { label: 'Galería secundaria', value: 'Galeria secundaria' },
@@ -630,10 +642,12 @@ async function cargarVariaciones (uidMaestro) {
 async function guardar () {
   guardando.value = true
   try {
-    // TODO: PUT /api/comercial/productos/:uid con producto.value
-    $q.notify({ type: 'positive', message: 'Producto guardado correctamente' })
+    const resultado = await llamar('comercial', 'productos', 'guardar_producto', { ...producto.value })
+    // El backend devuelve el registro completo (con uid, fechas, etc.)
+    Object.assign(producto.value, resultado)
+    $q.notify({ type: 'positive', message: 'Producto guardado correctamente', icon: 'check_circle' })
   } catch (error) {
-    $q.notify({ type: 'negative', message: `Error al guardar: ${error.message}` })
+    $q.notify({ type: 'negative', message: error.message, icon: 'error' })
   } finally {
     guardando.value = false
   }
@@ -651,12 +665,35 @@ function crearVariacion () {
 }
 
 function urlArchivo (archivo) {
-  return archivo.archivo_local || archivo.archivo_woocommerce || ''
+  return archivo.url_publica || archivo.archivo_local || ''
 }
 
 function abrirSubida () {
-  // TODO: subida de archivos → SOS_ERP_archivos/
-  console.log('[Multimedia] Abrir subida')
+  inputArchivo.value?.click()
+}
+
+async function procesarArchivos (archivos) {
+  for (const archivo of Array.from(archivos)) {
+    const datosExtra = {
+      uid_producto:    producto.value.uid,
+      empresa:         producto.value.empresa,
+      usuario_creador: producto.value.usuario_creador || 'sistema',
+      orden:           multimedia.value.length + 1,
+      uso:             multimedia.value.length === 0 ? 'Portada' : 'Galeria'
+    }
+    try {
+      $q.loading.show({ message: `Subiendo ${archivo.name}…` })
+      const registro = await subirArchivo('comercial', 'productos', 'subir_multimedia', archivo, datosExtra)
+      multimedia.value.push(registro)
+      $q.notify({ type: 'positive', message: `${archivo.name} subida correctamente` })
+    } catch (error) {
+      $q.notify({ type: 'negative', message: `Error al subir ${archivo.name}: ${error.message}` })
+    } finally {
+      $q.loading.hide()
+    }
+  }
+  // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
+  if (inputArchivo.value) inputArchivo.value.value = ''
 }
 
 function eliminarArchivo (archivo) {
