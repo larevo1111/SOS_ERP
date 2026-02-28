@@ -316,21 +316,19 @@ La conexión al servidor usa llave SSH sin contraseña. Ver protocolo completo e
 
 ### 11.3 Flujo de despliegue
 
-```
-Código local → prueba → Santi aprueba → push a GitHub → despliega en Hostinger
-```
+El despliegue está 100% automatizado mediante el uso de un script oficial de flujo (workflow). Nunca se debe intentar hacer push manuales a Producción sin seguir el protocolo.
 
-**Paso a paso:**
-1. El agente construye y prueba en local
-2. Santi revisa y aprueba
-3. Se hace commit y push al repo `SOS_ERP` en GitHub
-4. Santi se conecta al servidor por SSH y ejecuta el pull
-5. El servidor queda actualizado
+**Comando Maestro de Despliegue:**
+Simplemente solicita la ejecución del archivo `.agent/workflows/desplegar_produccion.md` dictando el comando `/desplegar_produccion`.
 
-El comando para actualizar el servidor desde SSH es:
-```bash
-cd ~/domains/oscomunidad.com/public_html/erp && git pull
-```
+El agente se encargará de ejecutar automáticamente los 7 pasos críticos:
+1. Verificar conectividad SSH.
+2. Hacer Backup de la BD de Producción.
+3. Compilar el Frontend estático optimizado (`npm run build`).
+4. Exportar la BD local (`db_export.sh`).
+5. Subir a GitHub (Push).
+6. Descargar en Hostinger (Pull).
+7. Importar la BD actualizada a Producción.
 
 ---
 
@@ -352,7 +350,7 @@ Ejemplo incorrecto:
 
 ---
 
-### 11.5 Archivos del sistema
+### 11.5 Archivos del sistema y Almacenamiento Institucional
 
 Los archivos subidos por usuarios (imágenes, documentos, facturas) se guardan fuera de `public_html` para que no sean accesibles directamente por URL. El ERP los sirve a través de PHP con control de permisos.
 
@@ -363,15 +361,20 @@ SOS_ERP_archivos/
     └── OS/              → una carpeta por siglas de empresa
         ├── CARPETA NOMBRE 1 (Se les asigna el nombre en cada caso, según el modulo o el contenido, debes preguntar sobre el nombre de estas carpetas)
         ├── CARPETA NOMBRE 2
-        ├── CARPETA NOMBRE 3
-        └── CARPETA NOMBRE 4
 ```
 
 Cuando se agrega una empresa nueva al sistema, se crea automáticamente su carpeta con sus siglas.
 
-**Almacenamiento Centralizado Mandatorio:** Para garantizar el orden (5S) y evitar la redundancia de archivos (3 copias del mismo logo), se utiliza exclusivamente **Cloudflare R2**. 
+**Almacenamiento Centralizado Mandatorio:** Para garantizar el orden (5S) y evitar la redundancia de archivos, se utiliza exclusivamente **Cloudflare R2**. 
 - Ninguna estación de trabajo debe guardar archivos permanentes del sistema localmente; todo debe fluir a través de R2.
 - Las llaves necesarias para R2 se configuran únicamente en el `.env` de cada ambiente siguiendo el manual de seguridad.
+
+**Política de URLs Dinámicas (Prohibición de URLs Quemadas):**
+Por diseño, las rutas de almacenamiento (como dominios de R2 o servidores locales) pueden cambiar en el futuro. Por ello:
+- **NUNCA** se debe guardar la URL pública completa (Ej: `https://archivos.oscomunidad.com/empresas/os/...`) directamente en un registro de base de datos.
+- Las tablas en base de datos (Ej: `com_productos_multimedia`) solo deben guardar la **Ruta Relativa** en el campo `ruta_archivo` (Ej: `empresas/os/productos/...`).
+- Es obligación absoluta de los Casos de Uso del Backend y Controladores de las API formar la URL definitiva al vuelo (`URL_PUBLICA_ENV + ruta_archivo`) antes de devovlersela en JSON al Frontend. 
+- Al guardar un nuevo archivo, el backend formará la ruta pública pero evitará guardarla dura (harcodearla) si la base de datos no lo exige.
 
 ---
 
