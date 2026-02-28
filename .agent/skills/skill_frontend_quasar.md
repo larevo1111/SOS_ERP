@@ -69,6 +69,19 @@ build: {
 **Problema**: `PLAN_woocommerce.md` definía Verde Bosque `#2D5A27` y Naranja Terracota `#D2691E`. La `GUIA_ESTILOS.md` define Naranja OS `#E8750A` y Verde `#3A7A35`.
 **Regla** (MANIFESTO sección 14.2): `GUIA_ESTILOS.md` es la fuente de verdad para todos los colores y estilos. Si hay conflicto con un plan, siempre gana la guía de estilos. Reportar el conflicto a Santi pero aplicar la guía.
 
+### 7. Alineación visual perfecta en menús expandibles
+**Problema**: Al usar `q-expansion-item` directamente con los props `label` e `icon`, pierde los paddings personalizados que tienen los `.nav-item` regulares, desencajando visualmente con menúes de primer nivel (como un "Dashboard").
+**Solución**: Usar el template `v-slot:header` para replicar exactamente la estructura interna del ítem normal:
+```vue
+<q-expansion-item expand-icon-class="text-grey-6">
+  <template v-slot:header>
+    <q-item-section avatar><q-icon name="store" size="18px" /></q-item-section>
+    <q-item-section class="mi-clase-titulo">Comercial</q-item-section>
+  </template>
+  <!-- sub items aquí -->
+</q-expansion-item>
+```
+
 ---
 
 ## Ejemplos de código correcto

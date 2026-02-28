@@ -10,10 +10,10 @@
 
 **Módulo en construcción:** Comercial — Catálogo & Listados
 **Fase:** Ejecución — Visualización (Fase 4)
-**Última tarea completada:** Sincronización de Base de Datos y Configuración de Ambiente Espejo (PHP/MariaDB)
+**Última tarea completada:** Despliegue de Catálogo Real en Producción y Corrección de Quasar Expansion Item
 **Madrina a cargo:** AntiGravity (Arquitecta)
-**Próximo paso:** [CODEX] Implementación de CatalogoProductos.vue (Fase 4)
-**Fecha de última actualización:** 2026-02-27 (Sesión Tarde)
+**Próximo paso:** [CODEX] Mejorar estética y sangría visual de los subítems del menú Comercial.
+**Fecha de última actualización:** 2026-02-27 (Sesión Noche)
 
 ---
 
@@ -28,7 +28,7 @@
 
 ## Notas y bloqueos activos
 
-_Sin bloqueos activos._
+- **[PENDIENTE CODEX - ESTÉTICA UX]**: El menú lateral tiene la estructura funcional de subítems en "Comercial" (`q-expansion-item`), pero Santi indicó que *estéticamente* aún no parecen subítems profesionales. Falla la jerarquía visual (parecen ítems de primer nivel). **Codex debe mejorar el diseño, sangría y look-and-feel de esos subítems** en `LayoutPrincipal.vue`.
 
 ---
 
@@ -62,6 +62,8 @@ _Sin bloqueos activos._
 | 2026-02-27 | Creación de Bitácora de Errores y Skill de Entorno Espejo | AntiGravity | ✅ Completado |
 | 2026-02-27 | Creación de Índice Maestro de Skills (README_SKILLS.md) | AntiGravity | ✅ Completado |
 | 2026-02-27 | Estandarización de DB (url_producto default) y Sincronización Git | AntiGravity | ✅ Completado |
+| 2026-02-27 | Corrección estructural del menú (q-expansion-item con v-slot header) | AntiGravity | ✅ Completado |
+| 2026-02-27 | Activación del Catálogo Comercial API y pase a Producción Web | AntiGravity | ✅ Completado |
 
 ---
 

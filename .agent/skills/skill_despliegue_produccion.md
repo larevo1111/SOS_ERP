@@ -61,3 +61,8 @@ Si es la primera vez, asegúrate de que el contenido de `erp/frontend/dist/spa` 
 
 ## Regla de Oro del Despliegue
 **NUNCA** despliegues sin antes haber probado en local que todo funciona. El servidor es sagrado.
+
+## Tip: Caché del Navegador
+> [!TIP]
+> Si subes cambios al Frontend y Santi no los ve, es por la caché del navegador.
+> Dile que recargue usando **Ctrl + Shift + R** (Recarga Forzada) o que agregue un parámetro falso a la URL (ej. `erp.oscomunidad.com/?v=123`).
