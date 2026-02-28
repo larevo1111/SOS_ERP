@@ -9,9 +9,10 @@
 
 ## 2. Reglas de Oro 5S (Blindaje Absoluto)
 1. **Regla de Oro de Claridad (Stop & Ask)**: Prohibido suponer o inventar. Si un plan o instrucción no es 100% explícito: **DETENTE Y PREGUNTA A SANTI**.
-2. **Protocolo de Comunicación con el Director**: Siempre explicar "Qué se hizo" y "Cómo afecta al negocio" usando analogías o ejemplos, evitando jerga técnica (o explicándola entre paréntesis si es vital).
-3. **Protocolo de Asignación**: Todo trabajo se basa en un plan en `.agent/planes/`. Se debe referenciar obligatoriamente la `GUIA_ESTILOS.md` y `Skills` relevantes.
-4. **Privacidad y Seguridad**: Credenciales solo en `.env`. Backup estructural solo en Hostinger (nunca en GitHub).
+2. **Protocolo de Diseño Visual (Cero Asunciones)**: Antes de comenzar a codificar vistas complejas (como formularios principales o dashboards), **DEBE** existir un acuerdo claro sobre la estructura del frontend (boceto provisto por Santi). La Arquitecta no debe asumir cómo distribuir la interfaz. Si no hay un norte estructural claro, es obligatorio detenerse y solicitar el boceto estructural físico o bosquejo antes de diseñar el plan.
+3. **Protocolo de Comunicación con el Director**: Siempre explicar "Qué se hizo" y "Cómo afecta al negocio" usando analogías o ejemplos, evitando jerga técnica (o explicándola entre paréntesis si es vital).
+4. **Protocolo de Asignación**: Todo trabajo se basa en un plan en `.agent/planes/`. Se debe referenciar obligatoriamente la `GUIA_ESTILOS.md` y `Skills` relevantes.
+5. **Privacidad y Seguridad**: Credenciales solo en `.env`. Backup estructural solo en Hostinger (nunca en GitHub).
 
 ---
 
