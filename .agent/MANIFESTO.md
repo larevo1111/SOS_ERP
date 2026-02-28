@@ -373,8 +373,20 @@ Cuando se agrega una empresa nueva al sistema, se crea automáticamente su carpe
 Por diseño, las rutas de almacenamiento (como dominios de R2 o servidores locales) pueden cambiar en el futuro. Por ello:
 - **NUNCA** se debe guardar la URL pública completa (Ej: `https://archivos.oscomunidad.com/empresas/os/...`) directamente en un registro de base de datos.
 - Las tablas en base de datos (Ej: `com_productos_multimedia`) solo deben guardar la **Ruta Relativa** en el campo `ruta_archivo` (Ej: `empresas/os/productos/...`).
-- Es obligación absoluta de los Casos de Uso del Backend y Controladores de las API formar la URL definitiva al vuelo (`URL_PUBLICA_ENV + ruta_archivo`) antes de devovlersela en JSON al Frontend. 
+- Es obligación absoluta de los Casos de Uso del Backend y Controladores de las API formar la URL definitiva al vuelo (`R2_URL_PUBLICA + ruta_archivo`) antes de devovlersela en JSON al Frontend. 
 - Al guardar un nuevo archivo, el backend formará la ruta pública pero evitará guardarla dura (harcodearla) si la base de datos no lo exige.
+
+**Ejemplo Técnico Obligatorio (Ensamblaje al vuelo en Controladores):**
+```php
+// 1. Backend lee la "nube" secreta desde el entorno del servidor actual
+$urlBase = getenv('R2_URL_PUBLICA'); // Da: "https://archivos.oscomunidad.com" o "http://localhost:9000"
+
+// 2. Lee la "ruta interna" pre-guardada en la base de datos
+$rutaEnBD = $filaBD['ruta_archivo']; // Da: "empresas/os/productos/OS-202/foto.jpg"
+
+// 3. Junta ambas piezas y manda la URL final al Frontend
+$producto['enlace_foto'] = rtrim($urlBase, '/') . '/' . $rutaEnBD;
+```
 
 ---
 
