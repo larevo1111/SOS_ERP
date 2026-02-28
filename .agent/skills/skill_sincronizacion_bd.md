@@ -1,7 +1,10 @@
-# skill_sincronizacion_bd.md
+# skill_sincronizacion_bd_win11.md
 
 ## Para qué sirve
-Este skill describe el procedimiento estándar para subir cambios de la base de datos local (Windows/Ubuntu) al servidor de producción Hostinger de forma segura y sin errores de codificación.
+Este skill describe el procedimiento estándar para subir cambios de la base de datos local desde **Windows 11** al servidor de producción Hostinger. 
+
+> [!IMPORTANT]
+> Este procedimiento está optimizado para resolver problemas de codificación (UTF-16) específicos de Windows/PowerShell. Para Linux (Ubuntu), el procedimiento es más directo y será documentado por separado.
 
 ## Reglas que nunca se rompen
 1. **Backup Preventivo**: Siempre ejecutar un backup en Hostinger antes de importar nada nuevo. Se guarda en `~/backups/bd/`.

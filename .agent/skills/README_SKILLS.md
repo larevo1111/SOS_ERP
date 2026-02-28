@@ -8,7 +8,7 @@ Este archivo es el catálogo oficial de conocimientos institucionalizados del pr
 |---|---|---|---|
 | **[skill_entorno_espejo.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_entorno_espejo.md)** | Infraestructura Local | Configuración de MariaDB, PHP, SSH, Puertos y Límites de Memoria. | Antes de preparar una nueva estación o ante errores de conexión/servidor. |
 | **[skill_acceso_datos_php.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_acceso_datos_php.md)** | Desarrollo de Datos | Uso de la clase `Conexion.php`, manejo de PDO, excepciones y campos de auditoría. | Al desarrollar consultas SQL o lógica que interactúe con la base de datos. |
-| **[skill_sincronizacion_bd.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_sincronizacion_bd.md)** | Sincronización DB | Procedimiento seguro para mover bases de datos entre Local y Producción. | Siempre que se necesite subir cambios de estructura o datos a Hostinger. |
+| **[skill_sincronizacion_bd.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_sincronizacion_bd.md)** | Sincronización DB (Win11) | Procedimiento seguro desde Windows 11 para mover bases de datos a Hostinger. | Siempre que se necesite subir cambios a Hostinger desde una estación Windows. |
 
 ---
 
