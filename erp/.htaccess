@@ -1,22 +1,23 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Si se accede desde http://localhost/erp/ en Windows/Ubuntu, necesitamos esta base:
+    # Si se accede desde https://erp.oscomunidad.com directo (Hostinger), la ignorará si no se usa.
     RewriteBase /
 
-    # 1. API - Redirigir /api/* al enrutador PHP
-    RewriteRule ^api/(.*)$ erp/infraestructura/rutas.php [QSA,L]
+    # 1. API - Enviar tráfico de /api/ al framework backend
+    RewriteCond %{REQUEST_URI} api/ [NC]
+    RewriteRule ^(.*)?api/(.*)$ erp/infraestructura/rutas.php [QSA,L]
 
-    # 2. Archivos estaticos
-    # Si el archivo solicitado existe en la ruta del SPA, servirlo directamente
-    RewriteCond %{DOCUMENT_ROOT}/erp/frontend/dist/spa%{REQUEST_URI} -f
-    RewriteRule ^(.*)$ erp/frontend/dist/spa/$1 [L]
-
-    # 3. Fallback para Rutas de Vue (SPA)
-    # Permite navegar a /productos y que cargue el index.html
-    RewriteCond %{REQUEST_URI} !^/api/
+    # 2. Ignorar tráfico que ya está en la carpeta compilada (prevención de bucles)
+    RewriteCond %{REQUEST_URI} /frontend/dist/spa/ [NC]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ erp/frontend/dist/spa/index.html [L]
 
-    # 4. Raiz vacia
-    RewriteRule ^$ erp/frontend/dist/spa/index.html [L]
+    # 3. Frontend Estático - Servir los archivos compilados en Producción
+    # Si no es tráfico de API ni archivos ya en dist/spa...
+    RewriteCond %{REQUEST_URI} !api/ [NC]
+    RewriteCond %{REQUEST_URI} !/frontend/dist/spa/ [NC]
+    RewriteRule ^(?:erp/)?(.*)$ erp/frontend/dist/spa/$1 [L]
 </IfModule>
