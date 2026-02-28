@@ -59,12 +59,14 @@
 1. **AntiGravity** crea el plan en un archivo `PLAN_nombre.md` con tareas usando `- [ ]`.
 2. **Santi aprueba** el plan en el chat antes de que cualquier constructor ejecute.
 3. **Claude Code** lee el plan, revisa el repositorio y construye el código.
-4. Al completar cada tarea, Claude Code:
+4. Al completar cada tarea, Claude Code (o Codex):
    - Marca el checkbox como `- [x]`
    - Actualiza `CONTEXTO_ACTIVO.md` (incluyendo su nombre en el historial y en 'Madrina a cargo')
    - Entrega: archivo principal + SQL si aplica + rutas actualizadas
 
-5. **Confianza en la Arquitectura (Regla 5S)**: Si la Madrina Arquitecta ya detalló estructuras de tablas, estados del entorno o variables en el `PLAN_nombre.md` o `CONTEXTO_ACTIVO.md`, el Constructor debe confiar en esa investigación. Está prohibido ejecutar comandos de verificación redundantes que interrumpan al usuario con permisos de Bash innecesarios o consuman tokens repitiendo lo que ya se documentó.
+5. **Regla de Sincronización Estricta (Bloqueo de Falsas Esperanzas)**: Ningún agente (especialmente la Madrina Arquitecta) puede dar instrucciones, "luz verde" o comandos para otros agentes si el código o los planes **no han sido subidos exitosamente al repositorio remoto mediante `git push`**. El agente debe esperar a verificar la salida exitosa del comando push ANTES de decirle a Santi "ya puedes activar al otro agente".
+
+6. **Confianza en la Arquitectura (Regla 5S)**: Si la Madrina Arquitecta ya detalló estructuras de tablas, estados del entorno o variables en el `PLAN_nombre.md` o `CONTEXTO_ACTIVO.md`, el Constructor debe confiar en esa investigación. Está prohibido ejecutar comandos de verificación redundantes que interrumpan al usuario con permisos de Bash innecesarios o consuman tokens repitiendo lo que ya se documentó.
 
 ### Estados de tarea
 
