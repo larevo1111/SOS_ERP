@@ -173,12 +173,33 @@
               </div>
             </div>
 
-            <q-input v-model="producto.uid_producto_padre"
-              label="UID Producto Padre (Costos)" outlined dense readonly bg-color="grey-1"
-              hint="Solo lectura — vincula este registro con su ficha de costos"
+            <q-select
+              v-model="producto.uid_producto_padre"
+              :options="opcionesMaestrosCosto"
+              :loading="cargandoMaestrosCosto"
+              label="Producto Maestro de Costos"
+              outlined
+              dense
+              clearable
+              emit-value
+              map-options
+              use-input
+              fill-input
+              hide-selected
+              input-debounce="250"
+              hint="Busca por nombre del maestro de costos y enlaza su UID"
+              @filter="filtrarMaestrosCosto"
+              @update:model-value="alSeleccionarMaestroCosto"
             >
               <template #prepend><q-icon name="link" color="grey-5" /></template>
-            </q-input>
+              <template #no-option>
+                <q-item>
+                  <q-item-section class="text-grey-6">
+                    No hay coincidencias.
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
 
           </div>
         </div>
@@ -596,6 +617,10 @@ const multimedia        = ref([])
 const variaciones       = ref([])
 const archivoEnArrastre = ref(null)
 const inputArchivo      = ref(null)   // referencia al <input type="file"> oculto
+const opcionesMaestrosCosto = ref([])
+const cargandoMaestrosCosto = ref(false)
+const ultimoNombreAutocompletado = ref('')
+const errorMaestrosCostoMostrado = ref(false)
 
 const esMaestro = computed(() => !producto.value.producto_principal_variacion)
 
@@ -623,6 +648,57 @@ const opcionesUso = [
   { label: 'Galería secundaria', value: 'Galeria secundaria' },
   { label: 'Otro',               value: 'Otro' }
 ]
+
+function mapearMaestrosCosto (items = []) {
+  return items.map(item => ({
+    label: `${item.producto} · ${item.uid}`,
+    value: item.uid,
+    nombre: item.producto
+  }))
+}
+
+async function consultarMaestrosCosto (busqueda = '') {
+  cargandoMaestrosCosto.value = true
+  try {
+    const datos = await llamar('comercial', 'costos', 'listar_maestros_costo', { busqueda })
+    const maestros = Array.isArray(datos?.maestros) ? datos.maestros : []
+    opcionesMaestrosCosto.value = mapearMaestrosCosto(maestros)
+  } catch (error) {
+    if (!errorMaestrosCostoMostrado.value) {
+      $q.notify({
+        type: 'warning',
+        message: 'No fue posible cargar maestros de costo. Puedes continuar digitando el UID manualmente.',
+        icon: 'warning'
+      })
+      errorMaestrosCostoMostrado.value = true
+    }
+    opcionesMaestrosCosto.value = []
+  } finally {
+    cargandoMaestrosCosto.value = false
+  }
+}
+
+function filtrarMaestrosCosto (valor, update) {
+  update(async () => {
+    await consultarMaestrosCosto(valor.trim())
+  })
+}
+
+function alSeleccionarMaestroCosto (uidSeleccionado) {
+  if (!uidSeleccionado) {
+    ultimoNombreAutocompletado.value = ''
+    return
+  }
+
+  const maestro = opcionesMaestrosCosto.value.find(opcion => opcion.value === uidSeleccionado)
+  if (!maestro) return
+
+  const nombreActual = (producto.value.nombre || '').trim()
+  if (nombreActual === '' || nombreActual === ultimoNombreAutocompletado.value) {
+    producto.value.nombre = maestro.nombre
+    ultimoNombreAutocompletado.value = maestro.nombre
+  }
+}
 
 async function cargarProducto (uid) {
   // TODO: GET /api/comercial/productos/:uid
@@ -739,6 +815,8 @@ function formatearFecha (fecha) {
 }
 
 onMounted(async () => {
+  await consultarMaestrosCosto()
+
   const uid = route.params.uid
   if (uid) {
     await cargarProducto(uid)

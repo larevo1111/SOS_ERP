@@ -56,15 +56,15 @@
     - [x] Verificación de integridad de datos en BD vs Vista de Edición
     - [x] Identificación y corrección de "Edge Cases" (CORS, index.php, htaccess)
 
-- [/] **Fase 6: Menú Dinámico y Estética UX** [Madrina: AntiGravity]
+- [x] **Fase 6: Menú Dinámico y Estética UX** [Madrina: AntiGravity]
     - [x] Creación de tabla `sys_menu_v2` con patrón Padre-Hijo (Adjacency List) [AntiGravity]
     - [x] Generar script de siembra (Seeder) con el menú base y módulo Comercial [AntiGravity]
     - [x] API `MenuController` para armar el árbol JSON anidado [AntiGravity]
-    - [ ] Refactor del Frontend `LayoutPrincipal.vue` para renderizado dinámico de 3 niveles **[Asignado: Codex]**
+    - [x] Refactor del Frontend `LayoutPrincipal.vue` para renderizado dinámico de 3 niveles **[Asignado: Codex]**
 
 - [ ] **Fase 7: Integración WooCommerce (Maestros de Costos)**
     - [ ] API Endpoint `listar_maestros_costo` desde `costos_encabezados_productos` **[Asignado: Claude Code]**
-    - [ ] Implementar UI de `q-select` en `FormularioProducto.vue` para enlazar `uid_producto_padre` **[Asignado: Codex]**
+    - [x] Implementar UI de `q-select` en `FormularioProducto.vue` para enlazar `uid_producto_padre` **[Asignado: Codex]**
     - [ ] Estructura base para sincronizar (push/pull) con API de WooCommerce **[Asignado: Claude Code]**
     - [ ] UI de la vista `IntegracionWooCommerce.vue` (Tabla de estado y botón Sync) **[Asignado: Codex]**
 

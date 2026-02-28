@@ -22,33 +22,90 @@
             </q-item>
           </div>
 
-          <!-- Módulo Comercial — expandible -->
-          <q-expansion-item
-            default-opened
-            expand-separator
-            class="nav-expansion"
-            expand-icon-class="text-grey-6"
-          >
-            <!-- Cabecera idéntica a "Dashboard" -->
-            <template v-slot:header>
-              <q-item-section avatar>
-                <q-icon name="store" size="18px" />
-              </q-item-section>
-              <q-item-section class="nav-expansion__titulo">
-                Comercial
-              </q-item-section>
-            </template>
+          <div class="nav-grupo">
+            <div class="nav-grupo__label">Módulos</div>
 
-            <!-- Subitems con leve sangría hacia la derecha -->
-            <q-item clickable v-ripple :to="{ name: 'catalogo-productos' }" active-class="nav-item--activo" class="nav-item nav-item--sub">
-              <q-item-section avatar><q-icon name="inventory_2" size="16px" /></q-item-section>
-              <q-item-section>Catálogo Comercial</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple :to="{ name: 'woocommerce' }" active-class="nav-item--activo" class="nav-item nav-item--sub">
-              <q-item-section avatar><q-icon name="shopping_cart" size="16px" /></q-item-section>
-              <q-item-section>Integración WooCommerce</q-item-section>
-            </q-item>
-          </q-expansion-item>
+            <template v-for="nodoNivel1 in menuArbol" :key="nodoNivel1.uid">
+              <q-expansion-item
+                v-if="tieneHijos(nodoNivel1)"
+                :default-opened="nodoAbiertoPorRuta(nodoNivel1)"
+                class="nav-expansion nav-expansion--nivel-1"
+                expand-icon-class="text-grey-6"
+              >
+                <template #header>
+                  <q-item-section avatar>
+                    <q-icon :name="nodoNivel1.icono || 'folder'" size="18px" />
+                  </q-item-section>
+                  <q-item-section class="nav-expansion__titulo">
+                    {{ nodoNivel1.titulo }}
+                  </q-item-section>
+                </template>
+
+                <template v-for="nodoNivel2 in nodoNivel1.hijos || []" :key="nodoNivel2.uid">
+                  <q-expansion-item
+                    v-if="tieneHijos(nodoNivel2)"
+                    :default-opened="nodoAbiertoPorRuta(nodoNivel2)"
+                    class="nav-expansion nav-expansion--nivel-2"
+                    dense
+                    expand-icon-class="text-grey-5"
+                  >
+                    <template #header>
+                      <q-item-section avatar>
+                        <q-icon :name="nodoNivel2.icono || 'subdirectory_arrow_right'" size="16px" />
+                      </q-item-section>
+                      <q-item-section class="nav-expansion__titulo nav-expansion__titulo--sub">
+                        {{ nodoNivel2.titulo }}
+                      </q-item-section>
+                    </template>
+
+                    <q-item
+                      v-for="nodoNivel3 in nodoNivel2.hijos || []"
+                      :key="nodoNivel3.uid"
+                      clickable
+                      v-ripple
+                      :to="nodoNivel3.destino || undefined"
+                      :disable="!nodoNivel3.destino"
+                      active-class="nav-item--activo"
+                      class="nav-item nav-item--nivel-3"
+                    >
+                      <q-item-section avatar>
+                        <q-icon :name="nodoNivel3.icono || 'chevron_right'" size="14px" />
+                      </q-item-section>
+                      <q-item-section>{{ nodoNivel3.titulo }}</q-item-section>
+                    </q-item>
+                  </q-expansion-item>
+
+                  <q-item
+                    v-else
+                    clickable
+                    v-ripple
+                    :to="nodoNivel2.destino || undefined"
+                    :disable="!nodoNivel2.destino"
+                    active-class="nav-item--activo"
+                    class="nav-item nav-item--nivel-2"
+                  >
+                    <q-item-section avatar>
+                      <q-icon :name="nodoNivel2.icono || 'chevron_right'" size="16px" />
+                    </q-item-section>
+                    <q-item-section>{{ nodoNivel2.titulo }}</q-item-section>
+                  </q-item>
+                </template>
+              </q-expansion-item>
+
+              <q-item
+                v-else
+                clickable
+                v-ripple
+                :to="nodoNivel1.destino || undefined"
+                :disable="!nodoNivel1.destino"
+                active-class="nav-item--activo"
+                class="nav-item nav-item--nivel-1"
+              >
+                <q-item-section avatar><q-icon :name="nodoNivel1.icono || 'folder'" size="18px" /></q-item-section>
+                <q-item-section>{{ nodoNivel1.titulo }}</q-item-section>
+              </q-item>
+            </template>
+          </div>
         </q-scroll-area>
 
         <!-- Usuario -->
@@ -72,8 +129,84 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { llamar } from '../servicios/apiService.js'
+
 const menuAbierto = ref(true)
+const menuArbol = ref([])
+const route = useRoute()
+const router = useRouter()
+
+const rutasAlias = {
+  'integracion-woocommerce': 'woocommerce'
+}
+
+const menuFallback = [
+  {
+    uid: 'fallback-comercial',
+    titulo: 'Comercial',
+    icono: 'store',
+    destino: null,
+    hijos: [
+      { uid: 'fallback-catalogo', titulo: 'Catálogo Comercial', icono: 'inventory_2', destino: { name: 'catalogo-productos' }, hijos: [] },
+      { uid: 'fallback-woo', titulo: 'Integración WooCommerce', icono: 'sync_alt', destino: { name: 'woocommerce' }, hijos: [] }
+    ]
+  }
+]
+
+function tieneHijos (nodo) {
+  return Array.isArray(nodo?.hijos) && nodo.hijos.length > 0
+}
+
+function resolverDestino (rutaVue) {
+  if (!rutaVue) return null
+  const rutaNormalizada = rutasAlias[rutaVue] || rutaVue
+
+  if (router.hasRoute(rutaNormalizada)) {
+    return { name: rutaNormalizada }
+  }
+
+  const destinoPath = rutaNormalizada.startsWith('/') ? rutaNormalizada : `/${rutaNormalizada}`
+  return destinoPath
+}
+
+function normalizarNodo (nodo) {
+  return {
+    uid: nodo.uid,
+    titulo: nodo.titulo,
+    icono: nodo.icono,
+    destino: resolverDestino(nodo.ruta_vue),
+    hijos: (nodo.hijos || []).map(normalizarNodo)
+  }
+}
+
+function destinoEsActivo (destino) {
+  if (!destino) return false
+  if (typeof destino === 'string') return route.path === destino
+  if (destino.name) return route.name === destino.name
+  return false
+}
+
+function nodoAbiertoPorRuta (nodo) {
+  if (destinoEsActivo(nodo.destino)) return true
+  return (nodo.hijos || []).some(hijo => nodoAbiertoPorRuta(hijo))
+}
+
+async function cargarMenuDinamico () {
+  try {
+    const datos = await llamar('sistema', 'menu', 'obtener_menu', {})
+    const menu = Array.isArray(datos?.menu) ? datos.menu : []
+    menuArbol.value = menu.length > 0 ? menu.map(normalizarNodo) : menuFallback
+  } catch (error) {
+    console.warn('[LayoutPrincipal] No se pudo cargar menú dinámico:', error?.message)
+    menuArbol.value = menuFallback
+  }
+}
+
+onMounted(() => {
+  cargarMenuDinamico()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -186,9 +319,31 @@ const menuAbierto = ref(true)
     font-weight: 600;
   }
 
-  &--sub {
-    font-size: 13px;
-    padding-left: 24px; // Levemente corridos hacia la derecha como pidió Santi
+  &--nivel-1 {
+    padding-left: 2px;
+  }
+
+  &--nivel-2 {
+    margin-left: 10px;
+    padding-left: 6px;
+  }
+
+  &--nivel-3 {
+    margin-left: 28px;
+    padding-left: 4px;
+    font-size: 12.5px;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -10px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      border-radius: 999px;
+      background: rgba(141, 184, 154, 0.35);
+    }
   }
 }
 
@@ -201,11 +356,23 @@ const menuAbierto = ref(true)
     font-weight: 500;
     color: #3A3A3A;
     text-align: left;
+
+    &--sub {
+      font-size: 12.5px;
+      color: #4A4A4A;
+      font-weight: 600;
+    }
+  }
+
+  &--nivel-2 {
+    margin-left: 10px;
+    border-left: 2px solid rgba(141, 184, 154, 0.25);
+    padding-left: 8px;
   }
 
   :deep(.q-item) {
     border-radius: 10px;
-    padding: 8px 16px; // Mismo padding exacto que el Dashboard (nav-item por defecto de Quasar suele tener esto)
+    padding: 8px 16px;
     min-height: 36px;
   }
 }
