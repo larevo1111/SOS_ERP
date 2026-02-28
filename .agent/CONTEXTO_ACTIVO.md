@@ -12,23 +12,23 @@
 **Fase:** Ejecución — Visualización (Fase 4)
 **Última tarea completada:** Despliegue de Catálogo Real en Producción y Corrección de Quasar Expansion Item
 **Madrina a cargo:** AntiGravity (Arquitecta)
-**Próximo paso:** [CODEX] Mejorar estética y sangría visual de los subítems del menú Comercial.
-**Fecha de última actualización:** 2026-02-27 (Sesión Noche)
+**Próximo paso:** [CLAUDE / CODEX] Ejecución en paralelo Fases 7 y 8 según `PLAN_novedades.md`. Configurar Auth, Integrar Maestros de Costos. Además, Codex completará UI del Menú Dinámico (Fase 6).
+**Fecha de última actualización:** 2026-02-27 (Sesión Nocturna Novedades)
 
 ---
 
 ## 📚 Referencias Obligatorias para esta Fase
 - 🎨 **Diseño**: [.agent/diseno/GUIA_ESTILOS.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)
 - ⚡ **Skills**: [.agent/skills/skill_frontend_quasar.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/skills/skill_frontend_quasar.md)
-- 📐 **Mockup**: [.agent/diseno/dashboard_ref.html](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/dashboard_ref.html)
+- 📜 **Plan Novedades (ACTIVO)**: [.agent/planes/PLAN_novedades.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/PLAN_novedades.md)
 - 📜 **Plan Conexión**: [.agent/planes/implementation_plan_conexion.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/implementation_plan_conexion.md)
-- 📜 **Plan Vistas**: [.agent/planes/implementation_plan_vistas.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/implementation_plan_vistas.md)
 
 ---
 
 ## Notas y bloqueos activos
 
-- **[PENDIENTE CODEX - ESTÉTICA UX]**: El menú lateral tiene la estructura funcional de subítems en "Comercial" (`q-expansion-item`), pero Santi indicó que *estéticamente* aún no parecen subítems profesionales. Falla la jerarquía visual (parecen ítems de primer nivel). **Codex debe mejorar el diseño, sangría y look-and-feel de esos subítems** en `LayoutPrincipal.vue`.
+- **[CLAUDE CODE] Ojo con JWT**: Tienes luz verde para requerir `firebase/php-jwt` mediante Composer, según el `PLAN_novedades.md`.
+- **[CODEX] UI del Menú**: Usa el `MenuController` (`/api/sistema/menu`) estructurado por la Madrina para poblar `sys_menu_v2` dinámicamente con `q-expansion-item` en `/LayoutPrincipal.vue`.
 
 ---
 
