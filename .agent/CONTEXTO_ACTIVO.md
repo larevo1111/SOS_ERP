@@ -8,12 +8,12 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Comercial — Costos + WooCommerce + Auth JWT
-**Fase:** Fases 7 y 8 completadas (backend)
-**Última tarea completada:** CostosController, WooCommerceController, AuthController+JWT, composer.json
-**Madrina a cargo:** Claude Code
-**Próximo paso:** [SANTI] `cd erp && composer install` en local y Hostinger. Agregar JWT_SECRET y WC_* al .env. [CODEX] Activar middleware JWT en rutas.php + actualizar apiService.js con Bearer token.
-**Fecha de última actualización:** 2026-02-27 (Sesión Nocturna — Post Novedades)
+**Módulo en construcción:** Comercial — Menú dinámico + Maestros de Costos
+**Fase:** Fase 6 (UI) completada · Fase 7 (UI) en avance
+**Última tarea completada:** Codex: Refactor de `LayoutPrincipal.vue` con menú dinámico `sys_menu_v2` + `q-select` de Maestros de Costos en `FormularioProducto.vue`
+**Madrina a cargo:** AntiGravity (Arquitecta)
+**Próximo paso:** [CODEX] Finalizar UI de Fase 7 (`IntegracionWooCommerce.vue`) y habilitar protección Auth JWT de Fase 8 en `apiService.js` y `Login.vue`.
+**Fecha de última actualización:** 2026-02-27 (Sesión Nocturna Novedades)
 
 ---
 
@@ -27,8 +27,8 @@
 
 ## Notas y bloqueos activos
 
-- **[CLAUDE CODE] Ojo con JWT**: Tienes luz verde para requerir `firebase/php-jwt` mediante Composer, según el `PLAN_novedades.md`.
-- **[CODEX] UI del Menú**: Usa el `MenuController` (`/api/sistema/menu`) estructurado por la Madrina para poblar `sys_menu_v2` dinámicamente con `q-expansion-item` en `/LayoutPrincipal.vue`.
+- **Menú dinámico**: Frontend consume `/api/sistema/menu` y tiene fallback visual por si el endpoint no responde.
+- **Maestros de Costos**: `q-select` ya enlaza `uid_producto_padre` y autocompleta nombre; requiere endpoint accesible (`/api/comercial/costos`, acción `listar_maestros_costo`).
 
 ---
 
@@ -64,6 +64,7 @@
 | 2026-02-27 | Estandarización de DB (url_producto default) y Sincronización Git | AntiGravity | ✅ Completado |
 | 2026-02-27 | Corrección estructural del menú (q-expansion-item con v-slot header) | AntiGravity | ✅ Completado |
 | 2026-02-27 | Activación del Catálogo Comercial API y pase a Producción Web | AntiGravity | ✅ Completado |
+| 2026-02-27 | Fase 6/7 UI: menú dinámico `sys_menu_v2` + q-select Maestros de Costos en FormularioProducto | Codex | ✅ Completado |
 
 ---
 
