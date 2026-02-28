@@ -44,7 +44,16 @@
 ## 6. Memoria y Gobernanza 5S
 - **Estética Orígenes**: Fidelidad total a `GUIA_ESTILOS.md` (Verdes/Naranjas tierra, minimalismo premium).
 - **Skills**: Documentar lecciones en `.agent/skills/`. Incluir `Estado`, `Autor` y `Fecha`.
-- **Contexto**: `CONTEXTO_ACTIVO.md` corto y real. Planes terminados a `.agent/historial/`.
+- **Contexto**: `CONTEXTO_ACTIVO.md` corto y real.
+
+## 7. Política de Sincronización de Base de Datos y Accesos
+
+Para garantizar que el ecosistema (Hostinger, Ubuntu Local, Windows 11) se mantenga en sincronía y no existan desfaces estructurales ni de datos de prueba:
+
+1. **La Base de Datos viaja por Git**: Toda alteración a la base de datos (nuevas tablas, migraciones, registros de prueba complejos) debe exportarse al archivo `erp/base_datos/sos_erp_sync.sql` usando el script oficial.
+2. **Mandamiento de Exportación**: Si alteras la BD en tu entorno, ejecuta `./erp/scripts/db_export.sh`, haz `git commit` y `git push`.
+3. **Mandamiento de Importación**: Al cambiar de equipo (ej. de Hostinger a Ubuntu o de Ubuntu a Windows 11), después de hacer `git pull`, debes ejecutar `./erp/scripts/db_import.sh` para absorber los cambios estructurales.
+4. **Acceso Permanente a Desarrollo**: Para visualizar el frontend desde cualquier equipo en la red local, se debe ejecutar siempre `./erp/scripts/iniciar_dev.sh`. Este script imprimirá la URL fija (ej. `http://<ip-ubuntu>:5173`) sin necesidad de configuraciones DNS adicionales.
 
 - MariaDB 11.8 único central. Tanto el servidor de Hostinger como el ambiente local deben usar MariaDB 11.8 para evitar conflictos de collation.
 - Todas las tablas incluyen: `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
