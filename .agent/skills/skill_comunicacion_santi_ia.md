@@ -43,9 +43,14 @@ Este skill define el protocolo estricto que rige cómo la inteligencia artificia
 > [!WARNING]
 > **Limitación Técnica de Guardado:** La IA Arquitecta (AntiGravity) PUEDE VER y analizar a la perfección las imágenes que se suben como adjunto en el chat, pero **NO TIENE HERRAMIENTAS** para agarrar ese binario de la foto del chat y embutirlo como archivo `.png` dentro del repositorio del proyecto.
 
+## Flujo de Trabajo (Paso a Paso Mejorado: Cero Fricción para Santi)
+> [!TIP]
+> **El Principio del "Inbox" (Bandeja de entrada):** Para que Santi no pierda tiempo renombrando archivos ni lidiando con su disco local, puede usar directamente la interfaz web de GitHub para arrastrar y soltar sus imágenes.
+
 1. **Santi** requiere una nueva interfaz y dibuja un boceto (estructural/lógico).
-2. **Santi** adjunta la imagen al chat de la Arquitecta para su análisis inmediato.
-3. **Santi (Acción Manual)** guarda esa misma imagen físicamente en su entorno en la carpeta `/erp/.agent/bocetos/` con un nombre descriptivo (Ej: `boceto_producto.png`) para que quede en el repositorio.
-4. **IA (Arquitecta)** analiza el boceto visual desde el chat, extrae la lógica, plantea viabilidad técnica y define el plan en `PLAN_xx.md`.
-5. **En el Plan (`PLAN_xx.md`)**, la Arquitecta instruye a los constructores: `> [!NOTE] Referencia Visual: Ver .agent/bocetos/boceto_producto.png`.
-6. **Constructores (Claude/Codex)** ejecutan leyendo el Plan y abriendo la imagen física que Santi dejó en la carpeta local.
+2. **Santi** sube la imagen cruda directamente a la página web de GitHub, dentro de la carpeta `/erp/.agent/bocetos_inbox/` (no importa el nombre feo que tenga la foto, ej: `IMG-2024-WhatsApp.jpeg`).
+3. **Santi** notifica a la IA en el chat diciéndole: *"Te dejé un nuevo boceto en el inbox para el formulario XYZ"*.
+4. **IA (Arquitecta)** hace `git pull` para detectar la nueva imagen.
+5. **IA (Arquitecta)** toma el mando operativo: Renombra el archivo a algo profesional (ej: `boceto_formulario_xyz.png`), lo mueve a su hogar final `/erp/.agent/bocetos/` y elimina la basura del Inbox.
+6. **IA (Arquitecta)** analiza el boceto visual, extrae la lógica, plantea viabilidad técnica y define el plan en `PLAN_xx.md` referenciando la nueva ruta limpia.
+7. **Constructores (Claude/Codex)** ejecutan leyendo el Plan y abriendo la imagen física ya organizada.

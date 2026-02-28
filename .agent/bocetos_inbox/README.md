@@ -1,0 +1,1 @@
+# Bandeja de Entrada de Bocetos\nEste directorio es temporal. Santi puede subir imágenes aquí desde GitHub Web con cualquier nombre. La IA las procesará, renombrará y moverá a la carpeta principal de bocetos.
