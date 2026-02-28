@@ -1,24 +1,17 @@
 # skill_entorno_espejo.md
 
 ## Para qué sirve
-Este skill define los protocolos para mantener la paridad absoluta entre las estaciones de trabajo locales (Windows/Ubuntu) y el servidor de producción Hostinger, evitando errores de "en mi máquina si funciona".
+Este skill define los protocolos para mantener la paridad absoluta entre las estaciones de trabajo locales (Windows/Ubuntu) y el servidor de producción Hostinger. Es una guía de **Infraestructura**.
 
 ## Reglas que nunca se rompen
-1. **MariaDB 11.8**: Prohibido usar MySQL 8 o versiones inferiores en local. La colación y tipos de datos deben ser idénticos.
-2. **PHP Espejo**: Siempre validar que las extensiones `zip`, `gd`, `soap`, `sockets`, `ftp` y `gmp` estén activas en el `php.ini` local.
-3. **Memoria y Post**: `memory_limit` debe estar en 2048M para soportar procesos pesados.
+1. **MariaDB 11.8**: Prohibido usar MySQL 8 o versiones inferiores en local.
+2. **PHP Espejo**: Validar extensiones `zip`, `gd`, `soap`, `sockets`, `ftp` y `gmp` en el `php.ini` local.
+3. **Memoria**: `memory_limit=2048M` obligatorio en todas las estaciones.
 
 ## Problemas conocidos y soluciones
-- **Bloqueo de Puertos (SSH/Database)**: Desactivar VPNs o servicios como Cloudflare WARP que interceptan el tráfico del puerto 65002 o 3306.
-- **Error 1364 (Integridad SQL)**: Las tablas heredadas pueden tener campos `NOT NULL` sin default. Se debe estandarizar la tabla con `ALTER TABLE ... DEFAULT ''` si el campo no es crítico para la inserción inicial.
+- **Bloqueo 65002/3306**: Cloudflare WARP o Firewalls locales deben tener reglas de excepción para estos puertos.
+- **Diferencia de Collation**: Si los motores no coinciden, fallarán las importaciones de base de datos.
 
-## Ejemplos de código correcto
-Para estandarizar un campo sin default:
-```sql
-ALTER TABLE com_productos MODIFY url_producto varchar(255) DEFAULT '';
-```
-
-Para verificar módulos PHP desde consola:
-```bash
-php -m
-```
+## Ejemplos de comandos
+Verificar módulos: `php -m`
+Verificar límites: `php -i | findstr "memory_limit"`
