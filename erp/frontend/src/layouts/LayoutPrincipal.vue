@@ -20,9 +20,17 @@
               <q-item-section avatar><q-icon name="dashboard" size="18px" /></q-item-section>
               <q-item-section>Dashboard</q-item-section>
             </q-item>
-            <q-item clickable v-ripple :to="{ name: 'catalogo-productos' }" active-class="nav-item--activo" class="nav-item">
+          </div>
+
+          <div class="nav-grupo">
+            <div class="nav-grupo__label">Comercial</div>
+            <q-item clickable v-ripple :to="{ name: 'catalogo-productos' }" active-class="nav-item--activo" class="nav-item nav-item--sub">
               <q-item-section avatar><q-icon name="inventory_2" size="18px" /></q-item-section>
-              <q-item-section>Comercial</q-item-section>
+              <q-item-section>Productos</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple :to="{ name: 'woocommerce' }" active-class="nav-item--activo" class="nav-item nav-item--sub">
+              <q-item-section avatar><q-icon name="shopping_cart" size="18px" /></q-item-section>
+              <q-item-section>Integración WooCommerce</q-item-section>
             </q-item>
           </div>
         </q-scroll-area>
@@ -160,6 +168,11 @@ const menuAbierto = ref(true)
     background: rgba(232, 117, 10, 0.08) !important;
     color: #C55E00 !important;
     font-weight: 600;
+  }
+
+  &--sub {
+    font-size: 12.5px;
+    padding-left: 6px;
   }
 }
 </style>

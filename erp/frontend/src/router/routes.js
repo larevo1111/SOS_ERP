@@ -22,6 +22,11 @@ const routes = [
         path: '/comercial/producto/nuevo',
         name: 'nuevo-producto',
         component: () => import('modulos/comercial/FormularioProducto.vue')
+      },
+      {
+        path: '/comercial/woocommerce',
+        name: 'woocommerce',
+        component: () => import('modulos/comercial/IntegracionWooCommerce.vue')
       }
     ]
   },
