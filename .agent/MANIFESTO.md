@@ -22,6 +22,7 @@ El equipo de agentes opera bajo la siguiente jerarquía:
 - Sin sobreingeniería: solo la complejidad que el problema requiere.
 - Estructura modular: cada módulo es autosuficiente.
 - **Protocolo de Asignación**: Siempre que la **Arquitecta (AntiGravity)** asigne una misión o plan a un Constructor (especialmente en Frontend), es obligatorio referenciar la **GUIA_ESTILOS.md** y las **Skills** relevantes cargadas en el repositorio. Asimismo, los planes técnicos detallados deben ser desplegados obligatoriamente en la carpeta **`.agent/planes/`** del repositorio para asegurar que sean visibles para todos los agentes constructores.
+- **Regla de Oro de Claridad**: Si una instrucción, plan o situación técnica no es 100% clara para un agente, o si detecta una incoherencia que podría causar daños colaterales, **EL AGENTE DEBE DETENERSE Y PREGUNTAR A SANTI**. Está estrictamente prohibido improvisar, inventar soluciones o proceder bajo suposiciones en puntos críticos del sistema.
 
 ---
 

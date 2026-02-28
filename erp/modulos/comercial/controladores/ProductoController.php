@@ -8,6 +8,8 @@
 require_once __DIR__ . '/../../../infraestructura/base_datos/Conexion.php';
 require_once __DIR__ . '/../casos_de_uso/GuardarProducto.php';
 require_once __DIR__ . '/../casos_de_uso/SubirMultimedia.php';
+require_once __DIR__ . '/../casos_de_uso/ObtenerProducto.php';
+require_once __DIR__ . '/../casos_de_uso/ListarProductos.php';
 
 use Infraestructura\BaseDatos\Conexion;
 
@@ -32,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 function responder(bool $exito, $datos = null, string $mensaje = '', array $errores = []): void
 {
     echo json_encode([
-        'exito'   => $exito,
-        'datos'   => $datos ?? (object)[],
+        'exito' => $exito,
+        'datos' => $datos ?? (object)[],
         'mensaje' => $mensaje,
         'errores' => $errores,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -42,22 +44,23 @@ function responder(bool $exito, $datos = null, string $mensaje = '', array $erro
 
 // ── Detectar tipo de petición: JSON o multipart (subida de archivos)
 $esMultipart = isset($_SERVER['CONTENT_TYPE']) &&
-               str_contains($_SERVER['CONTENT_TYPE'], 'multipart/form-data');
+    str_contains($_SERVER['CONTENT_TYPE'], 'multipart/form-data');
 
 if ($esMultipart) {
     // Subida de archivos: el token y la acción llegan como campos de formulario
-    $tokenEnviado = $_POST['token']  ?? '';
-    $accion       = trim($_POST['accion'] ?? '');
-    $datos        = isset($_POST['datos']) ? json_decode($_POST['datos'], true) : [];
-} else {
+    $tokenEnviado = $_POST['token'] ?? '';
+    $accion = trim($_POST['accion'] ?? '');
+    $datos = isset($_POST['datos']) ? json_decode($_POST['datos'], true) : [];
+}
+else {
     // Petición JSON estándar
     $cuerpo = json_decode(file_get_contents('php://input'), true);
     if (!$cuerpo) {
         responder(false, null, 'Petición inválida: se esperaba JSON.', ['sin_cuerpo']);
     }
-    $tokenEnviado = $cuerpo['token']  ?? '';
-    $accion       = trim($cuerpo['accion'] ?? '');
-    $datos        = $cuerpo['datos']  ?? [];
+    $tokenEnviado = $cuerpo['token'] ?? '';
+    $accion = trim($cuerpo['accion'] ?? '');
+    $datos = $cuerpo['datos'] ?? [];
 }
 
 // ── Validar token (R2_TOKEN del .env) ─────────────────────────────
@@ -87,14 +90,24 @@ try {
     switch ($accion) {
 
         case 'guardar_producto':
-            $caso      = new GuardarProducto($pdo);
+            $caso = new GuardarProducto($pdo);
             $resultado = $caso->ejecutar($datos);
             responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
 
         case 'subir_multimedia':
             $archivo = $_FILES['archivo'] ?? null;
-            $caso    = new SubirMultimedia($pdo);
+            $caso = new SubirMultimedia($pdo);
             $resultado = $caso->ejecutar($datos, $archivo);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'obtener_producto':
+            $caso = new ObtenerProducto($pdo);
+            $resultado = $caso->ejecutar($datos);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'listar_productos':
+            $caso = new ListarProductos($pdo);
+            $resultado = $caso->ejecutar($datos);
             responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
 
         default:
@@ -102,7 +115,8 @@ try {
             responder(false, null, "Acción desconocida: {$accion}", ['accion_invalida']);
     }
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(500);
     responder(false, null, 'Error interno del servidor.', [$e->getMessage()]);
 }
