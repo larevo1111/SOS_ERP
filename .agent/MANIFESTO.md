@@ -3,53 +3,45 @@
 ## 1. Identidad y Jerarquía
 - **Santiago (Santi)**: Director. Prioridad absoluta en comunicación clara, en español y sin tecnicismos innecesarios.
 - **Arquitecta (AntiGravity/Madrina)**: Liderazgo estratégico. Única autorizada para crear planes, definir estructuras y tomar decisiones de diseño.
-- **Constructor Principal (Claude Code)**: Implementación de lógica pesada y backend.
-- **Constructor Secundario (Codex)**: Implementación de UI/UX y fidelidad estética.
+- **Constructores (Claude/Codex)**: Implementación de lógica (Claude) y UI/UX (Codex). Siguen planes locales estrictamente.
 
 ---
 
 ## 2. Reglas de Oro y Seguridad 5S
-1. **Regla de Oro de Claridad (Stop & Ask)**: Si algo no es 100% claro, o detectas incoherencia: **DETENTE Y PREGUNTA A SANTI**. Prohibida la suposición.
-2. **Protocolo de Asignación**: Todo plan debe estar en `.agent/planes/` y referenciar la `GUIA_ESTILOS.md` y `Skills` relevantes.
+1. **Regla de Oro de Claridad (Stop & Ask)**: Si hay duda o incoherencia: **DETENTE Y PREGUNTA A SANTI**. Prohibida la suposición.
+2. **Protocolo de Asignación**: Todo plan debe estar en `.agent/planes/` y referenciar `GUIA_ESTILOS.md` y `Skills`.
 3. **Privacidad de Credenciales**: Passwords y Tokens viven **exclusivamente** en el `.env` local. Nunca en código o planes.
-4. **Modo Espejo**: El ambiente local (Windows/Ubuntu) debe reflejar a producción (MariaDB 11.8).
+4. **Modo Espejo**: Ambiente local debe reflejar a producción (MariaDB 11.8).
 
 ---
 
-## 3. Estándares Técnicos (API y Código)
+## 3. Estándares Técnicos y Multiempresa
 - **Idioma**: 100% Español (Código, Documentación, Commits).
 - **Convención**: `PascalCase` (PHP/Vue), `snake_case` (DB/Endpoints/Campos), `camelCase` (JS).
+- **Lógica Multiempresa**: El campo `empresa` es obligatorio en todas las tablas y debe estar siempre en **minúscula** (ej: `os`).
 
-### 3.1 Protocolo de API (JSON Uniforme)
-Toda comunicación Frontend-Backend usa `POST` con esta estructura:
+### 3.1 Almacenamiento Centralizado (Cloudflare R2)
+- **R2 es el único almacenamiento permanente**. Prohibido guardar archivos permanentes en el FS local del servidor o estación.
+- Carpetas en R2/FS siguen formato: `siglas_modulo_descripcion` (ej: `os_com_fotos`).
 
-**Petición (Request):**
-```json
-{
-  "token": "VITE_API_TOKEN",
-  "accion": "nombre_accion",
-  "datos": { ... }
-}
-```
+### 3.2 Protocolo de API (JSON Uniforme)
+Toda comunicación usa `POST` con esta estructura:
 
-**Respuesta (Response):**
-```json
-{
-  "exito": true,
-  "datos": { ... },
-  "mensaje": "Feedback para el usuario",
-  "errores": []
-}
-```
+**Petición (Request):** `{ "token": "...", "accion": "...", "datos": { ... } }`
+**Respuesta (Response):** `{ "exito": true, "datos": { ... }, "mensaje": "...", "errores": [] }`
 
 ---
 
 ## 4. Leyes de Base de Datos
 - **Prefijos Mandatorios**: `sys_` (Sistema), `com_` (Comercial), `inv_` (Inventario), `ven_` (Ventas), `din_` (Finanzas).
-- **Campos Audit (Obligatorios)**: `id` (PK), `uid` (OS-...), `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
+- **Campos Audit (Obligatorios)**: 
+  - `id`: BIGINT UNSIGNED PK AI.
+  - `uid`: VARCHAR(100) UNIQUE (Formato: `SIGLAS-YYYYMMDD-CORRELATIVO`).
+  - `empresa`: VARCHAR(50) (Siempre en minúscula).
+  - `usuario_creador` / `usuario_ult_modificacion`: VARCHAR(150) (Email del usuario).
+  - `fecha_creacion` / `fecha_ult_modificacion`: DATETIME.
 
-### 4.1 Tablas Protegidas (Inviolables)
-Prohibido modificar estructura de tablas AppSheet o Sistema:
+### 4.1 Tablas Protegidas (No Modificar Estructura)
 - `costos_...`, `prod_...`, `din_...`, `inv_bodegas`, `inv_tipos_pp`.
 - `sys_...`, `menu_ppal`.
 - **Modificables**: Solo tablas `com_` y tablas nuevas del ERP.
@@ -57,29 +49,14 @@ Prohibido modificar estructura de tablas AppSheet o Sistema:
 ---
 
 ## 5. Infraestructura y Despliegue
-### 5.1 Protocolo SSH (Hostinger)
-Acceso vía aliasing en `~/.ssh/config`:
-```text
-Host hostinger_erp
-    HostName 109.106.250.195
-    Port 65002
-    User u768061575
-    IdentityFile ~/.ssh/sos_erp
-```
-**Permisos**: `chmod 600 ~/.ssh/sos_erp ~/.ssh/config`.
-
-### 5.2 Backup Estratégico
-Backup obligatorio **solo** antes de cambios estructurales en Hostinger.
-- **Ubicación**: `~/backups/bd/` en el servidor. **NUNCA en GitHub**.
-- **Formato**: `backup_YYYYMMDD_HHMMSS_descripcion.sql`.
+- **SSH (Hostinger)**: Acceso vía alias `hostinger_erp` configurado en `~/.ssh/config`. Permisos `600` mandatorios.
+- **Backup**: Obligatorio **solo** antes de cambios estructurales en Hostinger. Guardar en `~/backups/bd/` del servidor.
 
 ---
 
 ## 6. Gobernanza Técnica (Memoria 5S)
-- **Estética Orígenes**: Fidelidad a `GUIA_ESTILOS.md` (verdes/naranjas tierra, minimalismo premium).
-- **Skills (Memoria Técnica)**: Cada aprendizaje se graba en `.agent/skills/skill_tema.md`.
-  - **Formato obligatorio**: `Estado` (🚧 En Revisión | ✅ Validada), `Autor`, `Fecha`.
-- **Orden Seiton**: Planes terminados se mueven a `.agent/historial/`.
-- **Contexto Activo**: Mantener `CONTEXTO_ACTIVO.md` corto, veraz y con la "Madrina a cargo" actualizada.
+- **Estética Orígenes**: Fidelidad a `GUIA_ESTILOS.md` (Minimalismo premium, verdes/naranjas tierra).
+- **Skills**: Documentar aprendizajes en `.agent/skills/`. Debe incluir: `Estado` (🚧 o ✅), `Autor` y `Fecha`.
+- **Orden Seiton**: Planes terminados se mueven a `.agent/historial/`. `CONTEXTO_ACTIVO.md` siempre corto y veraz.
 
-> **FILOSOFÍA 5S**: Menos ruido, más precisión. Si no está en el Manifiesto, pregúntale a la Madrina.
+> **FILOSOFÍA 5S**: Menos ruido, más precisión. Si no está aquí, pregúntale a la Madrina.
