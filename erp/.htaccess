@@ -1,0 +1,22 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /erp/erp/
+
+    # Redirigir todas las peticiones a /api/* hacia el enrutador principal en infraestructura
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^api/(.*)$ infraestructura/rutas.php [QSA,L]
+</IfModule>
+
+# Impedir el listado de directorios por seguridad
+Options -Indexes
+
+# Bloquear acceso a archivos sensibles
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+<Files "tablas_comercial.sql">
+    Order allow,deny
+    Deny from all
+</Files>

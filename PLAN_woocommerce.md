@@ -23,7 +23,7 @@ Este plan define la hoja de ruta para la integración con WooCommerce y la estru
     - **Registro Maestro (Principal)**: Es una variación real (ej: 640g) que porta el `nombre_grupo_catalogo`. `producto_principal_variacion = NULL`.
     - **Variaciones (Hijas)**: Registros reales que apuntan al `uid` del Maestro. `nombre_grupo_catalogo` ignorado.
     - **Vínculo de Costos**: Todo producto "real" (Maestro o Hijo) debe tener su `uid_producto_padre` vinculado a Costos.
-- [/] **Formulario Dinámico "Orígenes"**:
+- [x] **Formulario Dinámico "Orígenes"**:
     - [x] **Detección de Patrones**: Campo `nombre_grupo_catalogo` asistido por IA (sugerencia basada en el nombre del artículo).
     - [x] **Gestión de Variaciones**: Panel lateral para añadir variaciones rápidas vinculadas al Maestro actual. (Scaffolding Quasar listo).
 - [ ] **Galería Multimedia Avanzada**:

@@ -8,12 +8,21 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Comercial — Formulario de Producto
-**Fase:** Ejecución — Frontend
-**Última tarea completada:** FormularioProducto.vue con lógica Variación Representante
-**Madrina a cargo:** Claude Code
-**Próximo paso:** Conectar formulario con API backend (casos de uso PHP)
-**Fecha de última actualización:** 2026-02-26
+**Módulo en construcción:** Comercial — Catálogo & Listados
+**Fase:** Ejecución — Visualización (Fase 4)
+**Última tarea completada:** Backend comercial 100% listo (listar_productos y obtener_producto implementados)
+**Madrina a cargo:** AntiGravity (Arquitecta)
+**Próximo paso:** [CODEX] Implementación de CatalogoProductos.vue (Fase 4)
+**Fecha de última actualización:** 2026-02-27
+
+---
+
+## 📚 Referencias Obligatorias para esta Fase
+- 🎨 **Diseño**: [.agent/diseno/GUIA_ESTILOS.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)
+- ⚡ **Skills**: [.agent/skills/skill_frontend_quasar.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/skills/skill_frontend_quasar.md)
+- 📐 **Mockup**: [.agent/diseno/dashboard_ref.html](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/dashboard_ref.html)
+- 📜 **Plan Conexión**: [.agent/planes/implementation_plan_conexion.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/implementation_plan_conexion.md)
+- 📜 **Plan Vistas**: [.agent/planes/implementation_plan_vistas.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/implementation_plan_vistas.md)
 
 ---
 
@@ -41,6 +50,14 @@ _Sin bloqueos activos._
 | 2026-02-26 | Creación de estructura de carpetas /erp | AntiGravity | ✅ Completado |
 | 2026-02-26 | Diseño y redacción de PLAN_woocommerce.md | AntiGravity | ✅ Completado |
 | 2026-02-26 | Scaffolding Quasar + FormularioProducto.vue (Variación Representante) | Claude Code | ✅ Completado |
+| 2026-02-27 | Planificación API "Una por Pantalla" & Configuración Cloudflare R2 | AntiGravity | ✅ Completado |
+| 2026-02-27 | Implementación Backend API: ProductoController, GuardarProducto, SubirMultimedia, rutas.php | Claude Code | ✅ Completado |
+| 2026-02-27 | Rediseño FormularioProducto.vue: maquetación, tabs custom, card-productor, merge Contenido+Historia | Claude Code | ✅ Completado |
+| 2026-02-27 | Ajuste tab Contenido: sección Origen 3ra, Propuesta de valor, quitar resaltado verde | Claude Code | ✅ Completado |
+| 2026-02-27 | Actualizar skill_frontend_quasar.md con learnings del primer módulo frontend | Claude Code | ✅ Completado |
+| 2026-02-27 | Conexión Frontend↔API: apiService.js, guardar_producto, subir_multimedia, .env.example | Claude Code | ✅ Completado |
+| 2026-02-27 | Refactorización Final 5S "Versión Diamante" del Manifiesto (Certificación Total) | AntiGravity | ✅ Completado |
+| 2026-02-27 | Backend comercial 100%: ObtenerProducto y ListarProductos | AntiGravity | ✅ Completado |
 
 ---
 

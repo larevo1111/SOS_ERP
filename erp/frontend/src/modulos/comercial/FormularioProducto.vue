@@ -1,473 +1,524 @@
 <template>
   <q-page class="pagina-formulario">
 
-    <!-- ── Cabecera ────────────────────────────────────────────── -->
-    <div class="cabecera q-mb-lg">
-      <div>
-        <div class="cabecera__titulo">
-          {{ esMaestro ? 'Producto Maestro' : 'Variación de producto' }}
-          <span v-if="producto.nombre" class="cabecera__nombre">— {{ producto.nombre }}</span>
+    <!-- ════════════════════════════════════════════════════════════
+         CABECERA
+    ═════════════════════════════════════════════════════════════ -->
+    <div class="cabecera">
+
+      <!-- Lado izquierdo: migas + título -->
+      <div class="cabecera__izq">
+        <div class="cabecera__miga">
+          <span class="cabecera__miga-link" @click="cancelar">Comercial</span>
+          <q-icon name="chevron_right" size="14px" color="grey-4" />
+          <span class="cabecera__miga-link" @click="cancelar">Productos</span>
+          <q-icon name="chevron_right" size="14px" color="grey-4" />
+          <span class="cabecera__miga-actual">
+            {{ producto.nombre || 'Nuevo producto' }}
+          </span>
         </div>
-        <div class="cabecera__badges q-mt-xs">
-          <span :class="['badge', producto.estado === 'Activo' ? 'badge-activo' : 'badge-inactivo']">
-            {{ producto.estado }}
-          </span>
-          <!-- Maestro: es el representante del grupo en WooCommerce -->
-          <span v-if="esMaestro" class="badge-maestro q-ml-sm">★ Maestro del grupo</span>
-          <!-- Hija: variación que apunta a un Maestro -->
-          <span v-else class="badge-hija q-ml-sm">
-            ↳ Variación de: {{ uidMaestroCorto }}
-          </span>
+
+        <div class="cabecera__titulo-row">
+          <div class="cabecera__titulo">
+            {{ producto.nombre || (esMaestro ? 'Producto Maestro' : 'Variación') }}
+          </div>
+          <div class="cabecera__chips">
+            <span :class="['chip', producto.estado === 'Activo' ? 'chip--verde' : 'chip--gris']">
+              {{ producto.estado || 'Activo' }}
+            </span>
+            <span :class="['chip', `chip--pub-${producto.estado_publicacion || 'borrador'}`]">
+              {{ producto.estado_publicacion || 'Borrador' }}
+            </span>
+            <span v-if="esMaestro" class="chip chip--maestro">★ Maestro</span>
+            <span v-else class="chip chip--hija">↳ Variación</span>
+          </div>
         </div>
       </div>
-      <div class="cabecera__acciones">
-        <q-btn flat label="Cancelar" color="grey-7" @click="cancelar" />
+
+      <!-- Lado derecho: acciones -->
+      <div class="cabecera__der">
         <q-btn
-          unelevated label="Guardar cambios" color="primary" icon="save"
-          @click="guardar" :loading="guardando" class="q-ml-sm"
+          flat no-caps icon="arrow_back" label="Volver"
+          color="grey-6" size="sm" @click="cancelar"
+          class="q-mr-sm"
+        />
+        <q-btn
+          unelevated no-caps icon="save" label="Guardar cambios"
+          color="primary" @click="guardar" :loading="guardando"
         />
       </div>
     </div>
 
-    <!-- ── Cuerpo: formulario + panel lateral ─────────────────── -->
+    <!-- Línea separadora bajo la cabecera -->
+    <div class="cabecera__separador q-mb-lg" />
+
+    <!-- ════════════════════════════════════════════════════════════
+         CUERPO: tabs + panel lateral
+    ═════════════════════════════════════════════════════════════ -->
     <div class="cuerpo" :class="{ 'cuerpo--con-panel': esMaestro }">
 
-      <!-- Formulario principal (tabs) -->
+      <!-- ── Formulario principal ──────────────────────────────── -->
       <div class="formulario-principal">
-        <q-tabs
-          v-model="tabActiva" align="left"
-          indicator-color="primary" active-color="primary"
-          class="tabs-navegacion q-mb-md"
-        >
-          <q-tab name="general"    label="General"    icon="inventory_2" />
-          <q-tab name="variacion"  label="Variación"  icon="tune" />
-          <q-tab name="precios"    label="Precios"    icon="sell" />
-          <q-tab name="contenido"  label="Contenido"  icon="description" />
-          <q-tab name="historia"   label="Historia"   icon="eco" />
-          <q-tab name="multimedia" label="Multimedia" icon="photo_library" />
-          <q-tab name="auditoria"  label="Auditoría"  icon="manage_search" />
-        </q-tabs>
 
-        <q-tab-panels v-model="tabActiva" animated transition-prev="fade" transition-next="fade">
+        <!-- Barra de tabs -->
+        <div class="tabs-barra q-mb-lg">
+          <div
+            v-for="tab in tabs"
+            :key="tab.nombre"
+            :class="['tab-item', { 'tab-item--activo': tabActiva === tab.nombre }]"
+            @click="tabActiva = tab.nombre"
+          >
+            <q-icon :name="tab.icono" size="16px" class="tab-item__icono" />
+            <span>{{ tab.label }}</span>
+          </div>
+        </div>
 
-          <!-- ── TAB: GENERAL ──────────────────────────────────── -->
-          <q-tab-panel name="general" class="q-pa-none">
-            <div class="card-origenes q-pa-lg">
-              <div class="q-gutter-md">
+        <!-- ── TAB: GENERAL ──────────────────────────────────── -->
+        <div v-show="tabActiva === 'general'">
 
-                <q-input
-                  v-model="producto.nombre"
-                  label="Nombre del producto *"
-                  outlined dense
-                  hint="Nombre completo incluyendo tamaño. Ej: Miel Silvestre 500g"
-                />
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--naranja q-mb-md">
+              <div class="s-header__icono" style="background:#FFF0E5">
+                <q-icon name="inventory_2" size="15px" color="orange-8" />
+              </div>
+              <span class="s-header__titulo">Identificación</span>
+              <div class="s-header__linea" />
+            </div>
 
-                <div class="row q-col-gutter-md">
-                  <div class="col-12 col-md-6">
-                    <q-select
-                      v-model="producto.estado"
-                      :options="opcionesEstado"
-                      label="Estado *" outlined dense
-                      emit-value map-options
-                    />
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <q-select
-                      v-model="producto.estado_publicacion"
-                      :options="opcionesPublicacion"
-                      label="Estado de publicación *" outlined dense
-                      emit-value map-options
-                    />
-                  </div>
-                </div>
+            <q-input
+              v-model="producto.nombre"
+              label="Nombre del producto *"
+              outlined
+              hint="Nombre completo con tamaño. Ej: Miel Silvestre 500g"
+              class="q-mb-md nombre-grande"
+            />
 
-                <div class="row q-col-gutter-md">
-                  <div class="col-12 col-md-6">
-                    <q-input v-model="producto.categoria" label="Categoría" outlined dense />
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <q-input v-model="producto.marca" label="Marca" outlined dense />
-                  </div>
-                </div>
-
-                <q-input
-                  v-model="producto.etiquetas"
-                  label="Etiquetas"
-                  outlined dense
-                  hint="Separadas por coma. Ej: miel, natural, artesanal"
-                />
-
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-select v-model="producto.estado" :options="opcionesEstado"
+                  label="Estado *" outlined dense emit-value map-options />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-select v-model="producto.estado_publicacion" :options="opcionesPublicacion"
+                  label="Publicación *" outlined dense emit-value map-options />
               </div>
             </div>
-          </q-tab-panel>
+          </div>
 
-          <!-- ── TAB: VARIACIÓN ────────────────────────────────── -->
-          <q-tab-panel name="variacion" class="q-pa-none">
-            <div class="card-origenes q-pa-lg">
-              <div class="q-gutter-md">
+          <div class="card-origenes q-pa-lg">
+            <div class="s-header s-header--azul q-mb-md">
+              <div class="s-header__icono" style="background:#E5F0FF">
+                <q-icon name="label" size="15px" color="blue-8" />
+              </div>
+              <span class="s-header__titulo">Clasificación</span>
+              <div class="s-header__linea" />
+            </div>
 
-                <!--
-                  LÓGICA VARIACIÓN REPRESENTANTE:
-                  - Si producto_principal_variacion = NULL → es MAESTRO
-                    → nombre_grupo_catalogo es el nombre de familia en WooCommerce
-                  - Si producto_principal_variacion tiene un UID → es HIJA
-                    → nombre_grupo_catalogo se ignora (lo toma del Maestro)
-                -->
+            <div class="row q-col-gutter-md q-mb-md">
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.categoria" label="Categoría" outlined dense />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.marca" label="Marca" outlined dense />
+              </div>
+            </div>
+            <q-input v-model="producto.etiquetas" label="Etiquetas" outlined dense
+              hint="Separadas por coma. Ej: miel, natural, artesanal" />
+          </div>
+        </div>
 
-                <!-- Aviso visual según rol -->
-                <div v-if="esMaestro" class="aviso aviso--maestro">
-                  <q-icon name="star" size="16px" class="q-mr-sm" />
-                  <span>
-                    Este producto es el <strong>Representante</strong> del grupo.
-                    El <code>nombre_grupo_catalogo</code> es lo que WooCommerce muestra
-                    como nombre de familia del producto.
-                  </span>
+        <!-- ── TAB: VARIACIÓN ────────────────────────────────── -->
+        <div v-show="tabActiva === 'variacion'">
+          <div class="card-origenes q-pa-lg">
+
+            <div v-if="esMaestro" class="aviso aviso--maestro q-mb-lg">
+              <q-icon name="star" size="16px" class="q-mr-sm flex-shrink-0" />
+              <span>Este producto es el <strong>Representante del grupo</strong>.
+                El <code>nombre_grupo_catalogo</code> es lo que WooCommerce usa
+                como nombre de familia.</span>
+            </div>
+            <div v-else class="aviso aviso--hija q-mb-lg">
+              <q-icon name="account_tree" size="16px" class="q-mr-sm flex-shrink-0" />
+              <span>Esta es una <strong>variación hija</strong>.
+                El nombre de grupo lo gestiona el Maestro al que apunta.</span>
+            </div>
+
+            <q-input v-if="esMaestro"
+              v-model="producto.nombre_grupo_catalogo"
+              label="Nombre del grupo de catálogo (familia) *"
+              outlined class="q-mb-md"
+              hint="Ej: Miel Silvestre — aparece como nombre del producto padre en WooCommerce"
+            >
+              <template #prepend>
+                <q-icon name="folder_special" color="warning" />
+              </template>
+            </q-input>
+
+            <div class="s-header s-header--naranja q-mb-md q-mt-sm">
+              <div class="s-header__icono" style="background:#FFF0E5">
+                <q-icon name="tune" size="15px" color="orange-8" />
+              </div>
+              <span class="s-header__titulo">Atributo de esta variación</span>
+              <div class="s-header__linea" />
+            </div>
+
+            <div class="row q-col-gutter-md q-mb-md">
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.nombre_atributo_variacion"
+                  label="Atributo" outlined dense hint="Ej: Peso, Tamaño, Presentación" />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.valor_atributo_variacion"
+                  label="Valor" outlined dense hint="Ej: 500g, Grande, Caja × 6" />
+              </div>
+            </div>
+
+            <q-input v-model="producto.uid_producto_padre"
+              label="UID Producto Padre (Costos)" outlined dense readonly bg-color="grey-1"
+              hint="Solo lectura — vincula este registro con su ficha de costos"
+            >
+              <template #prepend><q-icon name="link" color="grey-5" /></template>
+            </q-input>
+
+          </div>
+        </div>
+
+        <!-- ── TAB: PRECIOS ──────────────────────────────────── -->
+        <div v-show="tabActiva === 'precios'">
+
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--verde q-mb-md">
+              <div class="s-header__icono" style="background:#E8F5E5">
+                <q-icon name="sell" size="15px" color="green-8" />
+              </div>
+              <span class="s-header__titulo">Precio de venta</span>
+              <div class="s-header__linea" />
+            </div>
+
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-input v-model.number="producto.precio_regular"
+                  label="Precio regular *" type="number" outlined prefix="$"
+                  :rules="[val => !val || val > 0 || 'Debe ser mayor a 0']" />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input v-model.number="producto.precio_oferta"
+                  label="Precio de oferta" type="number" outlined prefix="$"
+                  hint="Vacío = sin oferta activa" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Card de oferta: solo se muestra si hay precio de oferta -->
+          <transition name="fade-slide">
+            <div v-if="producto.precio_oferta" class="card-oferta q-pa-lg">
+              <div class="card-oferta__header q-mb-md">
+                <q-icon name="local_offer" size="18px" class="q-mr-sm" />
+                <span>Vigencia de la oferta</span>
+              </div>
+              <div class="row q-col-gutter-md">
+                <div class="col-12 col-md-6">
+                  <q-input v-model="producto.fecha_oferta_desde"
+                    label="Desde" outlined dense type="date" />
                 </div>
-                <div v-else class="aviso aviso--hija">
-                  <q-icon name="account_tree" size="16px" class="q-mr-sm" />
-                  <span>
-                    Esta es una <strong>variación hija</strong>. Su grupo de catálogo
-                    lo define el Maestro al que apunta.
-                  </span>
+                <div class="col-12 col-md-6">
+                  <q-input v-model="producto.fecha_oferta_hasta"
+                    label="Hasta" outlined dense type="date" />
                 </div>
+              </div>
+            </div>
+          </transition>
 
-                <!-- Nombre del grupo: solo editable en el Maestro -->
-                <q-input
-                  v-if="esMaestro"
-                  v-model="producto.nombre_grupo_catalogo"
-                  label="Nombre del grupo de catálogo (familia) *"
-                  outlined dense
-                  hint="Ej: Miel Silvestre — este nombre aparece en WooCommerce como producto padre"
-                >
+        </div>
+
+        <!-- ── TAB: CONTENIDO (fusiona Contenido + Historia) ─── -->
+        <div v-show="tabActiva === 'contenido'">
+
+          <!-- Sección 1: Texto del producto -->
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--naranja q-mb-lg">
+              <div class="s-header__icono" style="background:#FFF0E5">
+                <q-icon name="description" size="15px" color="orange-8" />
+              </div>
+              <span class="s-header__titulo">Texto del producto</span>
+              <div class="s-header__linea" />
+            </div>
+
+            <q-input v-model="producto.descripcion_corta" label="Descripción corta"
+              type="textarea" outlined :rows="3" class="q-mb-md"
+              hint="Máximo 2 líneas. Aparece debajo del nombre en la tienda" />
+
+            <q-input v-model="producto.descripcion_larga" label="Descripción larga"
+              type="textarea" outlined :rows="7"
+              hint="Descripción completa. Puede incluir HTML básico" />
+          </div>
+
+          <!-- Sección 2: Puntos clave -->
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--azul q-mb-lg">
+              <div class="s-header__icono" style="background:#E5F0FF">
+                <q-icon name="format_list_bulleted" size="15px" color="blue-8" />
+              </div>
+              <span class="s-header__titulo">Puntos clave</span>
+              <div class="s-header__linea" />
+            </div>
+
+            <q-input v-model="producto.bullets_superiores" label="Bullets superiores"
+              type="textarea" outlined :rows="5"
+              hint="Un punto por línea. Se muestran destacados en la parte superior de la página del producto" />
+          </div>
+
+          <!-- Sección 3: Origen (productor, lugar, cómo se hace) -->
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--verde q-mb-lg">
+              <div class="s-header__icono" style="background:#E8F5E5">
+                <q-icon name="agriculture" size="15px" color="green-8" />
+              </div>
+              <span class="s-header__titulo">Origen</span>
+              <div class="s-header__linea" />
+            </div>
+
+            <q-input v-model="producto.origen_macro" label="Origen del producto"
+              type="textarea" outlined :rows="4" class="q-mb-md"
+              hint="De dónde viene, cómo se obtiene" />
+
+            <div class="row q-col-gutter-md q-mb-md">
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.productor" label="Nombre del productor"
+                  outlined dense>
                   <template #prepend>
-                    <q-icon name="folder_special" color="warning" />
+                    <q-icon name="person_outline" color="grey-5" />
                   </template>
                 </q-input>
-
-                <div class="row q-col-gutter-md">
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="producto.nombre_atributo_variacion"
-                      label="Atributo de variación"
-                      outlined dense
-                      hint="Ej: Peso, Tamaño, Presentación"
-                    />
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="producto.valor_atributo_variacion"
-                      label="Valor del atributo"
-                      outlined dense
-                      hint="Ej: 500g, Grande, Caja × 6"
-                    />
-                  </div>
-                </div>
-
-                <!-- Vínculo con Costos: siempre visible pero solo lectura -->
-                <q-input
-                  v-model="producto.uid_producto_padre"
-                  label="UID Producto Padre (Costos)"
-                  outlined dense readonly
-                  hint="Vincula este producto con su ficha de costos. Solo lectura."
-                  bg-color="grey-1"
-                >
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.ubicacion_productor" label="Ubicación"
+                  outlined dense>
                   <template #prepend>
-                    <q-icon name="link" color="grey-6" />
+                    <q-icon name="location_on" color="grey-5" />
                   </template>
                 </q-input>
-
               </div>
             </div>
-          </q-tab-panel>
 
-          <!-- ── TAB: PRECIOS ──────────────────────────────────── -->
-          <q-tab-panel name="precios" class="q-pa-none">
-            <div class="card-origenes q-pa-lg">
-              <div class="q-gutter-md">
-
-                <div class="row q-col-gutter-md">
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model.number="producto.precio_regular"
-                      label="Precio regular *"
-                      type="number" outlined dense prefix="$"
-                      :rules="[val => val > 0 || 'El precio debe ser mayor a 0']"
-                    />
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model.number="producto.precio_oferta"
-                      label="Precio de oferta"
-                      type="number" outlined dense prefix="$"
-                      hint="Dejar vacío si no hay oferta activa"
-                    />
-                  </div>
-                </div>
-
-                <div class="texto-seccion q-pt-sm">Vigencia de la oferta</div>
-                <div class="row q-col-gutter-md">
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="producto.fecha_oferta_desde"
-                      label="Desde" outlined dense type="date"
-                      :disable="!producto.precio_oferta"
-                    />
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="producto.fecha_oferta_hasta"
-                      label="Hasta" outlined dense type="date"
-                      :disable="!producto.precio_oferta"
-                    />
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </q-tab-panel>
-
-          <!-- ── TAB: CONTENIDO ────────────────────────────────── -->
-          <q-tab-panel name="contenido" class="q-pa-none">
-            <div class="card-origenes q-pa-lg">
-              <div class="q-gutter-lg">
-
-                <q-input
-                  v-model="producto.descripcion_corta"
-                  label="Descripción corta"
-                  type="textarea" outlined :rows="3"
-                  hint="Máximo 2 líneas. Aparece debajo del nombre en la tienda"
-                />
-                <q-input
-                  v-model="producto.descripcion_larga"
-                  label="Descripción larga"
-                  type="textarea" outlined :rows="7"
-                  hint="Descripción completa. Puede incluir HTML básico"
-                />
-                <q-input
-                  v-model="producto.bullets_superiores"
-                  label="Bullets superiores"
-                  type="textarea" outlined :rows="4"
-                  hint="Un punto clave por línea. Se muestran destacados en la página del producto"
-                />
-                <q-input
-                  v-model="producto.ingredientes_resumen"
-                  label="Ingredientes / Resumen"
-                  type="textarea" outlined :rows="4"
-                />
-                <q-input
-                  v-model="producto.tabla_nutricional"
-                  label="Tabla nutricional"
-                  type="textarea" outlined :rows="6"
-                  hint="Texto estructurado o HTML de la tabla"
-                />
-
-              </div>
-            </div>
-          </q-tab-panel>
-
-          <!-- ── TAB: HISTORIA ─────────────────────────────────── -->
-          <q-tab-panel name="historia" class="q-pa-none">
-            <div class="card-origenes q-pa-lg">
-              <div class="q-gutter-lg">
-
-                <q-input v-model="producto.problema_real"
-                  label="Problema real que resuelve" type="textarea" outlined :rows="4" />
-                <q-input v-model="producto.origen_macro"
-                  label="Origen del producto" type="textarea" outlined :rows="4"
-                  hint="De dónde viene, cómo se obtiene" />
-                <q-input v-model="producto.beneficios_explicados"
-                  label="Beneficios explicados" type="textarea" outlined :rows="4" />
-                <q-input v-model="producto.experiencia_y_modo_de_uso"
-                  label="Experiencia y modo de uso" type="textarea" outlined :rows="4" />
-
-                <div class="row q-col-gutter-md">
-                  <div class="col-12 col-md-6">
-                    <q-input v-model="producto.productor"
-                      label="Productor" type="textarea" outlined :rows="3" />
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <q-input v-model="producto.ubicacion_productor"
-                      label="Ubicación del productor" type="textarea" outlined :rows="3" />
-                  </div>
-                </div>
-
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
                 <q-input v-model="producto.sistema_de_cultivo_origen"
-                  label="Sistema de cultivo / Origen" type="textarea" outlined :rows="4" />
+                  label="Sistema de cultivo / Origen"
+                  type="textarea" outlined :rows="4" />
+              </div>
+              <div class="col-12 col-md-6">
                 <q-input v-model="producto.proceso_de_transformacion"
-                  label="Proceso de transformación" type="textarea" outlined :rows="4" />
-
+                  label="Proceso de transformación"
+                  type="textarea" outlined :rows="4" />
               </div>
             </div>
-          </q-tab-panel>
+          </div>
 
-          <!-- ── TAB: MULTIMEDIA ───────────────────────────────── -->
-          <q-tab-panel name="multimedia" class="q-pa-none">
-            <div class="card-origenes q-pa-lg">
-
-              <div class="galeria__cabecera q-mb-md">
-                <span class="texto-seccion">Galería de archivos</span>
-                <q-btn
-                  unelevated size="sm" icon="upload" label="Agregar archivo"
-                  color="primary" @click="abrirSubida"
-                />
+          <!-- Sección 4: Composición -->
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--amarillo q-mb-lg">
+              <div class="s-header__icono" style="background:#FEF8E0">
+                <q-icon name="science" size="15px" color="amber-8" />
               </div>
-
-              <!-- Estado vacío -->
-              <div v-if="multimedia.length === 0" class="galeria__vacia">
-                <q-icon name="photo_library" size="56px" color="grey-3" />
-                <div class="q-mt-sm text-grey-5 text-caption">
-                  Sin archivos. Agrega imágenes o videos del producto.
-                </div>
-              </div>
-
-              <!-- Grid de archivos -->
-              <div v-else class="galeria__grid">
-                <div
-                  v-for="archivo in multimedia"
-                  :key="archivo.uid"
-                  class="galeria__item"
-                  :class="{ 'galeria__item--principal': archivo.uso === 'Principal' }"
-                  draggable="true"
-                  @dragstart="alIniciarArrastre($event, archivo)"
-                  @dragover.prevent
-                  @drop="alSoltar($event, archivo)"
-                >
-                  <!-- Vista previa -->
-                  <div class="galeria__preview">
-                    <img
-                      v-if="archivo.tipo_archivo === 'imagen'"
-                      :src="urlArchivo(archivo)"
-                      :alt="archivo.uso"
-                    />
-                    <div v-else class="galeria__preview-icono">
-                      <q-icon name="videocam" size="32px" color="grey-5" />
-                      <div class="text-caption text-grey-5 q-mt-xs">Video</div>
-                    </div>
-                    <!-- Badge "Principal" sobre la imagen -->
-                    <div v-if="archivo.uso === 'Principal'" class="galeria__badge-principal">
-                      ★ Principal
-                    </div>
-                  </div>
-
-                  <!-- Selector de uso -->
-                  <div class="galeria__uso q-pa-sm">
-                    <q-select
-                      v-model="archivo.uso"
-                      :options="opcionesUso"
-                      label="Uso" outlined dense emit-value map-options
-                      @update:model-value="actualizarUsoArchivo(archivo)"
-                    />
-                  </div>
-
-                  <!-- Acciones -->
-                  <div class="galeria__acciones">
-                    <q-icon
-                      name="drag_indicator"
-                      class="cursor-move" color="grey-4" size="20px"
-                      title="Arrastrar para reordenar"
-                    />
-                    <q-btn
-                      flat round dense size="sm" icon="delete" color="negative"
-                      @click="eliminarArchivo(archivo)"
-                    />
-                  </div>
-
-                </div>
-              </div>
-
+              <span class="s-header__titulo">Composición</span>
+              <div class="s-header__linea" />
             </div>
-          </q-tab-panel>
 
-          <!-- ── TAB: AUDITORÍA ────────────────────────────────── -->
-          <q-tab-panel name="auditoria" class="q-pa-none">
-            <div class="card-origenes q-pa-lg">
+            <q-input v-model="producto.ingredientes_resumen" label="Ingredientes / Resumen"
+              type="textarea" outlined :rows="4" class="q-mb-md" />
 
-              <div class="aviso aviso--info q-mb-lg">
-                <q-icon name="lock" size="16px" class="q-mr-xs" />
-                <span>Estos campos son de <strong>solo lectura</strong>. El sistema los gestiona automáticamente.</span>
+            <q-input v-model="producto.tabla_nutricional" label="Tabla nutricional"
+              type="textarea" outlined :rows="6"
+              hint="Texto estructurado o HTML de la tabla" />
+          </div>
+
+          <!-- Sección 5: Propuesta de valor -->
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--naranja q-mb-lg">
+              <div class="s-header__icono" style="background:#FFF0E5">
+                <q-icon name="star_rate" size="15px" color="orange-8" />
               </div>
+              <span class="s-header__titulo">Propuesta de valor</span>
+              <div class="s-header__linea" />
+            </div>
 
-              <div class="auditoria__grid">
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">UID del producto</div>
-                  <div class="campo-auditoria__valor">{{ producto.uid || '—' }}</div>
+            <q-input v-model="producto.problema_real" label="Problema real que resuelve"
+              type="textarea" outlined :rows="4" class="q-mb-md" />
+
+            <q-input v-model="producto.beneficios_explicados" label="Beneficios explicados"
+              type="textarea" outlined :rows="4" class="q-mb-md" />
+
+            <q-input v-model="producto.experiencia_y_modo_de_uso" label="Experiencia y modo de uso"
+              type="textarea" outlined :rows="4" />
+          </div>
+
+        </div>
+
+        <!-- ── TAB: MULTIMEDIA ───────────────────────────────── -->
+        <div v-show="tabActiva === 'multimedia'">
+          <div class="card-origenes q-pa-lg">
+
+            <!-- Input oculto: el botón "Agregar" lo dispara vía abrirSubida() -->
+            <input
+              ref="inputArchivo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+              multiple
+              style="display:none"
+              @change="procesarArchivos($event.target.files)"
+            />
+
+            <div class="galeria__cabecera q-mb-lg">
+              <div>
+                <div class="s-header__titulo" style="font-size:14px">Galería de archivos</div>
+                <div class="text-caption text-grey-5 q-mt-xs">
+                  Arrastra para reordenar · El primero marcado como Principal es la portada
                 </div>
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">Empresa</div>
-                  <div class="campo-auditoria__valor">{{ producto.empresa || '—' }}</div>
-                </div>
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">ID en WooCommerce</div>
-                  <div class="campo-auditoria__valor">
-                    {{ producto.id_producto_woocommerce || 'No sincronizado' }}
+              </div>
+              <q-btn unelevated size="sm" icon="upload" label="Agregar"
+                color="primary" @click="abrirSubida" />
+            </div>
+
+            <div v-if="multimedia.length === 0" class="galeria__vacia">
+              <q-icon name="photo_library" size="56px" color="grey-3" />
+              <div class="q-mt-sm text-grey-5 text-caption">
+                Sin archivos. Agrega imágenes o videos del producto.
+              </div>
+            </div>
+
+            <div v-else class="galeria__grid">
+              <div
+                v-for="archivo in multimedia"
+                :key="archivo.uid"
+                class="galeria__item"
+                :class="{ 'galeria__item--principal': archivo.uso === 'Portada' }"
+                draggable="true"
+                @dragstart="alIniciarArrastre($event, archivo)"
+                @dragover.prevent
+                @drop="alSoltar($event, archivo)"
+              >
+                <div class="galeria__preview">
+                  <img v-if="archivo.tipo_archivo === 'imagen'"
+                    :src="urlArchivo(archivo)" :alt="archivo.uso" />
+                  <div v-else class="galeria__preview-icono">
+                    <q-icon name="videocam" size="32px" color="grey-5" />
+                  </div>
+                  <div v-if="archivo.uso === 'Portada'" class="galeria__badge-principal">
+                    ★ Portada
                   </div>
                 </div>
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">URL del producto</div>
-                  <div class="campo-auditoria__valor">{{ producto.url_producto || '—' }}</div>
+                <div class="galeria__uso q-pa-sm">
+                  <q-select v-model="archivo.uso" :options="opcionesUso"
+                    label="Uso" outlined dense emit-value map-options
+                    @update:model-value="actualizarUsoArchivo(archivo)" />
                 </div>
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">Creado por</div>
-                  <div class="campo-auditoria__valor">{{ producto.usuario_creador || '—' }}</div>
-                </div>
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">Última modificación por</div>
-                  <div class="campo-auditoria__valor">{{ producto.usuario_ult_modificacion || '—' }}</div>
-                </div>
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">Fecha de creación</div>
-                  <div class="campo-auditoria__valor">{{ formatearFecha(producto.fecha_creacion) }}</div>
-                </div>
-                <div class="campo-auditoria">
-                  <div class="campo-auditoria__label">Última modificación</div>
-                  <div class="campo-auditoria__valor">{{ formatearFecha(producto.fecha_ult_modificacion) }}</div>
+                <div class="galeria__acciones">
+                  <q-icon name="drag_indicator" class="cursor-move" color="grey-4" size="20px" />
+                  <q-btn flat round dense size="sm" icon="delete" color="negative"
+                    @click="eliminarArchivo(archivo)" />
                 </div>
               </div>
-
             </div>
-          </q-tab-panel>
 
-        </q-tab-panels>
+          </div>
+        </div>
+
+        <!-- ── TAB: AUDITORÍA ────────────────────────────────── -->
+        <div v-show="tabActiva === 'auditoria'">
+          <div class="card-origenes q-pa-lg">
+
+            <div class="aviso aviso--info q-mb-lg">
+              <q-icon name="lock" size="15px" class="q-mr-sm flex-shrink-0" />
+              <span>Campos de <strong>solo lectura</strong>. El sistema los gestiona automáticamente.</span>
+            </div>
+
+            <div class="auditoria__grid">
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">UID del producto</div>
+                <div class="campo-auditoria__valor mono">{{ producto.uid || '—' }}</div>
+              </div>
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">Empresa</div>
+                <div class="campo-auditoria__valor">{{ producto.empresa || '—' }}</div>
+              </div>
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">ID en WooCommerce</div>
+                <div class="campo-auditoria__valor">
+                  {{ producto.id_producto_woocommerce || 'No sincronizado' }}
+                </div>
+              </div>
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">URL del producto</div>
+                <div class="campo-auditoria__valor mono">{{ producto.url_producto || '—' }}</div>
+              </div>
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">Creado por</div>
+                <div class="campo-auditoria__valor">{{ producto.usuario_creador || '—' }}</div>
+              </div>
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">Última modificación por</div>
+                <div class="campo-auditoria__valor">{{ producto.usuario_ult_modificacion || '—' }}</div>
+              </div>
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">Fecha de creación</div>
+                <div class="campo-auditoria__valor">{{ formatearFecha(producto.fecha_creacion) }}</div>
+              </div>
+              <div class="campo-auditoria">
+                <div class="campo-auditoria__label">Última modificación</div>
+                <div class="campo-auditoria__valor">{{ formatearFecha(producto.fecha_ult_modificacion) }}</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
-      <!-- ── Panel lateral: Variaciones (solo si es Maestro) ─── -->
+      <!-- ════════════════════════════════════════════════════════
+           PANEL LATERAL: Variaciones (solo si es Maestro)
+      ═════════════════════════════════════════════════════════ -->
       <div v-if="esMaestro" class="panel-variaciones card-origenes q-pa-lg">
 
         <div class="panel-variaciones__cabecera q-mb-md">
-          <span class="texto-seccion">Variaciones del grupo</span>
-          <q-btn flat dense size="sm" icon="add" color="primary" @click="crearVariacion" />
+          <div>
+            <div class="texto-seccion">Variaciones</div>
+            <div class="text-caption text-grey-5 q-mt-xs">
+              {{ variaciones.length }} registrada{{ variaciones.length !== 1 ? 's' : '' }}
+            </div>
+          </div>
+          <q-btn unelevated round dense size="sm" icon="add" color="primary"
+            @click="crearVariacion" />
         </div>
 
         <div v-if="variaciones.length === 0" class="panel-variaciones__vacio">
-          <q-icon name="tune" size="36px" color="grey-3" />
+          <div class="panel-variaciones__vacio-icono">
+            <q-icon name="tune" size="24px" color="grey-4" />
+          </div>
           <div class="text-caption text-grey-5 q-mt-sm text-center">
-            Sin variaciones. Crea la primera con el botón +
+            Sin variaciones aún.<br>Usa el + para crear la primera.
           </div>
         </div>
 
         <div v-else class="panel-variaciones__lista">
-          <!--
-            Cada variacion.producto_principal_variacion = uid del Maestro actual.
-            Al hacer clic, abrimos el formulario de esa variación hija.
-          -->
           <div
             v-for="variacion in variaciones"
             :key="variacion.uid"
             class="variacion-item"
             @click="irAVariacion(variacion.uid)"
           >
-            <div class="variacion-item__nombre">{{ variacion.nombre }}</div>
+            <div class="variacion-item__cabecera">
+              <div class="variacion-item__nombre">{{ variacion.nombre }}</div>
+              <span :class="['chip chip--xs', variacion.estado === 'Activo' ? 'chip--verde' : 'chip--gris']">
+                {{ variacion.estado }}
+              </span>
+            </div>
             <div class="variacion-item__atributo">
               {{ variacion.nombre_atributo_variacion }}:
               <strong>{{ variacion.valor_atributo_variacion }}</strong>
             </div>
-            <div class="variacion-item__pie">
-              <span :class="['badge', variacion.estado === 'Activo' ? 'badge-activo' : 'badge-inactivo']">
-                {{ variacion.estado }}
-              </span>
-              <span v-if="variacion.precio_regular" class="variacion-item__precio">
-                ${{ variacion.precio_regular }}
-              </span>
+            <div v-if="variacion.precio_regular" class="variacion-item__precio">
+              ${{ variacion.precio_regular }}
             </div>
           </div>
         </div>
@@ -482,17 +533,25 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { llamar, subirArchivo } from '../../servicios/apiService.js'
 
-// ── Navegación ────────────────────────────────────────────────────
 const route  = useRoute()
 const router = useRouter()
 const $q     = useQuasar()
 
-// ── Estado ────────────────────────────────────────────────────────
+// ── Definición de tabs (sin "historia" — fusionado en "contenido") ─
+const tabs = [
+  { nombre: 'general',    label: 'General',    icono: 'inventory_2' },
+  { nombre: 'variacion',  label: 'Variación',  icono: 'tune' },
+  { nombre: 'precios',    label: 'Precios',    icono: 'sell' },
+  { nombre: 'contenido',  label: 'Contenido',  icono: 'description' },
+  { nombre: 'multimedia', label: 'Multimedia', icono: 'photo_library' },
+  { nombre: 'auditoria',  label: 'Auditoría',  icono: 'manage_search' }
+]
+
 const tabActiva = ref('general')
 const guardando = ref(false)
 
-// Producto vacío con todos los campos de com_productos
 const producto = ref({
   uid: '',
   empresa: '',
@@ -500,10 +559,10 @@ const producto = ref({
   id_producto_woocommerce: null,
   uid_producto_padre: '',
   nombre: '',
-  nombre_grupo_catalogo: null,      // NULL = este producto es el Maestro del grupo
+  nombre_grupo_catalogo: null,
   estado_publicacion: 'borrador',
   url_producto: '',
-  producto_principal_variacion: null, // NULL = Maestro; UID del Maestro = Hija
+  producto_principal_variacion: null,
   nombre_atributo_variacion: '',
   valor_atributo_variacion: '',
   categoria: '',
@@ -533,27 +592,18 @@ const producto = ref({
   fecha_ult_modificacion: null
 })
 
-// Multimedia: registros de com_productos_multimedia
-const multimedia = ref([])
-
-// Variaciones hijas (solo se cargan si este producto es Maestro)
-const variaciones = ref([])
-
-// Control de arrastre para reordenar galería
+const multimedia        = ref([])
+const variaciones       = ref([])
 const archivoEnArrastre = ref(null)
+const inputArchivo      = ref(null)   // referencia al <input type="file"> oculto
 
-// ── Computed ──────────────────────────────────────────────────────
-
-// Es Maestro si producto_principal_variacion es null o vacío
 const esMaestro = computed(() => !producto.value.producto_principal_variacion)
 
-// Muestra los primeros 12 caracteres del UID del Maestro
 const uidMaestroCorto = computed(() => {
   const uid = producto.value.producto_principal_variacion
   return uid ? `${uid.substring(0, 12)}...` : ''
 })
 
-// ── Opciones para selects ─────────────────────────────────────────
 const opcionesEstado = [
   { label: 'Activo',   value: 'Activo' },
   { label: 'Inactivo', value: 'Inactivo' }
@@ -567,19 +617,15 @@ const opcionesPublicacion = [
 ]
 
 const opcionesUso = [
-  { label: 'Principal (portada)',  value: 'Principal' },
-  { label: 'Galería',             value: 'Galeria' },
-  { label: 'Variación',           value: 'Variacion' },
-  { label: 'Galería secundaria',  value: 'Galeria secundaria' },
-  { label: 'Otro',                value: 'Otro' }
+  { label: 'Portada',            value: 'Portada' },
+  { label: 'Galería',            value: 'Galeria' },
+  { label: 'Variación',          value: 'Variacion' },
+  { label: 'Galería secundaria', value: 'Galeria secundaria' },
+  { label: 'Otro',               value: 'Otro' }
 ]
 
-// ── Carga de datos ────────────────────────────────────────────────
-
 async function cargarProducto (uid) {
-  // TODO: reemplazar con llamada real cuando el backend esté listo
-  // Formato esperado: GET /api/comercial/productos/:uid
-  // Respuesta esperada: { exito: true, datos: { ...campos }, errores: [] }
+  // TODO: GET /api/comercial/productos/:uid
   console.log('[FormularioProducto] Cargando producto:', uid)
 }
 
@@ -589,60 +635,71 @@ async function cargarMultimedia (uid) {
 }
 
 async function cargarVariaciones (uidMaestro) {
-  // Carga todos los registros donde producto_principal_variacion = uidMaestro
   // TODO: GET /api/comercial/productos/:uid/variaciones
   console.log('[FormularioProducto] Cargando variaciones del Maestro:', uidMaestro)
 }
 
-// ── Acciones ──────────────────────────────────────────────────────
-
 async function guardar () {
   guardando.value = true
   try {
-    // TODO: PUT /api/comercial/productos/:uid con producto.value
-    // El backend actualiza usuario_ult_modificacion y fecha_ult_modificacion automáticamente
-    $q.notify({ type: 'positive', message: 'Producto guardado correctamente' })
+    const resultado = await llamar('comercial', 'productos', 'guardar_producto', { ...producto.value })
+    // El backend devuelve el registro completo (con uid, fechas, etc.)
+    Object.assign(producto.value, resultado)
+    $q.notify({ type: 'positive', message: 'Producto guardado correctamente', icon: 'check_circle' })
   } catch (error) {
-    $q.notify({ type: 'negative', message: `Error al guardar: ${error.message}` })
+    $q.notify({ type: 'negative', message: error.message, icon: 'error' })
   } finally {
     guardando.value = false
   }
 }
 
-function cancelar () {
-  router.back()
-}
-
-function irAVariacion (uid) {
-  router.push({ name: 'editar-producto', params: { uid } })
-}
+function cancelar () { router.back() }
+function irAVariacion (uid) { router.push({ name: 'editar-producto', params: { uid } }) }
 
 function crearVariacion () {
-  // TODO: abrir modal para crear una variación nueva vinculada al Maestro actual
-  // La variación nueva tendrá: producto_principal_variacion = producto.value.uid
   $q.dialog({
     title: 'Nueva variación',
-    message: `Se creará una variación hija vinculada al Maestro: ${producto.value.nombre}`,
+    message: `Se creará una variación hija del Maestro: ${producto.value.nombre}`,
     cancel: true
   })
 }
 
-// ── Galería multimedia ────────────────────────────────────────────
-
 function urlArchivo (archivo) {
-  return archivo.archivo_local || archivo.archivo_woocommerce || ''
+  return archivo.url_publica || archivo.archivo_local || ''
 }
 
 function abrirSubida () {
-  // TODO: implementar subida de archivos al servidor
-  // El backend detecta el tipo (imagen/video) por MIME y guarda en SOS_ERP_archivos/
-  console.log('[Multimedia] Abrir subida de archivos')
+  inputArchivo.value?.click()
+}
+
+async function procesarArchivos (archivos) {
+  for (const archivo of Array.from(archivos)) {
+    const datosExtra = {
+      uid_producto:    producto.value.uid,
+      empresa:         producto.value.empresa,
+      usuario_creador: producto.value.usuario_creador || 'sistema',
+      orden:           multimedia.value.length + 1,
+      uso:             multimedia.value.length === 0 ? 'Portada' : 'Galeria'
+    }
+    try {
+      $q.loading.show({ message: `Subiendo ${archivo.name}…` })
+      const registro = await subirArchivo('comercial', 'productos', 'subir_multimedia', archivo, datosExtra)
+      multimedia.value.push(registro)
+      $q.notify({ type: 'positive', message: `${archivo.name} subida correctamente` })
+    } catch (error) {
+      $q.notify({ type: 'negative', message: `Error al subir ${archivo.name}: ${error.message}` })
+    } finally {
+      $q.loading.hide()
+    }
+  }
+  // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
+  if (inputArchivo.value) inputArchivo.value.value = ''
 }
 
 function eliminarArchivo (archivo) {
   $q.dialog({
     title: 'Eliminar archivo',
-    message: '¿Seguro que quieres eliminar este archivo? Esta acción no se puede deshacer.',
+    message: '¿Seguro? Esta acción no se puede deshacer.',
     cancel: { label: 'Cancelar', flat: true },
     ok: { label: 'Eliminar', color: 'negative', unelevated: true }
   }).onOk(() => {
@@ -652,11 +709,10 @@ function eliminarArchivo (archivo) {
 }
 
 function actualizarUsoArchivo (archivo) {
-  // TODO: PATCH /api/comercial/multimedia/:uid con { uso: archivo.uso }
-  console.log('[Multimedia] Actualizando uso de:', archivo.uid, '→', archivo.uso)
+  // TODO: PATCH /api/comercial/multimedia/:uid
+  console.log('[Multimedia] Uso actualizado:', archivo.uid, '→', archivo.uso)
 }
 
-// Drag & drop para reordenar galería (actualiza campo `orden`)
 function alIniciarArrastre (evento, archivo) {
   archivoEnArrastre.value = archivo
   evento.dataTransfer.effectAllowed = 'move'
@@ -664,23 +720,15 @@ function alIniciarArrastre (evento, archivo) {
 
 function alSoltar (evento, archivoDestino) {
   if (!archivoEnArrastre.value || archivoEnArrastre.value.uid === archivoDestino.uid) return
-
-  const lista    = [...multimedia.value]
-  const indexOrigen  = lista.findIndex(m => m.uid === archivoEnArrastre.value.uid)
-  const indexDestino = lista.findIndex(m => m.uid === archivoDestino.uid)
-
-  // Intercambia posiciones
-  lista.splice(indexDestino, 0, lista.splice(indexOrigen, 1)[0])
-
-  // Actualiza campo `orden` según nueva posición
+  const lista = [...multimedia.value]
+  const iOrigen  = lista.findIndex(m => m.uid === archivoEnArrastre.value.uid)
+  const iDestino = lista.findIndex(m => m.uid === archivoDestino.uid)
+  lista.splice(iDestino, 0, lista.splice(iOrigen, 1)[0])
   lista.forEach((item, i) => { item.orden = i + 1 })
   multimedia.value = lista
-
   archivoEnArrastre.value = null
-  // TODO: PATCH /api/comercial/multimedia/reordenar con el nuevo orden de UIDs
+  // TODO: PATCH /api/comercial/multimedia/reordenar
 }
-
-// ── Utilidades ────────────────────────────────────────────────────
 
 function formatearFecha (fecha) {
   if (!fecha) return '—'
@@ -690,125 +738,253 @@ function formatearFecha (fecha) {
   })
 }
 
-// ── Ciclo de vida ─────────────────────────────────────────────────
-
 onMounted(async () => {
   const uid = route.params.uid
   if (uid) {
     await cargarProducto(uid)
     await cargarMultimedia(uid)
-    // Solo carga variaciones si el producto es Maestro
-    if (esMaestro.value) {
-      await cargarVariaciones(uid)
-    }
+    if (esMaestro.value) await cargarVariaciones(uid)
   }
 })
 </script>
 
 <style lang="scss" scoped>
 // Referencia visual: .agent/diseno/dashboard_ref.html
-// Colores: .agent/diseno/GUIA_ESTILOS.md
+// Colores:          .agent/diseno/GUIA_ESTILOS.md
 
 .pagina-formulario {
-  padding: 28px 30px;
-  max-width: 1400px;
+  padding: 28px 32px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 
-// ── Cabecera ───────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// CABECERA
+// ══════════════════════════════════════════════════════════════════
 .cabecera {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
 
-  &__titulo {
-    font-size: 22px;
-    font-weight: 800;
-    color: #1A1A1A;
-  }
+  &__izq { flex: 1; min-width: 0; }
 
-  &__nombre {
-    font-weight: 500;
-    color: #6A6A6A;
-    font-size: 18px;
-  }
-
-  &__badges {
+  &__miga {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
+    gap: 4px;
+    margin-bottom: 8px;
+    font-size: 12px;
   }
 
-  &__acciones {
+  &__miga-link {
+    color: #AAAAAA;
+    cursor: pointer;
+    transition: color 0.15s;
+    &:hover { color: #E8750A; }
+  }
+
+  &__miga-actual {
+    color: #6A6A6A;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__titulo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__titulo {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1A1A1A;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 520px;
+  }
+
+  &__chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  &__der {
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    padding-top: 28px; // alinea con el título
+  }
+
+  &__separador {
+    height: 1px;
+    background: linear-gradient(90deg, #E8750A22 0%, #E0DDD8 30%, #F8F7F5 100%);
+    margin-top: 16px;
   }
 }
 
-// ── Layout principal ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// CHIPS DE ESTADO
+// ══════════════════════════════════════════════════════════════════
+.chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+
+  &--xs { font-size: 9px; padding: 2px 7px; }
+
+  &--verde   { background: #E8F5E5; color: #2E7A2A; }
+  &--gris    { background: #F3F1EE; color: #7A7A7A; }
+  &--maestro { background: #FEF8E0; color: #9A7200; }
+  &--hija    { background: #E5F0FF; color: #1A5ACC; font-family: monospace; }
+
+  // Estados de publicación
+  &--pub-borrador  { background: #F3F1EE; color: #7A7A7A; }
+  &--pub-publicado { background: #E8F5E5; color: #2E7A2A; }
+  &--pub-privado   { background: #E5F0FF; color: #1A5ACC; }
+  &--pub-pendiente { background: #FEF8E0; color: #9A7200; }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// BARRA DE TABS PERSONALIZADA
+// ══════════════════════════════════════════════════════════════════
+.tabs-barra {
+  display: flex;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+
+  &::-webkit-scrollbar { height: 0; }
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7A7A7A;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  user-select: none;
+
+  &__icono { opacity: 0.6; transition: opacity 0.15s; }
+
+  &:hover {
+    background: #F8F7F5;
+    color: #3A3A3A;
+    .tab-item__icono { opacity: 0.8; }
+  }
+
+  &--activo {
+    background: rgba(232, 117, 10, 0.09);
+    color: #C55E00;
+    .tab-item__icono { opacity: 1; color: #E8750A; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LAYOUT PRINCIPAL
+// ══════════════════════════════════════════════════════════════════
 .cuerpo {
   display: flex;
   gap: 20px;
+  align-items: flex-start;
 
-  .formulario-principal {
+  .formulario-principal { flex: 1; min-width: 0; }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SEPARADORES DE SECCIÓN DENTRO DE CARDS
+// ══════════════════════════════════════════════════════════════════
+.s-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &__icono {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__titulo {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: #9A9A9A;
+    white-space: nowrap;
+  }
+
+  &__linea {
     flex: 1;
-    min-width: 0;
-  }
-
-  &--con-panel {
-    .formulario-principal {
-      flex: 1;
-    }
+    height: 1px;
+    background: #F0EDE8;
   }
 }
 
-// ── Tabs de navegación ─────────────────────────────────────────────
-.tabs-navegacion {
-  background: #fff;
-  border-radius: 12px 12px 0 0;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  border-bottom: none;
+// ══════════════════════════════════════════════════════════════════
+// INPUT DE NOMBRE (más grande, más presencia)
+// ══════════════════════════════════════════════════════════════════
+.nombre-grande {
+  :deep(.q-field__control) { font-size: 16px; font-weight: 600; }
+  :deep(.q-field__label)   { font-size: 13px; }
 }
 
-// ── Texto de sección ───────────────────────────────────────────────
-.texto-seccion {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1A1A1A;
+// ══════════════════════════════════════════════════════════════════
+// CARD DE OFERTA (aparece/desaparece con transición)
+// ══════════════════════════════════════════════════════════════════
+.card-oferta {
+  background: rgba(232, 117, 10, 0.04);
+  border: 1px solid rgba(232, 117, 10, 0.2);
+  border-radius: 16px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #C55E00;
+  }
 }
 
-// ── Badges de identificación Maestro/Hija ──────────────────────────
-.badge-maestro {
-  background: #FEF8E0;
-  color: #9A7200;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 20px;
-}
+.fade-slide-enter-active,
+.fade-slide-leave-active { transition: all 0.2s ease; }
+.fade-slide-enter-from,
+.fade-slide-leave-to { opacity: 0; transform: translateY(-6px); }
 
-.badge-hija {
-  background: #E5F0FF;
-  color: #1A5ACC;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 20px;
-  font-family: monospace;
-}
-
-// ── Avisos contextuales ────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// AVISOS CONTEXTUALES
+// ══════════════════════════════════════════════════════════════════
 .aviso {
   display: flex;
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 10px;
   font-size: 13px;
-  color: #3A3A3A;
 
   code {
     background: rgba(240, 184, 34, 0.2);
@@ -818,30 +994,31 @@ onMounted(async () => {
   }
 
   &--maestro {
-    background: rgba(240, 184, 34, 0.08);
-    border: 1px solid rgba(240, 184, 34, 0.25);
+    background: rgba(240, 184, 34, 0.07);
+    border: 1px solid rgba(240, 184, 34, 0.22);
     color: #7A5E00;
   }
 
   &--hija {
-    background: rgba(26, 90, 204, 0.06);
-    border: 1px solid rgba(26, 90, 204, 0.2);
+    background: rgba(26, 90, 204, 0.05);
+    border: 1px solid rgba(26, 90, 204, 0.18);
     color: #1A3A6A;
   }
 
   &--info {
     background: #F8F7F5;
-    border-radius: 10px;
     color: #7A7A7A;
     font-size: 12px;
   }
 }
 
-// ── Galería multimedia ─────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// GALERÍA MULTIMEDIA
+// ══════════════════════════════════════════════════════════════════
 .galeria {
   &__cabecera {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
   }
 
@@ -869,15 +1046,8 @@ onMounted(async () => {
     transition: box-shadow 0.15s;
     position: relative;
 
-    &:hover {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    }
-
-    // Destaca visualmente el archivo marcado como Principal
-    &--principal {
-      border-color: #E8750A;
-      border-width: 2px;
-    }
+    &:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); }
+    &--principal { border: 2px solid #E8750A; }
   }
 
   &__preview {
@@ -889,11 +1059,7 @@ onMounted(async () => {
     background: #F0EDE8;
     position: relative;
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    img { width: 100%; height: 100%; object-fit: cover; }
   }
 
   &__preview-icono {
@@ -914,10 +1080,7 @@ onMounted(async () => {
     border-radius: 10px;
   }
 
-  &__uso {
-    padding: 8px;
-  }
-
+  &__uso     { padding: 8px; }
   &__acciones {
     display: flex;
     align-items: center;
@@ -926,17 +1089,19 @@ onMounted(async () => {
   }
 }
 
-// ── Panel lateral: Variaciones ─────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// PANEL LATERAL DE VARIACIONES
+// ══════════════════════════════════════════════════════════════════
 .panel-variaciones {
-  width: 280px;
+  width: 268px;
   flex-shrink: 0;
-  height: fit-content;
   position: sticky;
   top: 24px;
+  height: fit-content;
 
   &__cabecera {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
   }
 
@@ -944,13 +1109,23 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 0;
+    padding: 28px 0;
+  }
+
+  &__vacio-icono {
+    width: 48px;
+    height: 48px;
+    background: #F8F7F5;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__lista {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 }
 
@@ -963,26 +1138,27 @@ onMounted(async () => {
 
   &:hover {
     background: rgba(232, 117, 10, 0.04);
-    border-color: rgba(232, 117, 10, 0.3);
+    border-color: rgba(232, 117, 10, 0.25);
+    transform: translateX(2px);
+  }
+
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
   }
 
   &__nombre {
     font-size: 12px;
     font-weight: 600;
     color: #1A1A1A;
-    margin-bottom: 2px;
   }
 
   &__atributo {
     font-size: 11px;
-    color: #7A7A7A;
-    margin-bottom: 6px;
-  }
-
-  &__pie {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    color: #9A9A9A;
+    margin-bottom: 5px;
   }
 
   &__precio {
@@ -992,14 +1168,20 @@ onMounted(async () => {
   }
 }
 
-// ── Grid de auditoría ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// GRID DE AUDITORÍA
+// ══════════════════════════════════════════════════════════════════
 .auditoria__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 
-  @media (max-width: 599px) {
-    grid-template-columns: 1fr;
-  }
+  @media (max-width: 599px) { grid-template-columns: 1fr; }
 }
+
+.texto-seccion { font-size: 13px; font-weight: 700; color: #1A1A1A; }
+
+.mono { font-family: monospace; font-size: 11px; }
+
+.flex-shrink-0 { flex-shrink: 0; }
 </style>
