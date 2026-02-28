@@ -6,6 +6,21 @@
 ## Para qué sirve
 Poner el sistema en vivo en `https://erp.oscomunidad.com` para empezar a usarlo con datos reales.
 
+> [!IMPORTANT]
+> **Entorno**: Windows 11. Los comandos de compilación (`npm run build`) se deben correr desde **CMD**, no desde PowerShell.
+
+## Problema conocido: .htaccess en Hostinger
+
+> [!CAUTION]
+> **NO uses `ssh hostinger_erp "cat > .htaccess <<EOF ... EOF"`** para crear el `.htaccess`.
+> El heredoc de SSH sobre PowerShell en Windows elimina las variables (`$1`) de las reglas de reescritura, rompiendo la carga de activos JS/CSS (Error MIME type mismatch → pantalla en blanco).
+>
+> **Solución correcta**: Crear el `.htaccess` localmente y subirlo con `scp`:
+> ```bash
+> # Crear el archivo en /tmp/prod.htaccess
+> scp -P 65002 -i ~/.ssh/sos_erp /tmp/prod.htaccess u768061575@109.106.250.195:~/domains/oscomunidad.com/public_html/erp/.htaccess
+> ```
+
 ## Procedimiento de Despliegue (Paso a Paso)
 
 ### 1. Preparar la Versión Final (Build)
