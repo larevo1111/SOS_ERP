@@ -16,8 +16,9 @@
     RewriteRule ^(.*)$ erp/frontend/dist/spa/index.html [L]
 
     # 3. Frontend Estático - Servir los archivos compilados en Producción
-    # Si no es tráfico de API ni archivos ya en dist/spa...
+    # Si no es tráfico de API, evitar interceptar el propio enrutador PHP
     RewriteCond %{REQUEST_URI} !api/ [NC]
+    RewriteCond %{REQUEST_URI} !rutas\.php [NC]
     RewriteCond %{REQUEST_URI} !/frontend/dist/spa/ [NC]
     RewriteRule ^(?:erp/)?(.*)$ erp/frontend/dist/spa/$1 [L]
 </IfModule>
