@@ -20,3 +20,6 @@ Se debe cargar la lista de la tabla de origen, presentar los nombres al usuario,
 
 ## 3. Disposición UX
 Los campos maestros (como el selector de Costos en productos) deben ubicarse **ARRIBA, EN LA PRIMERA POSICIÓN**, antes que el nombre, el estado o el autocompletado de IA. Esto porque de su selección depende el contexto que la inteligencia artificial utilizará para sugerir los demás campos del formulario.
+
+## 4. Prevención de Autenticación Anticipada (CORS / Tokens)
+Cuando se expongan nuevos Endpoints del Backend para alimentar selectores de Formularios en el Frontend, **los Controladores no deben forzar autenticación `ValidarJwt::verificar()` si el entorno no ha implementado la Fase 8**. Deben protegerse localmente usando el valor compartido en los entornos (`R2_TOKEN`) leyendo el JSON HTTP crudo **después de** decodificar el cuerpo (nunca antes para evitar buffers vacíos). Además, validar siempre en `.htaccess` y `VirtualHost` que Apache exponga la carpeta `erp/` correcta para evitar sobreescrituras HTML y bucles de `mod_rewrite`.
