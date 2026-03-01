@@ -135,7 +135,7 @@ Reglas de Sugerencia:
 4. Responde ÚNICAMENTE en JSON válido con esta estructura: {"sugerencia":"...", "nota":"..."}. Nada más. No uses bloques de código.
 PROMPT;
 
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($apiKey);
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' . urlencode($apiKey);
 
     $payload = json_encode([
         'contents' => [
