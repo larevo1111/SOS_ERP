@@ -129,10 +129,11 @@ Contexto actual:
 Campo que debes sugerir: "{$campoObjetivo}"
 
 Reglas de Sugerencia:
-1. Si pido "nombre": Combina el producto base con el valor/atributo. Ej: "Miel Silvestre" + "500g" -> "Miel Silvestre 500g".
-2. Si pido "nombre_grupo_catalogo": Debe ser el nombre del grupo/familia General, sin pesos ni medidas específicas. Ej: "Miel Silvestre 300g" -> "Miel Silvestre". "Miel de Abejas con Jengibre 250ml" -> "Miel de Abejas con Jengibre".
-3. Si pido "valor_atributo_variacion": Normaliza unidades eliminando puntos y estandarizando. Ej: "grs" -> "g", "ml." -> "ml", "500 gr" -> "500g".
-4. Responde ÚNICAMENTE en JSON válido con esta estructura: {"sugerencia":"...", "nota":"..."}. Nada más. No uses bloques de código.
+1. CRÍTICO: Si "Producto base" está vacío o no se provee, tu sugerencia debe estar vacía y la "nota" debe pedirle al usuario amigablemente que primero seleccione un "Producto de costos".
+2. Si pido "nombre": Combina el producto base con el valor/atributo. Ej: "Miel Silvestre" + "500g" -> "Miel Silvestre 500g".
+3. Si pido "nombre_grupo_catalogo": Debe ser el nombre del grupo/familia General, sin pesos ni medidas específicas. Ej: "Miel Silvestre 300g" -> "Miel Silvestre". "Miel de Abejas con Jengibre 250ml" -> "Miel de Abejas con Jengibre".
+4. Si pido "valor_atributo_variacion": Normaliza unidades eliminando puntos y estandarizando. Ej: "grs" -> "g", "ml." -> "ml", "500 gr" -> "500g".
+5. Responde ÚNICAMENTE en JSON válido con esta estructura estricta: {"sugerencia":"...", "nota":"..."}. Nada de texto adicional antes ni después.
 PROMPT;
 
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' . urlencode($apiKey);
@@ -144,6 +145,7 @@ PROMPT;
         'generationConfig' => [
             'temperature' => 0.2,
             'maxOutputTokens' => 200,
+            'responseMimeType' => 'application/json'
         ],
     ]);
 
@@ -182,15 +184,25 @@ PROMPT;
     }
 
     $textoGemini = trim($respuesta['candidates'][0]['content']['parts'][0]['text']);
-    // Limpiar posibles bloques de código que Gemini a veces agrega por error
-    $textoGemini = preg_replace('/^```json\s*|```$/m', '', $textoGemini);
+
+    // Extraer forzosamente el JSON incluso si Gemini incluye texto introductorio ("Claro, aquí tienes...")
+    $inicio = strpos($textoGemini, '{');
+    $fin = strrpos($textoGemini, '}');
+
+    if ($inicio !== false && $fin !== false) {
+        $textoGemini = substr($textoGemini, $inicio, $fin - $inicio + 1);
+    }
+    else {
+        // Fallback: Limpiar posibles bloques de código que Gemini a veces agrega por error
+        $textoGemini = preg_replace('/^```json\s*|```$/m', '', $textoGemini);
+    }
 
     $sugerencias = json_decode($textoGemini, true);
-    if (!$sugerencias || !isset($sugerencias['sugerencia'])) {
+    if (!$sugerencias || !array_key_exists('sugerencia', $sugerencias)) {
         return [
             'exito' => false,
             'datos' => null,
-            'mensaje' => 'Gemini devolvió una respuesta no estructurada.',
+            'mensaje' => 'Gemini devolvió una respuesta no estructurada o incompleta.',
             'errores' => [$textoGemini],
         ];
     }

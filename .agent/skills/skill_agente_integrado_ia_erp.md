@@ -22,6 +22,9 @@ Al solicitar asistencia, siempre se debe enviar el contexto completo disponible:
 - `nombre_actual`: Lo que el usuario ya escribió.
 - `campo_peticion`: Identificador del campo para que la IA sepa qué regla aplicar.
 
+> [!IMPORTANT]
+> **Contextos Incompletos:** Si el frontend no tiene un producto base seleccionado en el momento en que se solicita la IA, el servidor se encargará de indicarle a Gemini que devuelva una `nota` amigable para el usuario solicitándole que seleccione primero el producto base, previniendo así "alucinaciones" o errores de JSON no estructurado. Además, el backend requiere `responseMimeType: application/json` para asegurar que Gemini responda en formato nativo estricto.
+
 ## 4. Estética de Notificaciones
 - Usar el tipo `asistente` en Quasar Notify (color `deep-orange-9`, icono `auto_awesome`).
 - Mostrar la "nota" devuelta por la IA para dar transparencia al usuario sobre la sugerencia.
