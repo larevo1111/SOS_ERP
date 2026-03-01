@@ -23,3 +23,15 @@ Los campos maestros (como el selector de Costos en productos) deben ubicarse **A
 
 ## 4. Prevención de Autenticación Anticipada (CORS / Tokens)
 Cuando se expongan nuevos Endpoints del Backend para alimentar selectores de Formularios en el Frontend, **los Controladores no deben forzar autenticación `ValidarJwt::verificar()` si el entorno no ha implementado la Fase 8**. Deben protegerse localmente usando el valor compartido en los entornos (`R2_TOKEN`) leyendo el JSON HTTP crudo **después de** decodificar el cuerpo (nunca antes para evitar buffers vacíos). Además, validar siempre en `.htaccess` y `VirtualHost` que Apache exponga la carpeta `erp/` correcta para evitar sobreescrituras HTML y bucles de `mod_rewrite`.
+
+## 5. Patrón Anti-Loop para Quasar QSelect con Búsqueda Asíncrona
+**NUNCA** usar `update(async () => { await fetchData() })` dentro del `@filter` de un `<q-select>`. Esto causa un **bucle infinito de 30,000+ peticiones/seg** porque al actualizar `ref()` reactivas dentro de `update()`, Quasar re-dispara `@filter`.
+
+**Patrón correcto:**
+```js
+async function filtrarDatos (valor, update, abort) {
+  await cargarDatosDesdeAPI(valor.trim())  // Async FUERA de update()
+  update()                                  // Síncrono, sin callback
+}
+```
+
