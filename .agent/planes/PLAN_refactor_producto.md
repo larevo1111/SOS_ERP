@@ -33,6 +33,9 @@ Este plan aborda la reestructuración de la vista de creación y edición de pro
 
 ### [Frontend - Componentes]
 
+> [!NOTE] 
+> **Referencia Visual Obligatoria**: Antes de tocar el código de FormularioProducto.vue, el Constructor debe abrir y estudiar el archivo físico `.agent/bocetos/boceto_formulario_producto.png`. El código de la interfaz debe ser una representación técnica fiel de esa estructura lógica.
+
 #### [MODIFICAR] [FormularioProducto.vue](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/frontend/src/modulos/comercial/FormularioProducto.vue)
 *   **Alineamiento Estricto al Boceto Visual**:
     *   **Pestañas Finales**: `General`, `Contenido`, `Galeria`, `Auditoria`. (Se elimina "Precios", e "Historia/Contenido" se fusiona).
