@@ -4,23 +4,11 @@
 // Endpoint: /api/comercial/asistente
 // Asistente IA comercial usando Google Gemini API.
 //
-// Autenticación: JWT (Authorization: Bearer <token>)
+// Autenticación: R2_TOKEN (Temporal hasta Fase 8 JWT)
 //
 // Variable requerida en erp/.env:
 //   GEMINI_API_KEY → clave de la API de Google Gemini
 //
-// Acciones disponibles:
-//   sugerir_datos → recibe contexto parcial del producto/variación y retorna sugerencias
-//
-// Petición esperada:
-//   POST { accion: "sugerir_datos", datos: { contexto: { ... } } }
-//   El campo 'contexto' admite cualquier subconjunto de:
-//     nombre_atributo_variacion, valor_atributo_variacion,
-//     uid_producto_padre_nombre (nombre del producto de costos),
-//     nombre_actual (nombre que el usuario ya escribió, si hay alguno)
-//
-// Respuesta exitosa:
-//   { exito: true, datos: { nombre_sugerido, valor_atributo_normalizado, nota }, mensaje: "..." }
 
 // ── Cabeceras ─────────────────────────────────────────────────────
 header('Content-Type: application/json; charset=utf-8');
@@ -40,40 +28,50 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 function responderAsistente(bool $exito, $datos = null, string $mensaje = '', array $errores = []): void
 {
     echo json_encode([
-        'exito'   => $exito,
-        'datos'   => $datos ?? (object)[],
+        'exito' => $exito,
+        'datos' => $datos ?? (object)[],
         'mensaje' => $mensaje,
         'errores' => $errores,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
 
-// ── Verificar JWT ─────────────────────────────────────────────────
-$autoload = dirname(__DIR__, 3) . '/vendor/autoload.php';
-if (!file_exists($autoload)) {
-    http_response_code(500);
-    responderAsistente(false, null,
-        'Error de servidor: ejecuta `cd erp && composer install`.',
-        ['composer_no_instalado']);
-}
-require_once $autoload;
-require_once __DIR__ . '/../../../infraestructura/autenticacion/ValidarJwt.php';
-
-use Infraestructura\Autenticacion\ValidarJwt;
-ValidarJwt::verificar();
-
-// ── Parsear petición ──────────────────────────────────────────────
+// ── Parsear petición JSON ─────────────────────────────────────────
 $cuerpo = json_decode(file_get_contents('php://input'), true);
 if (!$cuerpo) {
     responderAsistente(false, null, 'Petición inválida: se esperaba JSON.', ['sin_cuerpo']);
 }
 
-$accion  = trim($cuerpo['accion'] ?? '');
-$datos   = $cuerpo['datos'] ?? [];
+// ── Validar token R2_TOKEN (Temporal hasta Fase 8 JWT) ───────────────
+$tokenEnviado = $cuerpo['token'] ?? '';
+$rutaEnv = dirname(__DIR__, 3) . '/.env';
+$tokenEsperado = '';
+if (file_exists($rutaEnv)) {
+    foreach (file($rutaEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
+        $linea = trim($linea);
+        if (str_starts_with($linea, 'R2_TOKEN=')) {
+            $tokenEsperado = trim(substr($linea, strlen('R2_TOKEN=')));
+            break;
+        }
+    }
+}
+
+if (!$tokenEsperado || !hash_equals($tokenEsperado, $tokenEnviado)) {
+    http_response_code(401);
+    responderAsistente(false, null, 'Token inválido o ausente.', ['token_invalido']);
+}
+
+$accion = trim($cuerpo['accion'] ?? '');
+$datos = $cuerpo['datos'] ?? [];
+
+// ── Autoload (Solo si existe para herramientas futuras) ───────────
+$autoload = dirname(__DIR__, 3) . '/vendor/autoload.php';
+if (file_exists($autoload)) {
+    require_once $autoload;
+}
 
 // ── Enrutar por acción ────────────────────────────────────────────
 switch ($accion) {
-
     case 'sugerir_datos':
         $contexto = $datos['contexto'] ?? [];
         if (empty($contexto)) {
@@ -105,37 +103,36 @@ function llamarGemini(array $contexto): array
 
     if (!$apiKey) {
         return [
-            'exito'   => false,
-            'datos'   => null,
+            'exito' => false,
+            'datos' => null,
             'mensaje' => 'Error de configuración: GEMINI_API_KEY no definida en .env.',
             'errores' => ['gemini_key_faltante'],
         ];
     }
 
     // Construir prompt con el contexto recibido
-    $nombreAtributo   = $contexto['nombre_atributo_variacion']  ?? '';
-    $valorAtributo    = $contexto['valor_atributo_variacion']   ?? '';
+    $nombreAtributo = $contexto['nombre_atributo_variacion'] ?? '';
+    $valorAtributo = $contexto['valor_atributo_variacion'] ?? '';
     $nombreProductoCostos = $contexto['uid_producto_padre_nombre'] ?? '';
-    $nombreActual     = $contexto['nombre_actual']               ?? '';
+    $nombreActual = $contexto['nombre_actual'] ?? '';
+    $campoObjetivo = $contexto['campo_peticion'] ?? 'nombre';
 
     $prompt = <<<PROMPT
-Eres un asistente de datos para Origen Silvestre, empresa colombiana de alimentos naturales.
-Tu tarea es sugerir el nombre comercial de una variación de producto y normalizar el atributo de variación.
+Eres un asistente de datos experto para Origen Silvestre, una empresa colombiana de alimentos artesanales y naturales.
+Tu tarea es sugerir valores coherentes para campos de productos basados en el contexto de su "Matriz de Costos" de origen.
 
-Contexto recibido:
-- Producto base (costos): "{$nombreProductoCostos}"
-- Nombre actual del producto (puede estar vacío): "{$nombreActual}"
-- Atributo de variación: "{$nombreAtributo}"
-- Valor del atributo: "{$valorAtributo}"
+Contexto actual:
+- Producto base (Matriz de Costos): "{$nombreProductoCostos}"
+- Nombre escrito por el usuario: "{$nombreActual}"
+- Atributo: "{$nombreAtributo}" | Valor: "{$valorAtributo}"
 
-Reglas:
-1. El nombre sugerido debe combinar el producto base con el valor del atributo (Ej: "Miel Silvestre 500g").
-2. Normaliza el valor del atributo: "grs" → "gramos", "grs." → "gramos", "500gr" → "500g", "ml." → "ml". Si ya está bien, devuélvelo igual.
-3. Si el nombre actual ya es correcto y descriptivo, puedes devolverlo sin cambios.
-4. Responde ÚNICAMENTE con JSON válido, sin texto extra, sin bloques de código, sin comillas triples.
+Campo que debes sugerir: "{$campoObjetivo}"
 
-Formato de respuesta:
-{"nombre_sugerido":"...","valor_atributo_normalizado":"...","nota":"..."}
+Reglas de Sugerencia:
+1. Si pido "nombre": Combina el producto base con el valor/atributo. Ej: "Miel Silvestre" + "500g" -> "Miel Silvestre 500g".
+2. Si pido "nombre_grupo_catalogo": Debe ser el nombre del grupo/familia General, sin pesos ni medidas específicas. Ej: "Miel Silvestre 300g" -> "Miel Silvestre". "Miel de Abejas con Jengibre 250ml" -> "Miel de Abejas con Jengibre".
+3. Si pido "valor_atributo_variacion": Normaliza unidades eliminando puntos y estandarizando. Ej: "grs" -> "g", "ml." -> "ml", "500 gr" -> "500g".
+4. Responde ÚNICAMENTE en JSON válido con esta estructura: {"sugerencia":"...", "nota":"..."}. Nada más. No uses bloques de código.
 PROMPT;
 
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($apiKey);
@@ -145,29 +142,29 @@ PROMPT;
             ['parts' => [['text' => $prompt]]]
         ],
         'generationConfig' => [
-            'temperature'     => 0.3,
-            'maxOutputTokens' => 256,
+            'temperature' => 0.2,
+            'maxOutputTokens' => 200,
         ],
     ]);
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => $payload,
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT => 15,
     ]);
 
     $respuestaRaw = curl_exec($ch);
-    $httpCode     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlError    = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
 
     if ($curlError) {
         return [
-            'exito'   => false,
-            'datos'   => null,
+            'exito' => false,
+            'datos' => null,
             'mensaje' => 'Error de red al contactar Gemini.',
             'errores' => [$curlError],
         ];
@@ -177,29 +174,30 @@ PROMPT;
 
     if ($httpCode !== 200 || !isset($respuesta['candidates'][0]['content']['parts'][0]['text'])) {
         return [
-            'exito'   => false,
-            'datos'   => null,
+            'exito' => false,
+            'datos' => null,
             'mensaje' => "Gemini respondió con HTTP {$httpCode}.",
             'errores' => [$respuestaRaw],
         ];
     }
 
     $textoGemini = trim($respuesta['candidates'][0]['content']['parts'][0]['text']);
+    // Limpiar posibles bloques de código que Gemini a veces agrega por error
+    $textoGemini = preg_replace('/^```json\s*|```$/m', '', $textoGemini);
 
-    // Parsear JSON que devuelve Gemini
     $sugerencias = json_decode($textoGemini, true);
-    if (!$sugerencias) {
+    if (!$sugerencias || !isset($sugerencias['sugerencia'])) {
         return [
-            'exito'   => false,
-            'datos'   => null,
+            'exito' => false,
+            'datos' => null,
             'mensaje' => 'Gemini devolvió una respuesta no estructurada.',
             'errores' => [$textoGemini],
         ];
     }
 
     return [
-        'exito'   => true,
-        'datos'   => $sugerencias,
+        'exito' => true,
+        'datos' => $sugerencias,
         'mensaje' => 'Sugerencias generadas correctamente.',
         'errores' => [],
     ];

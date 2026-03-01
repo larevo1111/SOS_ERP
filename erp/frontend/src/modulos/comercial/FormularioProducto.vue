@@ -115,20 +115,36 @@
             </q-select>
 
             <div class="row items-center justify-between q-mb-xs">
-              <div class="text-caption text-weight-medium">Nombre del producto</div>
+              <div class="text-caption text-weight-medium">Nombre para Catálogo (Grupo) *</div>
               <q-btn
                 flat dense no-caps
                 icon="auto_awesome"
                 color="deep-orange-8"
                 label="✨ Sugerir Asistencia IA"
-                @click="solicitarAsistenciaIA('nombre_producto')"
+                @click="solicitarAsistenciaIA('nombre_grupo_catalogo', producto)"
+              />
+            </div>
+            <q-input
+              v-model="producto.nombre_grupo_catalogo"
+              label="Nombre para Catálogo (Ej: Miel Silvestre)"
+              outlined
+              class="q-mb-md"
+            />
+
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-weight-medium">Nombre del producto (Variación) *</div>
+              <q-btn
+                flat dense no-caps
+                icon="auto_awesome"
+                color="deep-orange-8"
+                label="✨ Sugerir Asistencia IA"
+                @click="solicitarAsistenciaIA('nombre', producto)"
               />
             </div>
             <q-input
               v-model="producto.nombre"
-              label="Nombre del producto *"
+              label="Nombre completo (Ej: Miel Silvestre 500g)"
               outlined
-              hint="Nombre completo con tamaño. Ej: Miel Silvestre 500g"
               class="q-mb-md nombre-grande"
             />
 
@@ -675,6 +691,7 @@ const guardandoVariacion = ref(false)
 const variacionDraft = ref({
   uid_producto_padre: '',
   nombre: '',
+  nombre_grupo_catalogo: '',
   nombre_atributo_variacion: '',
   valor_atributo_variacion: '',
   precio_regular: null,
@@ -712,7 +729,7 @@ const opcionesUso = [
 
 function mapearMaestrosCosto (items = []) {
   return items.map(item => ({
-    label: `${item.producto} · ${item.uid}`,
+    label: `${item.producto} | Cod: ${item.uid}`,
     value: item.uid,
     nombre: item.producto
   }))
@@ -876,29 +893,34 @@ async function guardarVariacionExpress () {
 
 async function solicitarAsistenciaIA (campo, contexto = null) {
   try {
-    const base = contexto ? contexto.value || contexto : producto.value
+    const base = (contexto && '__v_isRef' in contexto) ? contexto.value : (contexto || producto.value)
+    const valorOriginal = base[campo] || ''
+
     const respuesta = await llamar('comercial', 'asistente', 'sugerir_datos', {
       contexto: {
+        campo_peticion: campo,
         nombre_atributo_variacion: base.nombre_atributo_variacion || '',
         valor_atributo_variacion: base.valor_atributo_variacion || '',
-        uid_producto_padre_nombre: producto.value.nombre || '',
-        nombre_actual: campo === 'nombre_producto' ? producto.value.nombre : base.nombre || ''
+        uid_producto_padre_nombre: (producto.value.nombre || '').split('|')[0].trim(),
+        nombre_actual: valorOriginal
       }
     })
 
-    if (campo === 'nombre_producto' && respuesta?.nombre_sugerido) {
-      producto.value.nombre = respuesta.nombre_sugerido
-    }
-    if (campo === 'nombre_atributo_variacion' && !variacionDraft.value.nombre_atributo_variacion) {
-      variacionDraft.value.nombre_atributo_variacion = 'Peso'
-    }
-    if (campo === 'valor_atributo_variacion' && respuesta?.valor_atributo_normalizado) {
-      variacionDraft.value.valor_atributo_variacion = respuesta.valor_atributo_normalizado
+    if (respuesta?.sugerencia) {
+      base[campo] = respuesta.sugerencia
+      $q.notify({
+        type: 'asistente',
+        message: respuesta.nota || 'Sugerencia IA aplicada',
+        icon: 'auto_awesome',
+        color: 'deep-orange-9',
+        timeout: 2500
+      })
     }
   } catch (error) {
+    console.error('[IA] Error:', error)
     $q.notify({
       type: 'warning',
-      message: 'Asistencia IA no disponible aún. El método quedó preparado para el endpoint comercial/asistente.',
+      message: `Asistencia IA: ${error.message}`,
       icon: 'auto_awesome'
     })
   }
