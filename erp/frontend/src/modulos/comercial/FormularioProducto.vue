@@ -739,10 +739,10 @@ async function consultarMaestrosCosto (busqueda = '') {
   }
 }
 
-function filtrarMaestrosCosto (valor, update) {
-  update(async () => {
-    await consultarMaestrosCosto(valor.trim())
-  })
+async function filtrarMaestrosCosto (valor, update, abort) {
+  if (valor.length < 0) { abort(); return }
+  await consultarMaestrosCosto(valor.trim())
+  update()
 }
 
 function alSeleccionarMaestroCosto (uidSeleccionado) {
@@ -792,10 +792,10 @@ async function consultarMarcas (busqueda = '') {
   }
 }
 
-function filtrarMarcas (valor, update) {
-  update(async () => {
-    await consultarMarcas(valor.trim())
-  })
+async function filtrarMarcas (valor, update, abort) {
+  if (valor.length < 0) { abort(); return }
+  await consultarMarcas(valor.trim())
+  update()
 }
 
 async function cargarProducto (uid) {

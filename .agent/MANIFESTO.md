@@ -54,7 +54,7 @@ Para garantizar que el ecosistema (Hostinger, Ubuntu Local, Windows 11) se mante
 1. **La Base de Datos viaja por Git**: Toda alteración a la base de datos (nuevas tablas, migraciones, registros de prueba complejos) debe exportarse al archivo `erp/base_datos/sos_erp_sync.sql` usando el script oficial.
 2. **Mandamiento de Exportación**: Si alteras la BD en tu entorno, ejecuta `./erp/scripts/db_export.sh`, haz `git commit` y `git push`.
 3. **Mandamiento de Importación**: Al cambiar de equipo (ej. de Hostinger a Ubuntu o de Ubuntu a Windows 11), después de hacer `git pull`, debes ejecutar `./erp/scripts/db_import.sh` para absorber los cambios estructurales.
-4. **Acceso Permanente a Desarrollo**: Para visualizar el frontend desde cualquier equipo en la red local, se debe ejecutar siempre `./erp/scripts/iniciar_dev.sh`. Este script imprimirá la URL fija (ej. `http://<ip-ubuntu>:5173`) sin necesidad de configuraciones DNS adicionales.
+4. **Acceso Permanente a Desarrollo**: Para visualizar probar cambios del frontend localmente, el equipo de desarrollo y el usuario líder siempre utilizarán `http://localhost:5173`. Si se corre desde la IP del servidor de desarrollo de red local, se usará `http://<ip-ubuntu>:5173`. Todo testeo funcional de Frontend se aprueba en ese puerto.
 
 - MariaDB 11.8 único central. Tanto el servidor de Hostinger como el ambiente local deben usar MariaDB 11.8 para evitar conflictos de collation.
 - Todas las tablas incluyen: `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
