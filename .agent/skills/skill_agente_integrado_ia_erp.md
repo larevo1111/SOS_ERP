@@ -29,3 +29,11 @@ Al solicitar asistencia, siempre se debe enviar el contexto completo disponible:
 ## 5. Seguridad
 - Durante el desarrollo (Fases 1-7), las peticiones de IA se validan con el `R2_TOKEN`.
 - A partir de la Fase 8, se migrará a validación `JWT` obligatoria.
+
+## 6. Troubleshooting: Error 429 (Quota Exceeded)
+**Problema:** Al utilizar una API Key nueva o el Tier Gratuito (Free Tier) de Gemini, la respuesta puede ser un HTTP 429 (Quota Exceeded) a pesar de no haberla utilizado nunca.  
+**Causa:** Restricciones regionales de Google Cloud. En ciertas regiones (como Colombia), las cuentas nuevas tienen una cuota efectiva de `0` peticiones en la capa gratuita si el proyecto de Google Cloud asociado a la API Key no tiene una cuenta de facturación vinculada activa.  
+**Solución:**
+1. Ingresar a Google Cloud Console.
+2. Afiliar un método de pago/cuenta de facturación al proyecto donde se creó la API Key (el Tier gratuito se seguirá aplicando, pero Google requiere la tarjeta como garantía por medidas anti-abuso).
+3. Alternativamente, utilizar los modelos más antiguos, aunque Google restringe agresivamente las cuotas en proyectos sin facturación.
