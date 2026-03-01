@@ -10,6 +10,8 @@ require_once __DIR__ . '/../casos_de_uso/GuardarProducto.php';
 require_once __DIR__ . '/../casos_de_uso/SubirMultimedia.php';
 require_once __DIR__ . '/../casos_de_uso/ObtenerProducto.php';
 require_once __DIR__ . '/../casos_de_uso/ListarProductos.php';
+require_once __DIR__ . '/../casos_de_uso/ListarVariaciones.php';
+require_once __DIR__ . '/../casos_de_uso/GuardarVariacionExpress.php';
 
 use Infraestructura\BaseDatos\Conexion;
 
@@ -107,6 +109,16 @@ try {
 
         case 'listar_productos':
             $caso = new ListarProductos($pdo);
+            $resultado = $caso->ejecutar($datos);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'listar_variaciones':
+            $caso = new ListarVariaciones($pdo);
+            $resultado = $caso->ejecutar($datos);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'guardar_variacion_express':
+            $caso = new GuardarVariacionExpress($pdo);
             $resultado = $caso->ejecutar($datos);
             responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
 
