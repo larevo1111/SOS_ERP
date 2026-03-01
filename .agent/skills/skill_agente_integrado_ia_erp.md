@@ -6,7 +6,9 @@ Esta skill define cómo interactúan los Agentes con el motor de IA (Google Gemi
 - **Backend:** `AsistenteComercialController.php` actúa como proxy hacia Google Gemini.
 - **Frontend:** Uso de la función `solicitarAsistenciaIA(campo, contexto)` en componentes Vue/Quasar.
 - **Prompts:** Centralizados en el Backend para mantener consistencia.
-- **Configuración (tokens):** Es mandatario configurar `maxOutputTokens` a valores altos (ej: `8192`) al usar versiones como `gemini-flash-latest`, ya que estos "Thinking Models" consumen miles de tokens de respuesta ocultos ("thought tokens") razonando internamente cómo cumplir el prompt antes de emitir la respuesta en sí. Con un límite bajo (ej: 200), la API se detiene prematuramente devolviendo un error `MAX_TOKENS` que rompe el JSON.
+- **Modelo activo:** `gemini-2.5-flash` (model ID exacto, no usar alias como `gemini-flash-latest`).
+- **⚠️ Thinking Models — NO usar `gemini-flash-latest`:** Este alias apunta al modelo experimental `gemini-3-flash-preview`, un "Thinking Model" que consume ~4.000 tokens internos de razonamiento antes de emitir una sola línea JSON. Con `maxOutputTokens` en 200, la respuesta es truncada (MAX_TOKENS). El modelo `gemini-2.5-flash` es equivalente en calidad pero sin razonamiento extravagante, consumiendo apenas ~35 tokens por petición.
+- **`maxOutputTokens`:** Mantener en `8192` ya que el límite cubre el caso más amplio sin costo real en tokens de salida efectiva.
 
 ## 2. Reglas de Sugerencia Lógica
 Para mantener la estética 5S y la coherencia de datos, la IA debe seguir estas reglas:
