@@ -85,6 +85,45 @@
               <div class="s-header__linea" />
             </div>
 
+            <q-select
+              v-model="producto.uid_producto_padre"
+              :options="opcionesMaestrosCosto"
+              :loading="cargandoMaestrosCosto"
+              label="Producto de costos *"
+              outlined
+              dense
+              class="q-mb-md"
+              clearable
+              emit-value
+              map-options
+              use-input
+              fill-input
+              hide-selected
+              input-debounce="250"
+              hint="Busca por nombre en costos_encabezados_productos y guarda el UID"
+              @filter="filtrarMaestrosCosto"
+              @update:model-value="alSeleccionarMaestroCosto"
+            >
+              <template #prepend><q-icon name="link" color="grey-5" /></template>
+              <template #no-option>
+                <q-item>
+                  <q-item-section class="text-grey-6">
+                    No hay coincidencias en Costos.
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-weight-medium">Nombre del producto</div>
+              <q-btn
+                flat dense no-caps
+                icon="auto_awesome"
+                color="deep-orange-8"
+                label="✨ Sugerir Asistencia IA"
+                @click="solicitarAsistenciaIA('nombre_producto')"
+              />
+            </div>
             <q-input
               v-model="producto.nombre"
               label="Nombre del producto *"
@@ -93,7 +132,7 @@
               class="q-mb-md nombre-grande"
             />
 
-            <div class="row q-col-gutter-md">
+            <div class="row q-col-gutter-md q-mb-sm">
               <div class="col-12 col-md-6">
                 <q-select v-model="producto.estado" :options="opcionesEstado"
                   label="Estado *" outlined dense emit-value map-options />
@@ -101,6 +140,48 @@
               <div class="col-12 col-md-6">
                 <q-select v-model="producto.estado_publicacion" :options="opcionesPublicacion"
                   label="Publicación *" outlined dense emit-value map-options />
+              </div>
+            </div>
+
+            <q-input
+              v-model="producto.url_producto"
+              label="URL producto"
+              outlined
+              dense
+              hint="Slug o URL pública del producto (WooCommerce)"
+            />
+          </div>
+
+          <div class="card-origenes q-pa-lg q-mb-md">
+            <div class="s-header s-header--verde q-mb-md">
+              <div class="s-header__icono" style="background:#E8F5E5">
+                <q-icon name="sell" size="15px" color="green-8" />
+              </div>
+              <span class="s-header__titulo">Precios</span>
+              <div class="s-header__linea" />
+            </div>
+
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-input v-model.number="producto.precio_regular"
+                  label="Precio regular *" type="number" outlined prefix="$"
+                  :rules="[val => !val || val > 0 || 'Debe ser mayor a 0']" />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input v-model.number="producto.precio_oferta"
+                  label="Precio de oferta" type="number" outlined prefix="$"
+                  hint="Vacío = sin oferta activa" />
+              </div>
+            </div>
+
+            <div class="row q-col-gutter-md q-mt-sm">
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.fecha_oferta_desde"
+                  label="Fecha oferta desde" outlined dense type="date" />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input v-model="producto.fecha_oferta_hasta"
+                  label="Fecha oferta hasta" outlined dense type="date" />
               </div>
             </div>
           </div>
@@ -119,137 +200,37 @@
                 <q-input v-model="producto.categoria" label="Categoría" outlined dense />
               </div>
               <div class="col-12 col-md-6">
-                <q-input v-model="producto.marca" label="Marca" outlined dense />
+                <q-select
+                  v-model="producto.marca"
+                  :options="opcionesMarcas"
+                  :loading="cargandoMarcas"
+                  label="Marca *"
+                  outlined
+                  dense
+                  clearable
+                  emit-value
+                  map-options
+                  use-input
+                  fill-input
+                  hide-selected
+                  input-debounce="250"
+                  hint="Muestra nombre de marca y guarda UID"
+                  @filter="filtrarMarcas"
+                >
+                  <template #prepend><q-icon name="branding_watermark" color="blue-6" /></template>
+                  <template #no-option>
+                    <q-item>
+                      <q-item-section class="text-grey-6">
+                        Sin marcas disponibles.
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
               </div>
             </div>
             <q-input v-model="producto.etiquetas" label="Etiquetas" outlined dense
               hint="Separadas por coma. Ej: miel, natural, artesanal" />
           </div>
-        </div>
-
-        <!-- ── TAB: VARIACIÓN ────────────────────────────────── -->
-        <div v-show="tabActiva === 'variacion'">
-          <div class="card-origenes q-pa-lg">
-
-            <div v-if="esMaestro" class="aviso aviso--maestro q-mb-lg">
-              <q-icon name="star" size="16px" class="q-mr-sm flex-shrink-0" />
-              <span>Este producto es el <strong>Representante del grupo</strong>.
-                El <code>nombre_grupo_catalogo</code> es lo que WooCommerce usa
-                como nombre de familia.</span>
-            </div>
-            <div v-else class="aviso aviso--hija q-mb-lg">
-              <q-icon name="account_tree" size="16px" class="q-mr-sm flex-shrink-0" />
-              <span>Esta es una <strong>variación hija</strong>.
-                El nombre de grupo lo gestiona el Maestro al que apunta.</span>
-            </div>
-
-            <q-input v-if="esMaestro"
-              v-model="producto.nombre_grupo_catalogo"
-              label="Nombre del grupo de catálogo (familia) *"
-              outlined class="q-mb-md"
-              hint="Ej: Miel Silvestre — aparece como nombre del producto padre en WooCommerce"
-            >
-              <template #prepend>
-                <q-icon name="folder_special" color="warning" />
-              </template>
-            </q-input>
-
-            <div class="s-header s-header--naranja q-mb-md q-mt-sm">
-              <div class="s-header__icono" style="background:#FFF0E5">
-                <q-icon name="tune" size="15px" color="orange-8" />
-              </div>
-              <span class="s-header__titulo">Atributo de esta variación</span>
-              <div class="s-header__linea" />
-            </div>
-
-            <div class="row q-col-gutter-md q-mb-md">
-              <div class="col-12 col-md-6">
-                <q-input v-model="producto.nombre_atributo_variacion"
-                  label="Atributo" outlined dense hint="Ej: Peso, Tamaño, Presentación" />
-              </div>
-              <div class="col-12 col-md-6">
-                <q-input v-model="producto.valor_atributo_variacion"
-                  label="Valor" outlined dense hint="Ej: 500g, Grande, Caja × 6" />
-              </div>
-            </div>
-
-            <q-select
-              v-model="producto.uid_producto_padre"
-              :options="opcionesMaestrosCosto"
-              :loading="cargandoMaestrosCosto"
-              label="Producto Maestro de Costos"
-              outlined
-              dense
-              clearable
-              emit-value
-              map-options
-              use-input
-              fill-input
-              hide-selected
-              input-debounce="250"
-              hint="Busca por nombre del maestro de costos y enlaza su UID"
-              @filter="filtrarMaestrosCosto"
-              @update:model-value="alSeleccionarMaestroCosto"
-            >
-              <template #prepend><q-icon name="link" color="grey-5" /></template>
-              <template #no-option>
-                <q-item>
-                  <q-item-section class="text-grey-6">
-                    No hay coincidencias.
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-
-          </div>
-        </div>
-
-        <!-- ── TAB: PRECIOS ──────────────────────────────────── -->
-        <div v-show="tabActiva === 'precios'">
-
-          <div class="card-origenes q-pa-lg q-mb-md">
-            <div class="s-header s-header--verde q-mb-md">
-              <div class="s-header__icono" style="background:#E8F5E5">
-                <q-icon name="sell" size="15px" color="green-8" />
-              </div>
-              <span class="s-header__titulo">Precio de venta</span>
-              <div class="s-header__linea" />
-            </div>
-
-            <div class="row q-col-gutter-md">
-              <div class="col-12 col-md-6">
-                <q-input v-model.number="producto.precio_regular"
-                  label="Precio regular *" type="number" outlined prefix="$"
-                  :rules="[val => !val || val > 0 || 'Debe ser mayor a 0']" />
-              </div>
-              <div class="col-12 col-md-6">
-                <q-input v-model.number="producto.precio_oferta"
-                  label="Precio de oferta" type="number" outlined prefix="$"
-                  hint="Vacío = sin oferta activa" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Card de oferta: solo se muestra si hay precio de oferta -->
-          <transition name="fade-slide">
-            <div v-if="producto.precio_oferta" class="card-oferta q-pa-lg">
-              <div class="card-oferta__header q-mb-md">
-                <q-icon name="local_offer" size="18px" class="q-mr-sm" />
-                <span>Vigencia de la oferta</span>
-              </div>
-              <div class="row q-col-gutter-md">
-                <div class="col-12 col-md-6">
-                  <q-input v-model="producto.fecha_oferta_desde"
-                    label="Desde" outlined dense type="date" />
-                </div>
-                <div class="col-12 col-md-6">
-                  <q-input v-model="producto.fecha_oferta_hasta"
-                    label="Hasta" outlined dense type="date" />
-                </div>
-              </div>
-            </div>
-          </transition>
-
         </div>
 
         <!-- ── TAB: CONTENIDO (fusiona Contenido + Historia) ─── -->
@@ -376,8 +357,8 @@
 
         </div>
 
-        <!-- ── TAB: MULTIMEDIA ───────────────────────────────── -->
-        <div v-show="tabActiva === 'multimedia'">
+        <!-- ── TAB: GALERIA ───────────────────────────────── -->
+        <div v-show="tabActiva === 'galeria'">
           <div class="card-origenes q-pa-lg">
 
             <!-- Input oculto: el botón "Agregar" lo dispara vía abrirSubida() -->
@@ -499,7 +480,7 @@
       <!-- ════════════════════════════════════════════════════════
            PANEL LATERAL: Variaciones (solo si es Maestro)
       ═════════════════════════════════════════════════════════ -->
-      <div v-if="esMaestro" class="panel-variaciones card-origenes q-pa-lg">
+      <div v-if="tabActiva === 'general'" class="panel-variaciones card-origenes q-pa-lg">
 
         <div class="panel-variaciones__cabecera q-mb-md">
           <div>
@@ -509,7 +490,7 @@
             </div>
           </div>
           <q-btn unelevated round dense size="sm" icon="add" color="primary"
-            @click="crearVariacion" />
+            @click="abrirPopupVariacion" />
         </div>
 
         <div v-if="variaciones.length === 0" class="panel-variaciones__vacio">
@@ -547,6 +528,73 @@
       </div>
     </div>
 
+    <q-dialog v-model="popupVariacionAbierto" persistent>
+      <q-card class="popup-variacion">
+        <q-card-section class="row items-center justify-between q-pb-sm">
+          <div class="text-subtitle1 text-weight-bold">Popup variación</div>
+          <q-btn icon="close" flat round dense color="grey-6" @click="popupVariacionAbierto = false" />
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-select
+            v-model="variacionDraft.uid_producto_padre"
+            :options="opcionesMaestrosCosto"
+            :loading="cargandoMaestrosCosto"
+            label="Producto de Costos *"
+            outlined dense
+            class="q-mb-sm"
+            emit-value map-options
+            use-input fill-input hide-selected
+            input-debounce="250"
+            @filter="filtrarMaestrosCosto"
+          />
+
+          <q-input v-model="variacionDraft.nombre" label="Nombre variación *" outlined dense class="q-mb-sm" />
+
+          <div class="row items-center justify-between q-mb-xs">
+            <div class="text-caption text-weight-medium">nombre_atributo_variacion</div>
+            <q-btn
+              flat dense no-caps icon="auto_awesome"
+              color="deep-orange-8" label="✨ Sugerir Asistencia IA"
+              @click="solicitarAsistenciaIA('nombre_atributo_variacion', variacionDraft)"
+            />
+          </div>
+          <q-input v-model="variacionDraft.nombre_atributo_variacion" outlined dense class="q-mb-sm" />
+
+          <div class="row items-center justify-between q-mb-xs">
+            <div class="text-caption text-weight-medium">valor_atributo_variacion</div>
+            <q-btn
+              flat dense no-caps icon="auto_awesome"
+              color="deep-orange-8" label="✨ Sugerir Asistencia IA"
+              @click="solicitarAsistenciaIA('valor_atributo_variacion', variacionDraft)"
+            />
+          </div>
+          <q-input v-model="variacionDraft.valor_atributo_variacion" outlined dense class="q-mb-md" />
+
+          <div class="text-subtitle2 text-weight-bold q-mb-sm">Auditoria</div>
+          <div class="row q-col-gutter-sm">
+            <div class="col-12 col-md-6">
+              <q-input v-model.number="variacionDraft.precio_regular" label="precio_regular" outlined dense type="number" />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input v-model.number="variacionDraft.precio_oferta" label="precio_oferta" outlined dense type="number" />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input v-model="variacionDraft.fecha_oferta_desde" label="fecha_oferta_desde" outlined dense type="date" />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input v-model="variacionDraft.fecha_oferta_hasta" label="fecha_oferta_hasta" outlined dense type="date" />
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat no-caps label="Cancelar" color="grey-7" @click="popupVariacionAbierto = false" />
+          <q-btn unelevated no-caps label="Guardar variación" color="primary" :loading="guardandoVariacion" @click="guardarVariacionExpress" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -563,10 +611,8 @@ const $q     = useQuasar()
 // ── Definición de tabs (sin "historia" — fusionado en "contenido") ─
 const tabs = [
   { nombre: 'general',    label: 'General',    icono: 'inventory_2' },
-  { nombre: 'variacion',  label: 'Variación',  icono: 'tune' },
-  { nombre: 'precios',    label: 'Precios',    icono: 'sell' },
   { nombre: 'contenido',  label: 'Contenido',  icono: 'description' },
-  { nombre: 'multimedia', label: 'Multimedia', icono: 'photo_library' },
+  { nombre: 'galeria',    label: 'Galeria',    icono: 'photo_library' },
   { nombre: 'auditoria',  label: 'Auditoría',  icono: 'manage_search' }
 ]
 
@@ -621,6 +667,21 @@ const opcionesMaestrosCosto = ref([])
 const cargandoMaestrosCosto = ref(false)
 const ultimoNombreAutocompletado = ref('')
 const errorMaestrosCostoMostrado = ref(false)
+const opcionesMarcas = ref([])
+const cargandoMarcas = ref(false)
+const errorMarcasMostrado = ref(false)
+const popupVariacionAbierto = ref(false)
+const guardandoVariacion = ref(false)
+const variacionDraft = ref({
+  uid_producto_padre: '',
+  nombre: '',
+  nombre_atributo_variacion: '',
+  valor_atributo_variacion: '',
+  precio_regular: null,
+  precio_oferta: null,
+  fecha_oferta_desde: null,
+  fecha_oferta_hasta: null
+})
 
 const esMaestro = computed(() => !producto.value.producto_principal_variacion)
 
@@ -667,7 +728,7 @@ async function consultarMaestrosCosto (busqueda = '') {
     if (!errorMaestrosCostoMostrado.value) {
       $q.notify({
         type: 'warning',
-        message: 'No fue posible cargar maestros de costo. Puedes continuar digitando el UID manualmente.',
+        message: 'No fue posible cargar maestros de costo desde backend.',
         icon: 'warning'
       })
       errorMaestrosCostoMostrado.value = true
@@ -698,6 +759,43 @@ function alSeleccionarMaestroCosto (uidSeleccionado) {
     producto.value.nombre = maestro.nombre
     ultimoNombreAutocompletado.value = maestro.nombre
   }
+}
+
+function mapearMarcas (items = []) {
+  return items.map(item => ({
+    label: item.nombre,
+    value: item.uid
+  }))
+}
+
+async function consultarMarcas (busqueda = '') {
+  cargandoMarcas.value = true
+  try {
+    const datos = await llamar('comercial', 'marcas', 'listar_marcas', { busqueda })
+    const marcas = Array.isArray(datos?.marcas) ? datos.marcas : []
+    opcionesMarcas.value = mapearMarcas(marcas)
+  } catch (error) {
+    if (!errorMarcasMostrado.value) {
+      $q.notify({
+        type: 'warning',
+        message: 'No fue posible cargar marcas desde backend. Verifica el endpoint listar_marcas.',
+        icon: 'warning'
+      })
+      errorMarcasMostrado.value = true
+    }
+
+    if (producto.value.marca && !opcionesMarcas.value.some(op => op.value === producto.value.marca)) {
+      opcionesMarcas.value = [{ label: `Marca actual (${producto.value.marca})`, value: producto.value.marca }]
+    }
+  } finally {
+    cargandoMarcas.value = false
+  }
+}
+
+function filtrarMarcas (valor, update) {
+  update(async () => {
+    await consultarMarcas(valor.trim())
+  })
 }
 
 async function cargarProducto (uid) {
@@ -732,12 +830,78 @@ async function guardar () {
 function cancelar () { router.back() }
 function irAVariacion (uid) { router.push({ name: 'editar-producto', params: { uid } }) }
 
-function crearVariacion () {
-  $q.dialog({
-    title: 'Nueva variación',
-    message: `Se creará una variación hija del Maestro: ${producto.value.nombre}`,
-    cancel: true
-  })
+function abrirPopupVariacion () {
+  variacionDraft.value = {
+    uid_producto_padre: producto.value.uid_producto_padre || '',
+    nombre: '',
+    nombre_atributo_variacion: '',
+    valor_atributo_variacion: '',
+    precio_regular: null,
+    precio_oferta: null,
+    fecha_oferta_desde: null,
+    fecha_oferta_hasta: null
+  }
+  popupVariacionAbierto.value = true
+}
+
+async function guardarVariacionExpress () {
+  if (!producto.value.uid) {
+    $q.notify({
+      type: 'warning',
+      message: 'Guarda primero el producto maestro antes de crear variaciones.',
+      icon: 'warning'
+    })
+    return
+  }
+
+  guardandoVariacion.value = true
+  try {
+    const payload = {
+      ...variacionDraft.value,
+      producto_principal_variacion: producto.value.uid,
+      empresa: producto.value.empresa,
+      estado: 'Activo',
+      estado_publicacion: 'borrador'
+    }
+    const variacionGuardada = await llamar('comercial', 'productos', 'guardar_producto', payload)
+    variaciones.value.unshift(variacionGuardada)
+    popupVariacionAbierto.value = false
+    $q.notify({ type: 'positive', message: 'Variación guardada correctamente', icon: 'check_circle' })
+  } catch (error) {
+    $q.notify({ type: 'negative', message: error.message, icon: 'error' })
+  } finally {
+    guardandoVariacion.value = false
+  }
+}
+
+async function solicitarAsistenciaIA (campo, contexto = null) {
+  try {
+    const base = contexto ? contexto.value || contexto : producto.value
+    const respuesta = await llamar('comercial', 'asistente', 'sugerir_datos', {
+      contexto: {
+        nombre_atributo_variacion: base.nombre_atributo_variacion || '',
+        valor_atributo_variacion: base.valor_atributo_variacion || '',
+        uid_producto_padre_nombre: producto.value.nombre || '',
+        nombre_actual: campo === 'nombre_producto' ? producto.value.nombre : base.nombre || ''
+      }
+    })
+
+    if (campo === 'nombre_producto' && respuesta?.nombre_sugerido) {
+      producto.value.nombre = respuesta.nombre_sugerido
+    }
+    if (campo === 'nombre_atributo_variacion' && !variacionDraft.value.nombre_atributo_variacion) {
+      variacionDraft.value.nombre_atributo_variacion = 'Peso'
+    }
+    if (campo === 'valor_atributo_variacion' && respuesta?.valor_atributo_normalizado) {
+      variacionDraft.value.valor_atributo_variacion = respuesta.valor_atributo_normalizado
+    }
+  } catch (error) {
+    $q.notify({
+      type: 'warning',
+      message: 'Asistencia IA no disponible aún. El método quedó preparado para el endpoint comercial/asistente.',
+      icon: 'auto_awesome'
+    })
+  }
 }
 
 function urlArchivo (archivo) {
@@ -816,6 +980,7 @@ function formatearFecha (fecha) {
 
 onMounted(async () => {
   await consultarMaestrosCosto()
+  await consultarMarcas()
 
   const uid = route.params.uid
   if (uid) {
@@ -834,6 +999,12 @@ onMounted(async () => {
   padding: 28px 32px;
   max-width: 1440px;
   margin: 0 auto;
+}
+
+.popup-variacion {
+  width: 100%;
+  max-width: 760px;
+  border-radius: 14px;
 }
 
 // ══════════════════════════════════════════════════════════════════
