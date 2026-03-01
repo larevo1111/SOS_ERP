@@ -19,6 +19,7 @@
 ## 3. Estándares de Ingeniería (Código y API)
 - **Idioma**: 100% Español. **Convenciones**: `PascalCase` (PHP/Vue), `snake_case` (DB/Campos), `camelCase` (JS).
 - **Lógica Multiempresa**: Campo `empresa` obligatorio en minúscula (ej: `os`).
+- **Filtro de Seguridad Multi-tenant (Empresa Activa)**: Toda tabla que tenga el campo `empresa` (todas, a excepción de las tablas de administración global como `sys_usuarios` o `sys_roles`) **DEBE** ser filtrada estrictamente en todas sus consultas SQL (Select, Insert, Update, Delete) utilizando el valor `empresa_activa` autenticado por el JWT del usuario. Un usuario solo puede ver y alterar los datos que pertenezcan a la empresa que tiene activa en ese momento. Los administradores globales tienen lógicas de bypass específicas si se requiere.
 - **Limpieza (Seiri)**: Los archivos de prueba (`test_...`, `info.php`) deben eliminarse inmediatamente tras verificar. Prohibido comitear "basura" de depuración.
 
 ### 3.1 Almacenamiento y API
