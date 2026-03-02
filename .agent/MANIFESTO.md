@@ -64,7 +64,7 @@
 
 ## 6. Memoria y Gobernanza 5S
 - **Estética Orígenes**: Fidelidad total a `GUIA_ESTILOS.md` (Verdes/Naranjas tierra, minimalismo premium).
-- **Skills**: Documentar lecciones en `.agent/skills/`. Incluir `Estado`, `Autor` y `Fecha`.
+- **Skills**: Documentar lecciones en `.agent/skills/`. **REGLA DE ORO:** Está PROHIBIDO actualizar o crear un Skill si el problema no ha sido previamente solucionado y VERIFICADO visualmente (screenshot o log de éxito). No se documentan teorías ni suposiciones. Incluir `Estado`, `Autor` y `Fecha`.
 - **Contexto**: `CONTEXTO_ACTIVO.md` corto y real.
 
 ## 7. Política de Sincronización de Base de Datos y Accesos

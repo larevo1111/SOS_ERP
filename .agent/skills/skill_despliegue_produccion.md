@@ -50,29 +50,15 @@ ssh -t hostinger_erp 'cd ~/domains/oscomunidad.com/public_html/erp && source .en
 
 ## ⚠️ Problemas Conocidos y Soluciones
 
-### Git push aparece "colgado" por 30+ minutos (monitoring de background)
-**Causa:** El paso 5 incluye `git add -f frontend/dist/spa/` que tiene decenas de archivos JS/CSS compilados. Git debe indexar (hashear) cada archivo antes de hacer el push. Esto puede tardar legitimamente 5-15 minutos. Además, cuando el agente AI ejecuta comandos en background, el monitoring puede no reflejar el progreso real.
-
-**Síntomas:** El agente reporta el comando como `RUNNING` indefinidamente; el usuario no ve output.
-
-**Verificación:** Abrir una terminal nueva y ejecutar:
+### Git push extremadamente lento (Bloqueo por carpeta `dist`)
+**Causa:** Forzar a git a trackear la carpeta `frontend/dist/spa/` (que contiene el build completo con cientos de archivos pequeños) hace que la indexación y el envío sean lentos (pueden tardar 5-15 min según la red y el disco).
+**Solución:** Si solo estás actualizando documentación o lógica del backend, EXCLUYE la carpeta dist del commit:
 ```bash
-cd ~/.gemini/antigravity/scratch/SOS_ERP/erp
-git log --oneline -3
-git status --short
-```
-Si el último commit aparece en `origin/main` y el `status` está limpio → **el push SÍ se completó**, el agente simplemente no lo sabía.
-
-**Solución si realmente está colgado:**
-```bash
-# Cancelar el proceso y hacer push manual:
-cd ~/.gemini/antigravity/scratch/SOS_ERP/erp
-git add -A -- ':!frontend/dist'   # excluir dist si no se necesita actualizar
+git add -A -- ':!frontend/dist'
 git commit -m "docs: ..."
 git push
 ```
-
-**Prevención:** Para el agente AI: siempre agregar `git log --oneline -2` al final del push para verificar que el commit está en origin. Para el workflow de despliegue: reducir lo que entra al dist commit separando el push de código del push del build.
+**Regla:** Solo incluir la carpeta `dist` cuando sea estrictamente necesario para un despliegue a producción.
 
 ### SSH git pull se queda colgado / timeout
 **Causa:** El `git pull` en Hostinger tarda si hay muchos archivos o si la conexión SSH tiene timeout bajo configurado.
