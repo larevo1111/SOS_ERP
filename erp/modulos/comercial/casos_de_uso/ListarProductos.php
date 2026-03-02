@@ -26,10 +26,13 @@ class ListarProductos
         $estado = trim($datos['estado'] ?? '');
         $soloMaestros = isset($datos['solo_maestros']) ? (bool)$datos['solo_maestros'] : true;
 
-        $sql = "SELECT p.uid, p.nombre, p.categoria, p.marca, p.precio_regular, 
+        $sql = "SELECT p.uid, p.nombre, p.categoria, p.marca, p.precio_regular,
                 p.estado, p.estado_publicacion, p.producto_principal_variacion,
-                p.empresa, p.fecha_creacion
-                FROM com_productos p 
+                p.empresa, p.fecha_creacion,
+                (SELECT archivo_local FROM com_productos_multimedia
+                 WHERE uid_producto = p.uid AND uso = 'Principal' AND estado = 'Activo'
+                 LIMIT 1) AS foto_principal_local
+                FROM com_productos p
                 WHERE p.empresa = :empresa";
 
         $params = [':empresa' => $empresa];
@@ -70,6 +73,16 @@ class ListarProductos
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Construir URL pública de la foto principal (ruta relativa → URL completa)
+        $r2BaseUrl = rtrim(getenv('R2_URL_PUBLICA') ?: '', '/');
+        foreach ($items as &$item) {
+            $item['foto_principal'] = !empty($item['foto_principal_local'])
+                ? $r2BaseUrl . '/' . $item['foto_principal_local']
+                : null;
+            unset($item['foto_principal_local']);
+        }
+        unset($item);
 
         return $this->respuesta(true, $items, 'Listado generado correctamente.');
     }

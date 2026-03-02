@@ -48,6 +48,15 @@
       class="tabla-productos"
       no-data-label="No hay productos registrados aún. Empieza creando el primero."
     >
+      <template v-slot:body-cell-foto="props">
+        <q-td :props="props">
+          <div class="producto-thumb">
+            <img v-if="props.row.foto_principal" :src="props.row.foto_principal" loading="lazy" />
+            <q-icon v-else name="image" color="grey-4" size="20px" />
+          </div>
+        </q-td>
+      </template>
+
       <template v-slot:body-cell-nombre="props">
         <q-td :props="props">
           <div class="row items-center cursor-pointer text-primary text-weight-medium" @click="verProducto(props.row.uid)">
@@ -90,10 +99,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { llamar } from '../../servicios/apiService.js'
-import { useQuasar } from 'quasar'
 
 const router = useRouter()
-const $q = useQuasar()
 
 const busqueda = ref('')
 const soloMaestros = ref(true)
@@ -101,12 +108,13 @@ const cargando = ref(false)
 const productos = ref([])
 
 const columnas = [
-  { name: 'nombre', label: 'Nombre del Producto', align: 'left', field: 'nombre', sortable: true },
-  { name: 'categoria', label: 'Categoría', align: 'left', field: 'categoria', sortable: true },
-  { name: 'marca', label: 'Marca', align: 'left', field: 'marca', sortable: true },
-  { name: 'precio', label: 'Precio Regular', align: 'right', field: 'precio_regular', sortable: true },
-  { name: 'estado', label: 'Estado', align: 'center', field: 'estado', sortable: true },
-  { name: 'acciones', label: '', align: 'right' }
+  { name: 'foto',      label: '',               align: 'center', field: 'foto_principal', style: 'width:68px; padding:8px' },
+  { name: 'nombre',   label: 'Nombre del Producto', align: 'left', field: 'nombre', sortable: true },
+  { name: 'categoria', label: 'Categoría',      align: 'left',   field: 'categoria',     sortable: true },
+  { name: 'marca',    label: 'Marca',            align: 'left',   field: 'marca',         sortable: true },
+  { name: 'precio',   label: 'Precio Regular',   align: 'right',  field: 'precio_regular', sortable: true },
+  { name: 'estado',   label: 'Estado',           align: 'center', field: 'estado',        sortable: true },
+  { name: 'acciones', label: '',                 align: 'right' }
 ]
 
 async function cargarProductos () {
@@ -173,5 +181,24 @@ onMounted(() => {
 
 .gap-sm {
   gap: 16px;
+}
+
+.producto-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 }
 </style>

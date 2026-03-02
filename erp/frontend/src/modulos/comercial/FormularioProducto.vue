@@ -119,8 +119,9 @@
               <q-btn
                 flat dense no-caps
                 icon="auto_awesome"
-                color="deep-orange-8"
-                label="✨ Sugerir Asistencia IA"
+                color="grey-6"
+                size="xs"
+                label="Sugerir IA"
                 @click="solicitarAsistenciaIA('nombre_grupo_catalogo', producto)"
               />
             </div>
@@ -136,8 +137,9 @@
               <q-btn
                 flat dense no-caps
                 icon="auto_awesome"
-                color="deep-orange-8"
-                label="✨ Sugerir Asistencia IA"
+                color="grey-6"
+                size="xs"
+                label="Sugerir IA"
                 @click="solicitarAsistenciaIA('nombre', producto)"
               />
             </div>
@@ -247,6 +249,46 @@
             <q-input v-model="producto.etiquetas" label="Etiquetas" outlined dense
               hint="Separadas por coma. Ej: miel, natural, artesanal" />
           </div>
+
+          <!-- Card: Foto Principal -->
+          <div class="card-origenes q-pa-lg q-mt-md">
+            <div class="s-header s-header--naranja q-mb-md">
+              <div class="s-header__icono" style="background:#FFF0E5">
+                <q-icon name="image" size="15px" color="orange-8" />
+              </div>
+              <span class="s-header__titulo">Foto Principal</span>
+              <div class="s-header__linea" />
+            </div>
+
+            <div v-if="!producto.uid" class="galeria__vacia">
+              <q-icon name="lock" size="32px" color="grey-3" />
+              <div class="q-mt-sm text-grey-5 text-caption text-center">
+                Guarda el producto para poder adjuntar la foto principal.
+              </div>
+            </div>
+
+            <template v-else>
+              <div v-if="fotoPrincipal" class="foto-principal">
+                <div class="foto-principal__preview">
+                  <img :src="urlArchivo(fotoPrincipal)" alt="Foto principal" />
+                  <div class="galeria__badge-principal">★ Principal</div>
+                </div>
+                <div class="foto-principal__acciones">
+                  <q-btn flat dense no-caps size="sm" icon="swap_horiz" label="Reemplazar"
+                    color="grey-7" @click="abrirSubidaSeccion('Principal')" />
+                  <q-btn flat dense no-caps size="sm" icon="delete" color="negative"
+                    @click="eliminarArchivo(fotoPrincipal)" />
+                </div>
+              </div>
+              <div v-else class="galeria__vacia foto-principal__dropzone"
+                @click="abrirSubidaSeccion('Principal')">
+                <q-icon name="add_photo_alternate" size="40px" color="grey-3" />
+                <div class="q-mt-sm text-grey-5 text-caption">
+                  Clic para subir la foto principal del producto
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
 
         <!-- ── TAB: CONTENIDO (fusiona Contenido + Historia) ─── -->
@@ -262,13 +304,23 @@
               <div class="s-header__linea" />
             </div>
 
-            <q-input v-model="producto.descripcion_corta" label="Descripción corta"
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Descripción corta</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('descripcion_corta', producto)" />
+            </div>
+            <q-input v-model="producto.descripcion_corta"
               type="textarea" outlined :rows="3" class="q-mb-md"
-              hint="Máximo 2 líneas. Aparece debajo del nombre en la tienda" />
+              placeholder="Máximo 2 líneas. Aparece debajo del nombre en la tienda." />
 
-            <q-input v-model="producto.descripcion_larga" label="Descripción larga"
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Descripción larga</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('descripcion_larga', producto)" />
+            </div>
+            <q-input v-model="producto.descripcion_larga"
               type="textarea" outlined :rows="7"
-              hint="Descripción completa. Puede incluir HTML básico" />
+              placeholder="Descripción completa del producto. Puede incluir HTML básico." />
           </div>
 
           <!-- Sección 2: Puntos clave -->
@@ -281,9 +333,14 @@
               <div class="s-header__linea" />
             </div>
 
-            <q-input v-model="producto.bullets_superiores" label="Bullets superiores"
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Bullets superiores</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('bullets_superiores', producto)" />
+            </div>
+            <q-input v-model="producto.bullets_superiores"
               type="textarea" outlined :rows="5"
-              hint="Un punto por línea. Se muestran destacados en la parte superior de la página del producto" />
+              placeholder="Un punto por línea. Se muestran destacados en la parte superior de la página del producto." />
           </div>
 
           <!-- Sección 3: Origen (productor, lugar, cómo se hace) -->
@@ -296,9 +353,14 @@
               <div class="s-header__linea" />
             </div>
 
-            <q-input v-model="producto.origen_macro" label="Origen del producto"
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Origen del producto</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('origen_macro', producto)" />
+            </div>
+            <q-input v-model="producto.origen_macro"
               type="textarea" outlined :rows="4" class="q-mb-md"
-              hint="De dónde viene, cómo se obtiene" />
+              placeholder="De dónde viene, cómo se obtiene, región de origen." />
 
             <div class="row q-col-gutter-md q-mb-md">
               <div class="col-12 col-md-6">
@@ -343,12 +405,23 @@
               <div class="s-header__linea" />
             </div>
 
-            <q-input v-model="producto.ingredientes_resumen" label="Ingredientes / Resumen"
-              type="textarea" outlined :rows="4" class="q-mb-md" />
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Ingredientes / Resumen</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('ingredientes_resumen', producto)" />
+            </div>
+            <q-input v-model="producto.ingredientes_resumen"
+              type="textarea" outlined :rows="4" class="q-mb-md"
+              placeholder="Ingredientes, alérgenos y notas de etiquetado." />
 
-            <q-input v-model="producto.tabla_nutricional" label="Tabla nutricional"
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Tabla nutricional</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('tabla_nutricional', producto)" />
+            </div>
+            <q-input v-model="producto.tabla_nutricional"
               type="textarea" outlined :rows="6"
-              hint="Texto estructurado o HTML de la tabla" />
+              placeholder="Texto estructurado o HTML de la tabla nutricional." />
           </div>
 
           <!-- Sección 5: Propuesta de valor -->
@@ -361,56 +434,74 @@
               <div class="s-header__linea" />
             </div>
 
-            <q-input v-model="producto.problema_real" label="Problema real que resuelve"
-              type="textarea" outlined :rows="4" class="q-mb-md" />
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Problema real que resuelve</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('problema_real', producto)" />
+            </div>
+            <q-input v-model="producto.problema_real"
+              type="textarea" outlined :rows="4" class="q-mb-md"
+              placeholder="¿Qué necesidad o dolor del cliente resuelve este producto?" />
 
-            <q-input v-model="producto.beneficios_explicados" label="Beneficios explicados"
-              type="textarea" outlined :rows="4" class="q-mb-md" />
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Beneficios explicados</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('beneficios_explicados', producto)" />
+            </div>
+            <q-input v-model="producto.beneficios_explicados"
+              type="textarea" outlined :rows="4" class="q-mb-md"
+              placeholder="Beneficios concretos del producto, ordenados por impacto." />
 
-            <q-input v-model="producto.experiencia_y_modo_de_uso" label="Experiencia y modo de uso"
-              type="textarea" outlined :rows="4" />
+            <div class="row items-center justify-between q-mb-xs">
+              <div class="text-caption text-grey-7">Experiencia y modo de uso</div>
+              <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+                label="Sugerir IA" @click="solicitarAsistenciaIA('experiencia_y_modo_de_uso', producto)" />
+            </div>
+            <q-input v-model="producto.experiencia_y_modo_de_uso"
+              type="textarea" outlined :rows="4"
+              placeholder="Cómo se usa, en qué momentos y con qué combinarlo." />
           </div>
 
         </div>
 
         <!-- ── TAB: GALERIA ───────────────────────────────── -->
         <div v-show="tabActiva === 'galeria'">
-          <div class="card-origenes q-pa-lg">
 
-            <!-- Input oculto: el botón "Agregar" lo dispara vía abrirSubida() -->
-            <input
-              ref="inputArchivo"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
-              multiple
-              style="display:none"
-              @change="procesarArchivos($event.target.files)"
-            />
+          <!-- Input oculto compartido para todas las subidas de galería -->
+          <input
+            ref="inputArchivo"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+            multiple
+            style="display:none"
+            @change="procesarArchivos($event.target.files)"
+          />
 
+          <!-- Sección 1: Galería -->
+          <div class="card-origenes q-pa-lg q-mb-md">
             <div class="galeria__cabecera q-mb-lg">
               <div>
-                <div class="s-header__titulo" style="font-size:14px">Galería de archivos</div>
+                <div class="s-header__titulo" style="font-size:14px">Galería</div>
                 <div class="text-caption text-grey-5 q-mt-xs">
-                  Arrastra para reordenar · El primero marcado como Principal es la portada
+                  Imágenes principales del producto · Arrastra para reordenar
                 </div>
               </div>
               <q-btn unelevated size="sm" icon="upload" label="Agregar"
-                color="primary" @click="abrirSubida" />
+                color="primary" @click="abrirSubidaSeccion('Galeria')" />
             </div>
 
-            <div v-if="multimedia.length === 0" class="galeria__vacia">
+            <div v-if="fotosGaleria.length === 0" class="galeria__vacia">
               <q-icon name="photo_library" size="56px" color="grey-3" />
               <div class="q-mt-sm text-grey-5 text-caption">
-                Sin archivos. Agrega imágenes o videos del producto.
+                Sin imágenes de galería. Agrega imágenes del producto.
               </div>
             </div>
 
             <div v-else class="galeria__grid">
               <div
-                v-for="archivo in multimedia"
+                v-for="archivo in fotosGaleria"
                 :key="archivo.uid"
                 class="galeria__item"
-                :class="{ 'galeria__item--principal': archivo.uso === 'Portada' }"
                 draggable="true"
                 @dragstart="alIniciarArrastre($event, archivo)"
                 @dragover.prevent
@@ -422,14 +513,6 @@
                   <div v-else class="galeria__preview-icono">
                     <q-icon name="videocam" size="32px" color="grey-5" />
                   </div>
-                  <div v-if="archivo.uso === 'Portada'" class="galeria__badge-principal">
-                    ★ Portada
-                  </div>
-                </div>
-                <div class="galeria__uso q-pa-sm">
-                  <q-select v-model="archivo.uso" :options="opcionesUso"
-                    label="Uso" outlined dense emit-value map-options
-                    @update:model-value="actualizarUsoArchivo(archivo)" />
                 </div>
                 <div class="galeria__acciones">
                   <q-icon name="drag_indicator" class="cursor-move" color="grey-4" size="20px" />
@@ -438,8 +521,54 @@
                 </div>
               </div>
             </div>
-
           </div>
+
+          <!-- Sección 2: Galería secundaria -->
+          <div class="card-origenes q-pa-lg">
+            <div class="galeria__cabecera q-mb-lg">
+              <div>
+                <div class="s-header__titulo" style="font-size:14px">Galería secundaria</div>
+                <div class="text-caption text-grey-5 q-mt-xs">
+                  Fotos adicionales del producto · Arrastra para reordenar
+                </div>
+              </div>
+              <q-btn unelevated size="sm" icon="upload" label="Agregar"
+                color="primary" @click="abrirSubidaSeccion('Galeria secundaria')" />
+            </div>
+
+            <div v-if="fotosGaleriaSecundaria.length === 0" class="galeria__vacia">
+              <q-icon name="photo_library" size="56px" color="grey-3" />
+              <div class="q-mt-sm text-grey-5 text-caption">
+                Sin imágenes secundarias.
+              </div>
+            </div>
+
+            <div v-else class="galeria__grid">
+              <div
+                v-for="archivo in fotosGaleriaSecundaria"
+                :key="archivo.uid"
+                class="galeria__item"
+                draggable="true"
+                @dragstart="alIniciarArrastre($event, archivo)"
+                @dragover.prevent
+                @drop="alSoltar($event, archivo)"
+              >
+                <div class="galeria__preview">
+                  <img v-if="archivo.tipo_archivo === 'imagen'"
+                    :src="urlArchivo(archivo)" :alt="archivo.uso" />
+                  <div v-else class="galeria__preview-icono">
+                    <q-icon name="videocam" size="32px" color="grey-5" />
+                  </div>
+                </div>
+                <div class="galeria__acciones">
+                  <q-icon name="drag_indicator" class="cursor-move" color="grey-4" size="20px" />
+                  <q-btn flat round dense size="sm" icon="delete" color="negative"
+                    @click="eliminarArchivo(archivo)" />
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- ── TAB: AUDITORÍA ────────────────────────────────── -->
@@ -544,10 +673,10 @@
       </div>
     </div>
 
-    <q-dialog v-model="popupVariacionAbierto" persistent>
+    <q-dialog v-model="popupVariacionAbierto" persistent @hide="limpiarArchivoVariacion">
       <q-card class="popup-variacion">
         <q-card-section class="row items-center justify-between q-pb-sm">
-          <div class="text-subtitle1 text-weight-bold">Popup variación</div>
+          <div class="text-subtitle1 text-weight-bold">Nueva Variación</div>
           <q-btn icon="close" flat round dense color="grey-6" @click="popupVariacionAbierto = false" />
         </q-card-section>
 
@@ -565,29 +694,37 @@
             @filter="filtrarMaestrosCosto"
           />
 
-          <q-input v-model="variacionDraft.nombre" label="Nombre variación *" outlined dense class="q-mb-sm" />
+          <div class="row items-center justify-between q-mb-xs">
+            <div class="text-caption text-weight-medium">Nombre variación *</div>
+            <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+              label="Sugerir IA"
+              @click="solicitarAsistenciaIA('nombre', variacionDraft)"
+            />
+          </div>
+          <q-input v-model="variacionDraft.nombre" outlined dense class="q-mb-sm"
+            placeholder="Ej: Miel Silvestre 500g" />
 
           <div class="row items-center justify-between q-mb-xs">
-            <div class="text-caption text-weight-medium">nombre_atributo_variacion</div>
-            <q-btn
-              flat dense no-caps icon="auto_awesome"
-              color="deep-orange-8" label="✨ Sugerir Asistencia IA"
+            <div class="text-caption text-weight-medium">Tipo de atributo</div>
+            <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+              label="Sugerir IA"
               @click="solicitarAsistenciaIA('nombre_atributo_variacion', variacionDraft)"
             />
           </div>
-          <q-input v-model="variacionDraft.nombre_atributo_variacion" outlined dense class="q-mb-sm" />
+          <q-input v-model="variacionDraft.nombre_atributo_variacion" outlined dense class="q-mb-sm"
+            placeholder="Ej: Peso, Tamaño, Sabor" />
 
           <div class="row items-center justify-between q-mb-xs">
-            <div class="text-caption text-weight-medium">valor_atributo_variacion</div>
-            <q-btn
-              flat dense no-caps icon="auto_awesome"
-              color="deep-orange-8" label="✨ Sugerir Asistencia IA"
+            <div class="text-caption text-weight-medium">Valor del atributo</div>
+            <q-btn flat dense no-caps size="xs" icon="auto_awesome" color="grey-6"
+              label="Sugerir IA"
               @click="solicitarAsistenciaIA('valor_atributo_variacion', variacionDraft)"
             />
           </div>
-          <q-input v-model="variacionDraft.valor_atributo_variacion" outlined dense class="q-mb-md" />
+          <q-input v-model="variacionDraft.valor_atributo_variacion" outlined dense class="q-mb-md"
+            placeholder="Ej: 500g, Grande, Naranja" />
 
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">Auditoria</div>
+          <div class="text-caption text-weight-medium text-grey-7 q-mb-sm">Precios</div>
           <div class="row q-col-gutter-sm">
             <div class="col-12 col-md-6">
               <q-input v-model.number="variacionDraft.precio_regular" label="precio_regular" outlined dense type="number" />
@@ -602,6 +739,33 @@
               <q-input v-model="variacionDraft.fecha_oferta_hasta" label="fecha_oferta_hasta" outlined dense type="date" />
             </div>
           </div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <div class="text-caption text-weight-medium q-mb-sm">Imagen de la variación</div>
+          <div v-if="!producto.uid" class="text-caption text-grey-5 q-mb-sm">
+            Guarda el producto maestro primero para poder adjuntar imagen.
+          </div>
+          <template v-else>
+            <div v-if="previewArchivoVariacion" class="q-mb-sm">
+              <img :src="previewArchivoVariacion"
+                style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;display:block;" />
+              <q-btn flat dense no-caps size="xs" icon="close" label="Quitar imagen" color="negative"
+                class="q-mt-xs" @click="limpiarArchivoVariacion" />
+            </div>
+            <div v-else class="galeria__vacia cursor-pointer" style="padding:20px 0;"
+              @click="inputArchivoVariacion?.click()">
+              <q-icon name="add_photo_alternate" size="32px" color="grey-3" />
+              <div class="q-mt-xs text-grey-5 text-caption">Clic para adjuntar imagen</div>
+            </div>
+            <input
+              ref="inputArchivoVariacion"
+              type="file"
+              style="display:none"
+              accept="image/jpeg,image/png,image/webp"
+              @change="seleccionarArchivoVariacion($event.target.files)"
+            />
+          </template>
         </q-card-section>
 
         <q-card-actions align="right">
@@ -678,7 +842,13 @@ const producto = ref({
 const multimedia        = ref([])
 const variaciones       = ref([])
 const archivoEnArrastre = ref(null)
-const inputArchivo      = ref(null)   // referencia al <input type="file"> oculto
+const inputArchivo      = ref(null)           // input file compartido de galería
+const usoSubidaActual   = ref('Galeria')      // uso a enviar en la próxima subida
+
+// Popup variación — imagen pendiente
+const inputArchivoVariacion    = ref(null)
+const archivoVariacionPendiente = ref(null)
+const previewArchivoVariacion  = ref('')
 const opcionesMaestrosCosto = ref([])
 const cargandoMaestrosCosto = ref(false)
 const ultimoNombreAutocompletado = ref('')
@@ -702,6 +872,11 @@ const variacionDraft = ref({
 
 const esMaestro = computed(() => !producto.value.producto_principal_variacion)
 
+// Vistas filtradas de multimedia por sección
+const fotoPrincipal          = computed(() => multimedia.value.find(m => m.uso === 'Principal') || null)
+const fotosGaleria           = computed(() => multimedia.value.filter(m => m.uso === 'Galeria'))
+const fotosGaleriaSecundaria = computed(() => multimedia.value.filter(m => m.uso === 'Galeria secundaria'))
+
 const uidMaestroCorto = computed(() => {
   const uid = producto.value.producto_principal_variacion
   return uid ? `${uid.substring(0, 12)}...` : ''
@@ -717,14 +892,6 @@ const opcionesPublicacion = [
   { label: 'Publicado', value: 'publicado' },
   { label: 'Privado',   value: 'privado' },
   { label: 'Pendiente', value: 'pendiente' }
-]
-
-const opcionesUso = [
-  { label: 'Principal (Portada)', value: 'Principal' },
-  { label: 'Galería',             value: 'Galeria' },
-  { label: 'Variación',           value: 'Variacion' },
-  { label: 'Galería secundaria',  value: 'Galeria secundaria' },
-  { label: 'Otro',                value: 'Otro' }
 ]
 
 function mapearMaestrosCosto (items = []) {
@@ -867,9 +1034,17 @@ function cancelar () { router.back() }
 function irAVariacion (uid) { router.push({ name: 'editar-producto', params: { uid } }) }
 
 function abrirPopupVariacion () {
+  const uidPadre     = producto.value.uid_producto_padre || ''
+  const opcionCostos = opcionesMaestrosCosto.value.find(op => op.value === uidPadre)
+  // Pre-llenar nombre: preferimos el nombre de costos, fallback al grupo/catálogo o nombre del producto
+  const nombreSugerido = opcionCostos?.nombre
+    || producto.value.nombre_grupo_catalogo
+    || producto.value.nombre
+    || ''
+
   variacionDraft.value = {
-    uid_producto_padre: producto.value.uid_producto_padre || '',
-    nombre: '',
+    uid_producto_padre: uidPadre,
+    nombre: nombreSugerido,
     nombre_atributo_variacion: '',
     valor_atributo_variacion: '',
     precio_regular: null,
@@ -877,6 +1052,7 @@ function abrirPopupVariacion () {
     fecha_oferta_desde: null,
     fecha_oferta_hasta: null
   }
+  limpiarArchivoVariacion()
   popupVariacionAbierto.value = true
 }
 
@@ -901,7 +1077,22 @@ async function guardarVariacionExpress () {
     }
     const variacionGuardada = await llamar('comercial', 'productos', 'guardar_producto', payload)
     variaciones.value.unshift(variacionGuardada)
+
+    // Si hay imagen pendiente, subirla al maestro con uso='Variacion'
+    if (archivoVariacionPendiente.value && producto.value.uid) {
+      const datosImagen = {
+        uid_producto:    producto.value.uid,
+        empresa:         producto.value.empresa,
+        usuario_creador: producto.value.usuario_creador || 'sistema',
+        orden:           multimedia.value.length + 1,
+        uso:             'Variacion'
+      }
+      const registro = await subirArchivo('comercial', 'productos', 'subir_multimedia', archivoVariacionPendiente.value, datosImagen)
+      multimedia.value.push(registro)
+    }
+
     popupVariacionAbierto.value = false
+    limpiarArchivoVariacion()
     $q.notify({ type: 'positive', message: 'Variación guardada correctamente', icon: 'check_circle' })
   } catch (error) {
     $q.notify({ type: 'negative', message: error.message, icon: 'error' })
@@ -913,23 +1104,193 @@ async function guardarVariacionExpress () {
 async function solicitarAsistenciaIA (campo, contexto = null) {
   try {
     const base = (contexto && '__v_isRef' in contexto) ? contexto.value : (contexto || producto.value)
-    const valorOriginal = base[campo] || ''
+    const valorActual = base[campo] || ''
+
+    // Información del producto disponible
+    const nombreProducto = producto.value.nombre || producto.value.nombre_grupo_catalogo || ''
+    const nombreGrupo    = producto.value.nombre_grupo_catalogo || ''
+
+    // Nombre del producto de costos seleccionado
+    const uidPadreActual = base.uid_producto_padre || producto.value.uid_producto_padre || ''
+    const opcionCostos   = opcionesMaestrosCosto.value.find(op => op.value === uidPadreActual)
+    const nombreCostos   = opcionCostos?.nombre || ''
+
+    // ── Construir instrucción enriquecida según el campo ──────────
+    let instruccion = ''
+
+    if (campo === 'nombre' && base === variacionDraft.value) {
+      instruccion = `Eres un especialista en naming de productos para e-commerce colombiano.
+Asigna el nombre comercial más apropiado para esta VARIACIÓN del producto.
+- Producto de costos (nombre exacto en sistema): "${nombreCostos}"
+- Grupo / catálogo del producto maestro: "${nombreGrupo}"
+- Nombre del producto maestro: "${nombreProducto}"
+- Valor actual del campo (puede estar vacío): "${valorActual}"
+
+Regla: el nombre debe incluir el nombre del grupo Y la presentación/tamaño extraída del nombre de costos.
+Ejemplo 1: costos="MIEL SILVESTRE 500G", grupo="Miel Silvestre" → "Miel Silvestre Pura 500g"
+Ejemplo 2: costos="CHOCOBEETAL OS 230 GRS", grupo="Chocobeetal Artesanal" → "Chocobeetal Artesanal 230g"
+Devuelve SOLO el nombre sugerido, sin explicaciones ni comillas.`
+    } else if (campo === 'nombre_grupo_catalogo') {
+      instruccion = `Eres un especialista en naming para tiendas online colombianas.
+Sugiere el nombre del GRUPO/CATÁLOGO para este producto. Este nombre agrupa todas sus variaciones en la tienda.
+- Producto de costos: "${nombreCostos}"
+- Nombre actual del producto: "${producto.value.nombre || ''}"
+- Valor actual del campo: "${valorActual}"
+
+El nombre del catálogo debe ser corto (2-4 palabras), atractivo y en español.
+Ejemplo 1: costos="MIEL SILVESTRE" → "Miel Silvestre"
+Ejemplo 2: costos="CHOCOBEETAL OS 230 GRS" → "Chocobeetal Artesanal"
+Devuelve SOLO el nombre, sin explicaciones.`
+    } else if (campo === 'nombre') {
+      instruccion = `Eres un especialista en naming para tiendas online colombianas.
+Sugiere el nombre comercial completo para este PRODUCTO MAESTRO (incluye presentación si aplica).
+- Producto de costos: "${nombreCostos}"
+- Grupo / catálogo: "${nombreGrupo}"
+- Valor actual del campo: "${valorActual}"
+
+Ejemplo: costos="MIEL SILVESTRE 500G", grupo="Miel Silvestre" → "Miel Silvestre Pura 500g"
+Devuelve SOLO el nombre, sin explicaciones.`
+    } else if (campo === 'descripcion_corta') {
+      instruccion = `Eres un copywriter especializado en productos naturales y artesanales colombianos para e-commerce.
+Escribe una DESCRIPCIÓN CORTA (máximo 2 líneas / 150 caracteres) para este producto. Aparece debajo del nombre en la tienda.
+- Producto: "${nombreProducto}"
+- Grupo / catálogo: "${nombreGrupo}"
+- Descripción corta actual (reescribir o mejorar si hay contenido): "${valorActual}"
+- Descripción larga disponible: "${producto.value.descripcion_larga || 'No disponible'}"
+- Ingredientes: "${producto.value.ingredientes_resumen || 'No disponible'}"
+
+Ejemplo para "Miel Silvestre 500g": "Miel 100% pura cosechada en colmenas silvestres de los Andes colombianos. Sin procesar, sin aditivos."
+Devuelve SOLO la descripción corta.`
+    } else if (campo === 'descripcion_larga') {
+      instruccion = `Eres un copywriter especializado en productos naturales y artesanales colombianos para e-commerce.
+Escribe una DESCRIPCIÓN LARGA completa y atractiva para la página del producto (entre 100 y 300 palabras).
+- Producto: "${nombreProducto}"
+- Grupo / catálogo: "${nombreGrupo}"
+- Descripción corta: "${producto.value.descripcion_corta || 'No disponible'}"
+- Ingredientes: "${producto.value.ingredientes_resumen || 'No disponible'}"
+- Productor: "${producto.value.productor || 'No disponible'}"
+- Origen: "${producto.value.origen_macro || 'No disponible'}"
+- Descripción larga actual (mejorar si hay contenido): "${valorActual}"
+
+Menciona el origen, los beneficios y la forma de uso. Usa tono cálido, auténtico y cercano.
+Devuelve SOLO la descripción larga.`
+    } else if (campo === 'bullets_superiores') {
+      instruccion = `Eres un copywriter especializado en productos naturales colombianos.
+Escribe los PUNTOS CLAVE de venta de este producto (aparecen destacados en la parte superior de la ficha).
+- Producto: "${nombreProducto}"
+- Descripción corta: "${producto.value.descripcion_corta || 'No disponible'}"
+- Ingredientes: "${producto.value.ingredientes_resumen || 'No disponible'}"
+- Contenido actual (mejorar si hay): "${valorActual}"
+
+Formato: máximo 5 puntos, un punto por línea, cada uno empieza con "•".
+Ejemplo:
+• 100% natural, sin conservantes ni aditivos
+• Cosechada artesanalmente en los Andes colombianos
+• Rica en enzimas, antioxidantes y propiedades antimicrobianas
+Devuelve SOLO los bullets, uno por línea.`
+    } else if (campo === 'origen_macro') {
+      instruccion = `Eres un especialista en trazabilidad de productos naturales colombianos.
+Describe el ORIGEN de este producto de manera atractiva para el consumidor.
+- Producto: "${nombreProducto}"
+- Productor: "${producto.value.productor || 'No disponible'}"
+- Ubicación del productor: "${producto.value.ubicacion_productor || 'No disponible'}"
+- Contenido actual (mejorar si hay): "${valorActual}"
+
+Ejemplo: "Proveniente de colmenas silvestres ubicadas en el bosque húmedo andino antioqueño a 1.800 msnm. Cosechada manualmente siguiendo prácticas apícolas tradicionales sin intervención industrial."
+Devuelve SOLO el texto de origen.`
+    } else if (campo === 'ingredientes_resumen') {
+      instruccion = `Eres un especialista en etiquetado de alimentos colombianos (normas INVIMA).
+Escribe el RESUMEN DE INGREDIENTES para la etiqueta de este producto.
+- Producto: "${nombreProducto}"
+- Descripción: "${producto.value.descripcion_corta || 'No disponible'}"
+- Contenido actual (mejorar si hay): "${valorActual}"
+
+Ejemplo para miel: "Ingredientes: Miel de abejas 100% pura.\nNo contiene conservantes, colorantes ni saborizantes artificiales.\n* La miel pura puede cristalizarse — calentar a baño maría para recuperar su estado líquido."
+Devuelve SOLO el texto de ingredientes.`
+    } else if (campo === 'tabla_nutricional') {
+      instruccion = `Eres un especialista en nutrición y etiquetado de alimentos colombianos.
+Escribe la TABLA NUTRICIONAL o información nutricional básica de este producto.
+- Producto: "${nombreProducto}"
+- Ingredientes: "${producto.value.ingredientes_resumen || 'No disponible'}"
+- Contenido actual (mejorar si hay): "${valorActual}"
+
+Incluye: tamaño de porción, calorías, grasas, carbohidratos, azúcares y proteínas.
+Formato texto estructurado. Ejemplo para miel (15g): "Porción: 1 cucharada (15g) | Calorías: 46 kcal | Grasas totales: 0g | Carbohidratos: 12g | Azúcares: 12g | Proteínas: 0g"
+Devuelve SOLO la tabla nutricional.`
+    } else if (campo === 'problema_real') {
+      instruccion = `Eres un especialista en marketing de productos naturales y saludables.
+Describe el PROBLEMA REAL que este producto resuelve para el consumidor.
+- Producto: "${nombreProducto}"
+- Descripción: "${producto.value.descripcion_corta || 'No disponible'}"
+- Contenido actual (mejorar si hay): "${valorActual}"
+
+Ejemplo para miel: "Muchas personas buscan endulzantes naturales sin efectos negativos del azúcar refinada. La miel silvestre endulza de forma natural mientras aporta enzimas, antioxidantes y propiedades antimicrobianas."
+Devuelve SOLO el texto (2-4 líneas).`
+    } else if (campo === 'beneficios_explicados') {
+      instruccion = `Eres un especialista en marketing de productos naturales colombianos.
+Explica los BENEFICIOS PRINCIPALES de este producto de forma clara y convincente.
+- Producto: "${nombreProducto}"
+- Ingredientes: "${producto.value.ingredientes_resumen || 'No disponible'}"
+- Contenido actual (mejorar si hay): "${valorActual}"
+
+Escribe entre 3 y 5 beneficios concretos, ordenados de mayor a menor impacto.
+Ejemplo: "1. Propiedades antimicrobianas naturales que refuerzan el sistema inmune.\n2. Endulzante con bajo índice glucémico comparado con el azúcar refinada.\n3. Rico en antioxidantes que protegen las células del daño oxidativo."
+Devuelve SOLO los beneficios numerados.`
+    } else if (campo === 'experiencia_y_modo_de_uso') {
+      instruccion = `Eres un especialista en comunicación de productos naturales y artesanales.
+Describe la EXPERIENCIA DE USO y cómo se usa este producto.
+- Producto: "${nombreProducto}"
+- Descripción: "${producto.value.descripcion_corta || 'No disponible'}"
+- Contenido actual (mejorar si hay): "${valorActual}"
+
+Incluye: cómo consumirlo, cuándo usarlo, con qué combinarlo. Usa un tono evocador y apetecible.
+Ejemplo: "Disfruta una cucharadita directamente para aprovechar sus propiedades en estado puro. Úsala para endulzar infusiones tibias, yogur natural o como ingrediente en recetas dulces artesanales. Ideal en las mañanas para empezar el día con energía natural."
+Devuelve SOLO el texto de experiencia y modo de uso.`
+    } else if (campo === 'nombre_atributo_variacion') {
+      instruccion = `Eres un especialista en catálogos de productos para e-commerce.
+Sugiere el NOMBRE DEL ATRIBUTO que diferencia esta variación (el tipo de diferenciador).
+- Producto: "${nombreProducto}"
+- Producto de costos (nombre en sistema): "${nombreCostos}"
+- Valor actual del campo: "${valorActual}"
+
+El atributo es la categoría del diferenciador (ej: "Peso", "Tamaño", "Sabor", "Presentación").
+Analiza el nombre del producto de costos para deducirlo.
+Ejemplo 1: costos="MIEL SILVESTRE 500G" → "Peso"
+Ejemplo 2: costos="CHOCOBEETAL OS 230 GRS" → "Peso"
+Ejemplo 3: costos="CAFE TOSTADO SUAVE" → "Tostado"
+Devuelve SOLO el nombre del atributo (1-2 palabras, sin comillas).`
+    } else if (campo === 'valor_atributo_variacion') {
+      instruccion = `Eres un especialista en catálogos de productos para e-commerce.
+Sugiere el VALOR del atributo "${base.nombre_atributo_variacion || 'de esta variación'}" para este producto.
+- Producto: "${nombreProducto}"
+- Producto de costos (nombre en sistema): "${nombreCostos}"
+- Tipo de atributo: "${base.nombre_atributo_variacion || 'no definido aún'}"
+- Valor actual del campo: "${valorActual}"
+
+Extrae el valor del atributo directamente del nombre del producto de costos.
+Ejemplo 1: costos="MIEL SILVESTRE 500G", atributo="Peso" → "500g"
+Ejemplo 2: costos="CHOCOBEETAL OS 230 GRS", atributo="Peso" → "230g"
+Devuelve SOLO el valor (sin unidad si ya está obvia en el contexto).`
+    } else {
+      instruccion = `Sugiere el mejor valor para el campo "${campo}" del producto "${nombreProducto}". Valor actual: "${valorActual}". Devuelve SOLO el valor sugerido.`
+    }
 
     const respuesta = await llamar('comercial', 'asistente', 'sugerir_datos', {
       contexto: {
         campo_peticion: campo,
-        nombre_atributo_variacion: base.nombre_atributo_variacion || '',
-        valor_atributo_variacion: base.valor_atributo_variacion || '',
-        uid_producto_padre_nombre: (producto.value.nombre || '').split('|')[0].trim(),
-        nombre_actual: valorOriginal
+        instruccion,
+        nombre_producto:   nombreProducto,
+        nombre_costos:     nombreCostos,
+        nombre_grupo:      nombreGrupo,
+        valor_actual:      valorActual
       }
     })
 
     if (respuesta?.sugerencia) {
       base[campo] = respuesta.sugerencia
       $q.notify({
-        type: 'asistente',
-        message: respuesta.nota || 'Sugerencia IA aplicada',
+        type: 'positive',
+        message: respuesta.nota || '✨ Sugerencia IA aplicada',
         icon: 'auto_awesome',
         color: 'deep-orange-9',
         timeout: 2500
@@ -946,10 +1307,13 @@ async function solicitarAsistenciaIA (campo, contexto = null) {
 }
 
 function urlArchivo (archivo) {
-  return archivo.url_publica || archivo.archivo_local || ''
+  // El backend devuelve url_publica_calculada (ver skill_multimedia_r2.md §5.3)
+  return archivo.url_publica_calculada || archivo.url_publica || archivo.archivo_local || ''
 }
 
-function abrirSubida () {
+// Abre el input file apuntando a la sección/uso indicado
+function abrirSubidaSeccion (uso) {
+  usoSubidaActual.value = uso
   inputArchivo.value?.click()
 }
 
@@ -963,13 +1327,21 @@ async function procesarArchivos (archivos) {
     return
   }
 
+  const uso = usoSubidaActual.value
+
+  // Si se sube una nueva Principal, mover la anterior a Galeria (solo puede haber una)
+  if (uso === 'Principal' && fotoPrincipal.value) {
+    fotoPrincipal.value.uso = 'Galeria'
+    // TODO: PATCH /api/comercial/multimedia/:uid → uso = 'Galeria'
+  }
+
   for (const archivo of Array.from(archivos)) {
     const datosExtra = {
       uid_producto:    producto.value.uid,
       empresa:         producto.value.empresa,
       usuario_creador: producto.value.usuario_creador || 'sistema',
       orden:           multimedia.value.length + 1,
-      uso:             multimedia.value.length === 0 ? 'Portada' : 'Galeria'
+      uso
     }
     try {
       $q.loading.show({ message: `Subiendo ${archivo.name}…` })
@@ -998,9 +1370,20 @@ function eliminarArchivo (archivo) {
   })
 }
 
-function actualizarUsoArchivo (archivo) {
-  // TODO: PATCH /api/comercial/multimedia/:uid
-  console.log('[Multimedia] Uso actualizado:', archivo.uid, '→', archivo.uso)
+// ── Imagen en popup de variación ─────────────────────────────────
+function seleccionarArchivoVariacion (archivos) {
+  if (!archivos || archivos.length === 0) return
+  const archivo = archivos[0]
+  if (previewArchivoVariacion.value) URL.revokeObjectURL(previewArchivoVariacion.value)
+  archivoVariacionPendiente.value = archivo
+  previewArchivoVariacion.value = URL.createObjectURL(archivo)
+  if (inputArchivoVariacion.value) inputArchivoVariacion.value.value = ''
+}
+
+function limpiarArchivoVariacion () {
+  if (previewArchivoVariacion.value) URL.revokeObjectURL(previewArchivoVariacion.value)
+  archivoVariacionPendiente.value = null
+  previewArchivoVariacion.value = ''
 }
 
 function alIniciarArrastre (evento, archivo) {
@@ -1483,4 +1866,40 @@ onMounted(async () => {
 .mono { font-family: monospace; font-size: 11px; }
 
 .flex-shrink-0 { flex-shrink: 0; }
+
+// ══════════════════════════════════════════════════════════════════
+// FOTO PRINCIPAL (card en pestaña General)
+// ══════════════════════════════════════════════════════════════════
+.foto-principal {
+  &__preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #F0EDE8;
+    max-height: 300px;
+
+    img {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  &__dropzone {
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    &:hover {
+      border-color: #E8750A;
+      background: rgba(232, 117, 10, 0.03);
+    }
+  }
+}
 </style>

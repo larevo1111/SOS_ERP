@@ -19,11 +19,23 @@ Para mantener la estética 5S y la coherencia de datos, la IA debe seguir estas 
 | `nombre_grupo_catalogo` | Nombre genérico de familia | Miel Silvestre |
 | `valor_atributo_variacion` | Normalización de unidades | 500 grs -> 500g |
 
-## 3. Manejo de Contexto
+## 3. Síntesis y Diseño de Contexto (Regla Universal)
+Para que la IA genere sugerencias útiles, precisas y relevantes en cualquier campo del sistema (nombres, descripciones, variaciones, etc.), el contexto enviado al backend y el prompt allí construido deben seguir este patrón estructurado:
+
+### 3.1. Responsabilidad del Frontend (Envío de Datos)
 Al solicitar asistencia, siempre se debe enviar el contexto completo disponible:
-- `uid_producto_padre_nombre`: El nombre original del producto de costos.
-- `nombre_actual`: Lo que el usuario ya escribió.
-- `campo_peticion`: Identificador del campo para que la IA sepa qué regla aplicar.
+- **Origen:** De dónde viene el dato (ej: `producto_costos: "CHOCOBEETAL OS 230 GRS"`).
+- **Jerarquía y Relaciones:** Los datos de los que depende (ej: Si es una variación, enviar el `nombre_grupo_catalogo` o `nombre_padre`).
+- **Contenido Actual (Retroalimentación):** OBLIGATORIO. En los campos de contenido (como Descripción Corta), siempre enviar lo que el usuario *ya ha escrito*.
+- **Campo de Petición:** Identificador del campo (`campo_peticion`) para que el backend sepa qué instrucción aplicar.
+
+### 3.2. Responsabilidad del Backend (Diseño del Prompt)
+El prompt que se envía a Gemini debe estar **contextualizado para cada caso específico** pero generalizable siguiendo estas directrices:
+
+1. **Definición Clara del Objetivo:** Explicar exactamente qué hacer (ej: "Asigna el nombre más apropiado para esta variación, partiendo del producto de costos...").
+2. **Uso de Datos Dinámicos:** Inyectar en el prompt los valores de Origen y Jerarquía enviados por el frontend ("...que aplica para el producto con catálogo X...").
+3. **Manejo del Contenido Actual:** Instruir a la IA a que procese y acomode el texto que el usuario ya digitó. Ejemplo de instrucción interna: *"Lee el contenido actual descrito. Si existe, tómalo, acomódalo, mejóralo y basate en todo ello. Si no hay nada adentro, constrúyelo desde cero basándote en el nombre del producto y los campos disponibles, o busca en tus propios conocimientos"*.
+4. **Ejemplos (Few-Shot Prompting):** Siempre, **SIN EXCEPCIÓN**, proveer ejemplos para la IA dentro del prompt. Ejemplo: "Si el producto base es 'CHOCOBEETAL OS 230 GRS', el catálogo es 'Chocobeetal', devuelve algo lógico como 'Chocobeetal 230g'".
 
 > [!IMPORTANT]
 > **Contextos Incompletos:** Si el frontend no tiene un producto base seleccionado en el momento en que se solicita la IA, el servidor se encargará de indicarle a Gemini que devuelva una `nota` amigable para el usuario solicitándole que seleccione primero el producto base, previniendo así "alucinaciones" o errores de JSON no estructurado. Además, el backend requiere `responseMimeType: application/json` para asegurar que Gemini responda en formato nativo estricto.

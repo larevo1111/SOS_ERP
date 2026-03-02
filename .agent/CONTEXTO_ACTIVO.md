@@ -8,50 +8,38 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Módulo Comercial — Galería de Productos (Siguiente tarea)
-**Fase:** Patrón 3 Vistas implementado. Galería pendiente de reorganización por secciones.
-**Última tarea completada:** AntiGravity: Implementación patrón 3 vistas (Listado, Detalle, Formulario), corrección de bugs críticos de BD/multimedia, actualización de skills y manifiesto. Git push commit `91b5f3a`.
-**Madrina a cargo:** AntiGravity / Claude (siguiente chat)
-**Próximo paso:** Reorganizar la galería del `FormularioProducto.vue` en secciones según el campo `uso`. Ver sección "Tarea pendiente" abajo.
+**Módulo en construcción:** Módulo Comercial — UX de Vistas de Producto
+**Fase:** Ronda de mejoras UX completada. Pendiente: verificación visual y despliegue.
+**Última tarea completada:** Claude Code: DetalleProducto con tabs+lightbox+hero, CatalogoProductos con thumbnail, contextos IA enriquecidos por campo, pre-fill nombre variación, IA en todos los campos de contenido.
+**Madrina a cargo:** Santi (verificación visual pendiente)
+**Próximo paso:** Verificar visualmente en `http://localhost:5173` y hacer git push + despliegue si todo OK.
 **Fecha de última actualización:** 2026-03-02
 
 ---
 
-## ⚡ TAREA INMEDIATA PARA EL PRÓXIMO AGENTE
+## ✅ TAREA COMPLETADA (2026-03-02)
 
-### Reorganizar Galería del Formulario de Producto por Secciones de `uso`
+### Galería reorganizada por secciones de `uso` — `FormularioProducto.vue`
 
-**Contexto:** La tabla `com_productos_multimedia` tiene el campo `uso` con estos valores:
-`ENUM('Principal','Galeria','Variacion','Galeria secundaria','Otro')`
+**Implementado por:** Claude Code
 
-**Lo que existe hoy:** La pestaña "Galería" del `FormularioProducto.vue` muestra todos los archivos mezclados en una sola sección, sin separar por tipo de `uso`. El botón "Agregar" sube con `uso='Galeria'` como default.
+**Cambios realizados en `erp/frontend/src/modulos/comercial/FormularioProducto.vue`:**
 
-**Lo que debe existir** (según diseño de Santi):
-
-| Ubicación en la UI | Sección | `uso` a enviar al API |
+| Sección de la UI | `uso` | Estado |
 |---|---|---|
-| **Pestaña General** (ya existe) | Zona/card para foto principal del producto | `Principal` |
-| **Popup de Variación** (ya existe el popup) | Campo de imagen de la variación | `Variacion` |
-| **Pestaña Galería** → Sección 1 | "Galería" — imágenes principales del producto | `Galeria` |
-| **Pestaña Galería** → Sección 2 | "Galería Secundaria" — fotos adicionales | `Galeria secundaria` |
+| **Pestaña General** → card Foto Principal | `Principal` | ✅ Implementado |
+| **Popup de Variación** → zona imagen | `Variacion` | ✅ Implementado |
+| **Pestaña Galería** → Sección 1 (Galería) | `Galeria` | ✅ Implementado |
+| **Pestaña Galería** → Sección 2 (Galería secundaria) | `Galeria secundaria` | ✅ Implementado |
 
-**Reglas de implementación:**
-1. Verificar primero con `DESCRIBE com_productos_multimedia;` antes de tocar el backend
-2. Al cargar el producto, filtrar multimedia por `uso` para mostrarla en la sección correcta
-3. Al subir un archivo, enviar el `uso` correcto según la sección desde donde se hace el upload
-4. La restricción "guardar primero" aplica igual en todas las secciones (ver `skill_multimedia_r2.md`)
-5. En pestaña General, mostrar la imagen `Principal` existente si existe, o un dropzone si no hay
-6. Si se sube una nueva `Principal`, el sistema debe cambiar la anterior a `Galeria` (solo puede haber UNA `Principal` por producto)
+**Bugs corregidos en el proceso:**
+- `'Portada'` → `'Principal'` en `procesarArchivos` (valor incorrecto no existía en ENUM)
+- `urlArchivo()` ahora usa `url_publica_calculada` según `skill_multimedia_r2.md §5.3`
 
-**Archivos a modificar:**
-- `erp/frontend/src/modulos/comercial/FormularioProducto.vue` → añadir secciones por uso en pestaña Galería y card en General
-- `erp/modulos/comercial/casos_de_uso/SubirMultimedia.php` → ya correcto con columnas reales
-- No tocar el schema de BD
-
-**Skills de referencia obligatorios:**
-- `skill_multimedia_r2.md` — schema real y template de INSERT
-- `skill_creacion_formularios.md` — convenciones de formularios Quasar
-- `MANIFESTO.md §6.11` — analizar BD ANTES de codificar
+**TODO pendientes en el código (no son bloqueantes):**
+- `PATCH /api/comercial/multimedia/:uid` para persistir cambio de `uso` al reemplazar Principal
+- `DELETE /api/comercial/multimedia/:uid` para eliminar archivo de R2 al borrar
+- `PATCH /api/comercial/multimedia/reordenar` para persistir orden arrastrado
 
 ---
 
@@ -100,7 +88,12 @@
 | 2026-03-02 | Nuevos skills: skill_multimedia_r2, skill_vista_detalle, skill_vista_listado | AntiGravity | ✅ Completado |
 | 2026-03-02 | Manifesto actualizado: §6.11 BD-Primero, §6.12 Filosofía Almacenamiento, §6.5.2 3 Vistas | AntiGravity | ✅ Completado |
 | 2026-03-02 | Git push commit 91b5f3a (75 archivos) | AntiGravity | ✅ Completado |
-| 2026-03-02 | **[PENDIENTE]** Galería por secciones en FormularioProducto | — | 🔲 Pendiente |
+| 2026-03-02 | Galería por secciones en FormularioProducto (Principal, Galería, Galería sec., Variación) | Claude Code | ✅ Completado |
+| 2026-03-02 | Síntesis y actualización de directivas de contexto IA en skill_agente_integrado_ia_erp.md | AntiGravity | ✅ Completado |
+| 2026-03-02 | ListarProductos.php: agregar foto_principal via subquery | Claude Code | ✅ Completado |
+| 2026-03-02 | DetalleProducto.vue: reescritura completa con tabs, hero image y lightbox | Claude Code | ✅ Completado |
+| 2026-03-02 | CatalogoProductos.vue: columna de thumbnail foto principal | Claude Code | ✅ Completado |
+| 2026-03-02 | FormularioProducto.vue: pre-fill nombre variación, contextos IA por campo, IA en contenido | Claude Code | ✅ Completado |
 
 ---
 

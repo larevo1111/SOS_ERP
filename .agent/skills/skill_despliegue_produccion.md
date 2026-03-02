@@ -60,17 +60,32 @@ git push
 ```
 **Regla:** Solo incluir la carpeta `dist` cuando sea estrictamente necesario para un despliegue a producción.
 
-### SSH git pull se queda colgado / timeout
-**Causa:** El `git pull` en Hostinger tarda si hay muchos archivos o si la conexión SSH tiene timeout bajo configurado.
-**Soluciones:**
-1. Esperar 2-3 minutos: si hay muchos archivos, es normal.
-2. Si cae por timeout, agregar a `~/.ssh/config`:
+### SSH `git pull` se queda colgado PERMANENTEMENTE (Bloqueo por conflicto remoto)
+**Causa REAL:** El servidor de producción (`Hostinger`) tiene archivos con modificaciones locales no guardadas (frecuentemente `erp/base_datos/sos_erp_sync.sql` modificado por un script o por entrar directamente).
+Cuando se ejecuta `git pull` a través de SSH de manera automatizada, Git detecta el conflicto y espera una decisión del usuario (abriendo un prompt interactivo), pero como estamos ejecutando un comando de una sola línea sin terminal interactiva, Git se queda trabado eternamente esperando una respuesta que nunca llegará.
+
+**Diagnóstico:**
+Para comprobar si este es el caso, ejecuta en terminal local:
+```bash
+ssh hostinger_erp "cd ~/domains/oscomunidad.com/public_html/erp && git status"
+```
+Si ves `modified: erp/base_datos/...` u otro archivo, confírmalo: el pull está bloqueado por conflicto.
+
+**Solución Fuerte (Drop remote local changes):**
+Para forzar a que el servidor tome exactamente la copia de GitHub y deseche cualquier cambio local, no uses `git pull`, usa un reset duro:
+```bash
+ssh hostinger_erp "cd ~/domains/oscomunidad.com/public_html/erp && git fetch origin && git reset --hard origin/main"
+```
+Este comando se ejecutará instantáneamente (3 segundos) destrabando todo.
+
+### SSH `git pull` da timeout (ServerAliveInterval)
+**Causa:** Conexión cerrada prematuramente.
+**Solución:** Agregar a `~/.ssh/config`:
    ```
    Host hostinger_erp
      ServerAliveInterval 30
      ServerAliveCountMax 5
    ```
-3. Si se cancela: repetir `ssh hostinger_erp "cd ~/domains/... && git pull"` — es idempotente.
 
 ### Catálogo vacío en producción después del deploy
 **Causa frecuente:** La BD de producción no fue sobrescrita (Paso 7 omitido) o tiene estructura diferente. Los datos de test (CHOCOBEETAL, Miel de Bosque) son datos de desarrollo local y **NO se deben subir a producción**. Solo se despliega estructura SQL.
