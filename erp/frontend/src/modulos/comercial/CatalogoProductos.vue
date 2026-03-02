@@ -50,7 +50,7 @@
     >
       <template v-slot:body-cell-nombre="props">
         <q-td :props="props">
-          <div class="row items-center cursor-pointer text-primary text-weight-medium" @click="editarProducto(props.row.uid)">
+          <div class="row items-center cursor-pointer text-primary text-weight-medium" @click="verProducto(props.row.uid)">
             <q-icon v-if="!props.row.producto_principal_variacion" name="star" color="amber" size="14px" class="q-mr-xs" />
             <q-icon v-else name="account_tree" color="grey" size="14px" class="q-mr-xs" />
             {{ props.row.nombre }}
@@ -74,8 +74,11 @@
       
       <template v-slot:body-cell-acciones="props">
         <q-td :props="props" class="text-right">
+          <q-btn flat round dense color="grey-6" icon="visibility" @click="verProducto(props.row.uid)" class="q-mr-xs">
+            <q-tooltip>Ver detalle</q-tooltip>
+          </q-btn>
           <q-btn flat round dense color="primary" icon="edit" @click="editarProducto(props.row.uid)">
-            <q-tooltip>Abrir FormularioCompleto</q-tooltip>
+            <q-tooltip>Editar producto</q-tooltip>
           </q-btn>
         </q-td>
       </template>
@@ -126,6 +129,10 @@ async function cargarProductos () {
 
 function nuevoProducto () {
   router.push({ name: 'nuevo-producto' })
+}
+
+function verProducto (uid) {
+  router.push({ name: 'ver-producto', params: { uid } })
 }
 
 function editarProducto (uid) {

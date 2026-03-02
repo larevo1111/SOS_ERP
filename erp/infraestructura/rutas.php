@@ -11,6 +11,16 @@
 //   La URL esperada: /api/{modulo}/{area}
 //   Ejemplo: POST /api/comercial/productos
 
+// ── Manejo Global de CORS y Preflight (OPTIONS) ───────────────────
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
 // ── Construir tabla de rutas cargando todos los módulos ──────────
 $rutas = [];
 $rutas = array_merge($rutas, require __DIR__ . '/../modulos/comercial/rutas_modulo.php');
@@ -49,19 +59,13 @@ if (!array_key_exists($uri, $rutas)) {
 }
 
 // ── Middleware JWT ────────────────────────────────────────────────
-// ESTADO: PENDIENTE DE ACTIVACIÓN
-//
-// Descomentar este bloque SOLO cuando Codex haya actualizado apiService.js
-// para enviar el header "Authorization: Bearer <token>" en cada petición.
-// Activar ambas líneas al mismo tiempo como un único commit.
-//
-// Endpoints exentos (sin token): sistema/login
-//
-// require_once __DIR__ . '/autenticacion/ValidarJwt.php';
-// use Infraestructura\Autenticacion\ValidarJwt;
-// if ($uri !== 'sistema/login') {
-//     ValidarJwt::verificar();
-// }
+// Activo: Protege todas las rutas de /api/* excepto las de login
+require_once __DIR__ . '/autenticacion/ValidarJwt.php';
+use Infraestructura\Autenticacion\ValidarJwt;
+
+if (!str_starts_with($uri, 'sistema/auth/') && $uri !== 'sistema/login') {
+    ValidarJwt::verificar();
+}
 
 // ── Despachar al controlador del módulo ──────────────────────────
 require $rutas[$uri];

@@ -1,24 +1,14 @@
 <?php
 // erp/modulos/sistema/controladores/AuthController.php
-//
-// Endpoint público: /api/sistema/login
-// NO requiere token previo — es el punto de obtención del JWT.
-//
-// Petición esperada:
-//   POST { accion: "login", datos: { email, password } }
-//
-// Respuesta exitosa:
-//   { exito: true, datos: { token, usuario: { uid, nombre, email, rol, empresa } }, mensaje: "..." }
-//
-// Variables requeridas en erp/.env:
-//   JWT_SECRET  → clave secreta para firmar el token (mínimo 32 caracteres)
-// Variables de Composer:
-//   firebase/php-jwt debe estar instalado (cd erp && composer install)
+// Endpoint público: /api/sistema/auth/*
 
 require_once __DIR__ . '/../../../infraestructura/base_datos/Conexion.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
 
 use Infraestructura\BaseDatos\Conexion;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use PDO;
 
 // ── Cabeceras ─────────────────────────────────────────────────────
 header('Content-Type: application/json; charset=utf-8');
@@ -35,117 +25,206 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     responderAuth(false, null, 'Solo se aceptan peticiones POST.', ['metodo_invalido']);
 }
 
-function responderAuth(bool $exito, $datos = null, string $mensaje = '', array $errores = []): void
+function responderAuth(bool $exito, $datos = null, string $mensaje = '', array $errores = [], $httpCode = null): void
 {
+    if ($httpCode !== null)
+        http_response_code($httpCode);
     echo json_encode([
-        'exito'   => $exito,
-        'datos'   => $datos ?? (object)[],
+        'exito' => $exito,
+        'datos' => $datos ?? (object)[],
         'mensaje' => $mensaje,
         'errores' => $errores,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
 
-// ── Cargar Composer (firebase/php-jwt) ────────────────────────────
-$autoload = dirname(__DIR__, 3) . '/vendor/autoload.php';
-if (!file_exists($autoload)) {
-    http_response_code(500);
-    responderAuth(false, null,
-        'Error de servidor: ejecuta `cd erp && composer install` para instalar dependencias.',
-        ['composer_no_instalado']);
+function getJwtSecret()
+{
+    $rutaEnv = dirname(__DIR__, 3) . '/.env';
+    if (file_exists($rutaEnv)) {
+        foreach (file($rutaEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
+            $linea = trim($linea);
+            if (str_starts_with($linea, 'JWT_SECRET=')) {
+                return trim(substr($linea, strlen('JWT_SECRET=')));
+            }
+        }
+    }
+    responderAuth(false, null, 'Error de servidor: JWT_SECRET no configurado.', ['missing_secret'], 500);
 }
-require_once $autoload;
 
 // ── Parsear petición ──────────────────────────────────────────────
 $cuerpo = json_decode(file_get_contents('php://input'), true);
 if (!$cuerpo) {
-    responderAuth(false, null, 'Petición inválida: se esperaba JSON.', ['sin_cuerpo']);
+    responderAuth(false, null, 'Petición inválida: se esperaba JSON.', ['sin_cuerpo'], 400);
 }
 
 $accion = trim($cuerpo['accion'] ?? '');
-$datos  = $cuerpo['datos'] ?? [];
+$datos = $cuerpo['datos'] ?? [];
 
-if ($accion !== 'login') {
-    http_response_code(400);
-    responderAuth(false, null, "Acción desconocida: {$accion}", ['accion_invalida']);
-}
+$pdo = Conexion::obtenerInstancia();
+$jwtSecret = getJwtSecret();
 
-// ── Acción: login ─────────────────────────────────────────────────
-$email    = trim($datos['email']    ?? '');
-$password = trim($datos['password'] ?? '');
+switch ($accion) {
+    case 'autenticar_google':
+        if (empty($datos['id_token']))
+            responderAuth(false, null, 'Falta el id_token.', ['id_token_missing'], 400);
 
-if ($email === '' || $password === '') {
-    responderAuth(false, null, 'Email y contraseña son obligatorios.', ['credenciales_vacias']);
-}
+        // Validar con Google
+        $url = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . $datos['id_token'];
+        $response = @file_get_contents($url);
+        if ($response === false)
+            responderAuth(false, null, 'Token de Google inválido o expirado.', ['invalid_google_token'], 401);
 
-// ── Buscar usuario en sys_usuarios ────────────────────────────────
-try {
-    $pdo  = Conexion::obtenerInstancia();
-    $stmt = $pdo->prepare(
-        'SELECT uid, nombre, email, password, rol, empresa
-         FROM sys_usuarios
-         WHERE email = :email
-         LIMIT 1'
-    );
-    $stmt->execute([':email' => $email]);
-    $usuario = $stmt->fetch();
+        $payload = json_decode($response, true);
+        if (!isset($payload['email']))
+            responderAuth(false, null, 'No se pudo obtener el email.', ['no_email'], 401);
 
-} catch (Exception $e) {
-    http_response_code(500);
-    responderAuth(false, null, 'Error interno del servidor.', [$e->getMessage()]);
-}
+        validarIdentidadYEmpresas($pdo, $payload['email'], $jwtSecret);
+        break;
 
-// Credenciales inválidas — mismo mensaje para email no encontrado y contraseña incorrecta
-// (no revelar cuál de los dos falló, por seguridad)
-if (!$usuario || !password_verify($password, $usuario['password'])) {
-    http_response_code(401);
-    responderAuth(false, null, 'Email o contraseña incorrectos.', ['credenciales_invalidas']);
-}
+    case 'autenticar_correo':
+        if (empty($datos['correo']) || empty($datos['contrasena']))
+            responderAuth(false, null, 'Correo y contraseña requeridos.', ['credenciales_vacias'], 400);
 
-// ── Generar JWT ───────────────────────────────────────────────────
-$secreto = '';
-$rutaEnv = dirname(__DIR__, 3) . '/.env';
-if (file_exists($rutaEnv)) {
-    foreach (file($rutaEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
-        $linea = trim($linea);
-        if (str_starts_with($linea, 'JWT_SECRET=')) {
-            $secreto = trim(substr($linea, strlen('JWT_SECRET=')));
-            break;
+        $email = trim($datos['correo']);
+        $pass = $datos['contrasena'];
+
+        $stmt = $pdo->prepare("SELECT password, estado FROM sys_usuarios WHERE email = :email LIMIT 1");
+        $stmt->execute(['email' => $email]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$usuario || !password_verify($pass, $usuario['password'])) {
+            responderAuth(false, null, 'Email o contraseña incorrectos.', ['auth_fail'], 401);
         }
+        if ($usuario['estado'] !== 'Activo') {
+            responderAuth(false, null, 'Usuario inactivo.', ['user_inactive'], 403);
+        }
+
+        validarIdentidadYEmpresas($pdo, $email, $jwtSecret);
+        break;
+
+    case 'seleccionar_empresa':
+        if (empty($datos['token_temporal']) || empty($datos['empresa']))
+            responderAuth(false, null, 'Faltan datos.', ['missing_data'], 400);
+
+        try {
+            $decoded = JWT::decode($datos['token_temporal'], new Key($jwtSecret, 'HS256'));
+            $tempData = (array)$decoded;
+        }
+        catch (Exception $e) {
+            responderAuth(false, null, 'Token temporal expirado o inválido.', ['invalid_temp_token'], 401);
+        }
+
+        $empresaElegida = $datos['empresa'];
+        $empresas = (array)$tempData['empresas_disponibles'];
+        $esValida = false;
+        $nombreEmpresaElegida = '';
+
+        foreach ($empresas as $emp) {
+            $empArr = (array)$emp;
+            // El identificador real es uid_empresa (ej: 'Ori_Sil_2'), NO las siglas
+            if ($empArr['uid_empresa'] === $empresaElegida) {
+                $esValida = true;
+                $nombreEmpresaElegida = $empArr['nombre_empresa'] ?? $empresaElegida;
+                $siglasEmpresaElegida = $empArr['siglas'] ?? '';
+                break;
+            }
+        }
+
+        if (!$esValida)
+            responderAuth(false, null, 'Empresa no autorizada.', ['unauthorized_company'], 403);
+
+        // Emitir Token Final — incluye uid, nombre_empresa y siglas de la empresa activa
+        $ahora = time();
+        $finalPayload = [
+            'sub'            => $tempData['email'],
+            'email'          => $tempData['email'],
+            'nombre'         => $tempData['nombre'],
+            'foto'           => $tempData['foto'],
+            'Nivel_Acceso'   => $tempData['nivel'],
+            'empresa_activa' => $empresaElegida,         // uid de sys_empresa (ej: 'Ori_Sil_2')
+            'empresa_nombre' => $nombreEmpresaElegida,   // nombre completo (ej: 'Origen Silvestre')
+            'empresa_siglas' => $siglasEmpresaElegida ?? '', // abreviatura (ej: 'OS')
+            'iat'            => $ahora,
+            'exp'            => $ahora + 86400 * 7       // 7 días
+        ];
+
+        $tokenFinal = JWT::encode($finalPayload, $jwtSecret, 'HS256');
+
+        responderAuth(true, [
+            'token' => $tokenFinal,
+            'usuario' => $finalPayload,
+            'empresas_disponibles' => $empresas
+        ], 'Acceso concedido.');
+        break;
+
+    default:
+        responderAuth(false, null, "Acción desconocida: {$accion}", ['accion_invalida'], 400);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function validarIdentidadYEmpresas($pdo, $email, $jwtSecret)
+{
+    try {
+        // sys_usuarios usa Email como PK (tabla heredada, NO tiene columna 'uid')
+        $stmt = $pdo->prepare("
+            SELECT Email, Nombre_Usuario, Nivel_Acceso, estado, foto_url, ultima_empresa
+            FROM sys_usuarios 
+            WHERE Email = :email 
+            LIMIT 1
+        ");
+        $stmt->execute(['email' => $email]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$usuario)
+            responderAuth(false, null, 'Usuario no registrado. Comunícate con el administrador.', ['user_not_found'], 403);
+        if ($usuario['estado'] !== 'Activo')
+            responderAuth(false, null, 'Usuario inactivo. Comunícate con el administrador.', ['user_inactive'], 403);
+
+        // Buscar empresas asignadas — sys_empresa.uid ('Ori_Sil_2') es el identificador real
+        // que coincide exactamente con sys_usuarios_empresas.empresa
+        $stmtEmp = $pdo->prepare("
+            SELECT 
+                e.uid          as uid_empresa,
+                e.nombre_empresa,
+                e.siglas
+            FROM sys_usuarios_empresas ue
+            INNER JOIN sys_empresa e ON e.uid = ue.empresa
+            WHERE ue.usuario = :email AND ue.estado = 'Activo'
+        ");
+        $stmtEmp->execute(['email' => $email]);
+        $empresas = $stmtEmp->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($empresas) === 0) {
+            responderAuth(false, null, 'No tienes ninguna empresa asignada. Comunícate con el administrador.', ['no_companies'], 403);
+        }
+
+        // Token temporal (5 min) para que el usuario elija empresa
+        $tempPayload = [
+            'iat' => time(),
+            'exp' => time() + 300,
+            'email' => $usuario['Email'],
+            'nombre' => $usuario['Nombre_Usuario'],
+            'foto' => $usuario['foto_url'] ?? '',
+            'nivel' => $usuario['Nivel_Acceso'],
+            'empresas_disponibles' => $empresas
+        ];
+
+        $tempToken = JWT::encode($tempPayload, $jwtSecret, 'HS256');
+
+        responderAuth(true, [
+            'requiere_seleccion' => true,
+            'token_temporal' => $tempToken,
+            'empresas' => $empresas,
+            'usuario' => [
+                'nombre' => $usuario['Nombre_Usuario'],
+                'email' => $usuario['Email'],
+                'foto' => $usuario['foto_url'] ?? ''
+            ]
+        ], 'Selecciona una empresa.');
+
+    }
+    catch (Exception $e) {
+        responderAuth(false, null, 'Error interno: ' . $e->getMessage(), ['db_error'], 500);
     }
 }
-
-if (!$secreto) {
-    http_response_code(500);
-    responderAuth(false, null,
-        'Error de configuración: JWT_SECRET no está definido en el archivo .env.',
-        ['jwt_secret_faltante']);
-}
-
-$ahora  = time();
-$expira = $ahora + 86400; // 24 horas
-
-$payload = [
-    'sub'     => $usuario['uid'],
-    'email'   => $usuario['email'],
-    'nombre'  => $usuario['nombre'],
-    'rol'     => $usuario['rol'],
-    'empresa' => $usuario['empresa'],
-    'iat'     => $ahora,
-    'exp'     => $expira,
-];
-
-$token = JWT::encode($payload, $secreto, 'HS256');
-
-// ── Respuesta exitosa ─────────────────────────────────────────────
-responderAuth(true, [
-    'token'   => $token,
-    'expira'  => $expira,
-    'usuario' => [
-        'uid'     => $usuario['uid'],
-        'nombre'  => $usuario['nombre'],
-        'email'   => $usuario['email'],
-        'rol'     => $usuario['rol'],
-        'empresa' => $usuario['empresa'],
-    ],
-], 'Sesión iniciada correctamente.');

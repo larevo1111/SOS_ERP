@@ -40,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 function responderWc(bool $exito, $datos = null, string $mensaje = '', array $errores = []): void
 {
     echo json_encode([
-        'exito'   => $exito,
-        'datos'   => $datos ?? (object)[],
+        'exito' => $exito,
+        'datos' => $datos ?? (object)[],
         'mensaje' => $mensaje,
         'errores' => $errores,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -58,7 +58,14 @@ if (!$cuerpo) {
 }
 
 $accion = trim($cuerpo['accion'] ?? '');
-$datos  = $cuerpo['datos'] ?? [];
+$datos = $cuerpo['datos'] ?? [];
+
+$usuarioRef = Infraestructura\Autenticacion\ValidarJwt::$usuarioActual;
+$datos['empresa'] = $usuarioRef->empresa_activa ?? '';
+if (empty($datos['empresa'])) {
+    http_response_code(403);
+    responderWc(false, null, 'Bloqueo: No hay empresa activa en el token.', ['empresa_activa_ausente']);
+}
 
 // ── Enrutar por acción ────────────────────────────────────────────
 try {
@@ -83,15 +90,15 @@ try {
             $stmt->execute([':empresa' => $empresa]);
             $productos = $stmt->fetchAll();
 
-            $sincronizados  = array_filter($productos, fn($p) => !empty($p['id_producto_woocommerce']));
-            $pendientes     = array_filter($productos, fn($p) =>  empty($p['id_producto_woocommerce']));
+            $sincronizados = array_filter($productos, fn($p) => !empty($p['id_producto_woocommerce']));
+            $pendientes = array_filter($productos, fn($p) => empty($p['id_producto_woocommerce']));
 
             responderWc(true, [
-                'productos'      => array_values($productos),
-                'resumen'        => [
-                    'total'         => count($productos),
+                'productos' => array_values($productos),
+                'resumen' => [
+                    'total' => count($productos),
                     'sincronizados' => count($sincronizados),
-                    'pendientes'    => count($pendientes),
+                    'pendientes' => count($pendientes),
                 ],
             ], 'Estado de sincronización obtenido.');
 
@@ -101,20 +108,21 @@ try {
             // WC_CONSUMER_KEY y WC_CONSUMER_SECRET del .env.
             responderWc(false, null,
                 'La sincronización individual estará disponible en la próxima fase.',
-                ['no_implementado']);
+            ['no_implementado']);
 
         case 'importar_producto':
             // TODO Fase posterior: pull de WooCommerce → com_productos
             responderWc(false, null,
                 'La importación desde WooCommerce estará disponible en la próxima fase.',
-                ['no_implementado']);
+            ['no_implementado']);
 
         default:
             http_response_code(400);
             responderWc(false, null, "Acción desconocida: {$accion}", ['accion_invalida']);
     }
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(500);
     responderWc(false, null, 'Error interno del servidor.', [$e->getMessage()]);
 }

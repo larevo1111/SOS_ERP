@@ -1,5 +1,87 @@
 <template>
   <q-layout view="lHh Lpr lFf">
+    <!-- TOPBAR DE ESTADO -->
+    <q-header elevated class="bg-dark text-white shadow-2 border-bottom-sutil">
+      <q-toolbar style="height: 64px;" class="q-px-lg">
+        <!-- Botón Hamburguesa Móvil -->
+        <q-btn flat dense round icon="menu" aria-label="Menu" @click="menuAbierto = !menuAbierto" class="q-mr-sm lt-md" />
+        
+        <!-- Info del Usuario Logueado (Izquierda) -->
+        <div class="flex items-center q-gutter-x-md" v-if="authStore.estaAutenticado">
+          <q-avatar size="38px" color="primary" text-color="white">
+            <img v-if="authStore.usuario?.foto" :src="authStore.usuario.foto" />
+            <span v-else class="text-weight-bold">{{ authStore.usuario?.nombre?.charAt(0) || 'U' }}</span>
+          </q-avatar>
+          <div class="column justify-center" style="line-height: 1.2;">
+            <div class="text-subtitle2 text-weight-bold">{{ authStore.usuario?.nombre || 'Usuario' }}</div>
+            <div class="font-mono text-grey-5" style="font-size: 11px;">{{ authStore.usuario?.email || '' }}</div>
+          </div>
+          
+          <q-separator vertical dark class="q-mx-sm opacity-30" />
+          
+          <!-- Selector Multi-tenant: muestra uid + nombre_empresa + siglas -->
+          <div class="flex items-center q-gutter-x-sm">
+            <div class="text-caption text-grey-4">Entorno:</div>
+            <q-select
+              dark
+              dense
+              outlined
+              v-model="empresaSeleccionada"
+              :options="opcionesEmpresas"
+              option-value="uid_empresa"
+              emit-value
+              map-options
+              style="min-width: 260px;"
+              bg-color="black"
+            >
+              <template v-slot:prepend>
+                <q-icon name="storefront" size="xs" />
+              </template>
+              <!-- Opción personalizada: uid · Nombre · [SIG] -->
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section avatar><q-icon name="domain" size="xs" /></q-item-section>
+                  <q-item-section>
+                    <q-item-label class="text-weight-bold text-caption font-mono">{{ scope.opt.uid_empresa }}</q-item-label>
+                    <q-item-label caption>{{ scope.opt.nombre_empresa }} · [{{ scope.opt.siglas }}]</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+              <!-- Valor seleccionado: muestra nombre completo y siglas -->
+              <template v-slot:selected-item="scope">
+                <span class="text-white text-weight-bold" style="font-size:12px;">
+                  {{ scope.opt.nombre_empresa }}
+                  <span class="text-grey-4 q-ml-xs">[{{ scope.opt.siglas }}]</span>
+                </span>
+              </template>
+            </q-select>
+            <q-btn
+              v-if="empresaSeleccionada !== authStore.empresaActiva"
+              unelevated
+              color="primary"
+              icon="swap_horiz"
+              label="Cambiar"
+              dense
+              class="q-px-sm text-weight-bold"
+              @click="ejecutarCambioEmpresa"
+              :loading="cargandoCambio"
+            />
+          </div>
+        </div>
+        
+        <q-space />
+        
+        <!-- Reloj y Fecha (Derecha) -->
+        <div class="flex items-center text-right q-gutter-x-sm font-mono text-grey-4">
+          <q-icon name="schedule" size="sm" />
+          <div>
+            <div class="text-white text-weight-bold" style="font-size: 15px; letter-spacing: 1px;">{{ horaActual }}</div>
+            <div style="font-size: 11px;">{{ fechaActual }}</div>
+          </div>
+        </div>
+      </q-toolbar>
+    </q-header>
+
     <!-- Sidebar -->
     <q-drawer v-model="menuAbierto" show-if-above :width="230" :breakpoint="768">
       <div class="sidebar">
@@ -108,15 +190,15 @@
           </div>
         </q-scroll-area>
 
-        <!-- Usuario -->
+        <!-- Footer: Cerrar Sesión -->
         <div class="sidebar__footer">
-          <div class="sidebar__usuario">
-            <div class="sidebar__avatar">SS</div>
-            <div>
-              <div class="sidebar__usuario-nombre">Santiago Sierra</div>
-              <div class="sidebar__usuario-rol">Administrador</div>
-            </div>
-          </div>
+          <q-btn
+            unelevated
+            class="full-width text-weight-bold btn-logout"
+            icon="logout"
+            label="Cerrar Sesión"
+            @click="cerrarSesion"
+          />
         </div>
       </div>
     </q-drawer>
@@ -129,14 +211,28 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { llamar } from '../servicios/apiService.js'
+import { useAuthStore } from '../stores/authStore.js'
 
+const authStore = useAuthStore()
+const $q = useQuasar()
 const menuAbierto = ref(true)
 const menuArbol = ref([])
 const route = useRoute()
 const router = useRouter()
+
+// Variables Topbar Multi-tenant
+const empresaSeleccionada = ref(authStore.empresaActiva || null)
+const opcionesEmpresas = ref(authStore.empresas || [])
+const cargandoCambio = ref(false)
+
+// Variables Reloj
+const horaActual = ref('')
+const fechaActual = ref('')
+let timerReloj = null
 
 const rutasAlias = {
   'integracion-woocommerce': 'woocommerce'
@@ -204,9 +300,42 @@ async function cargarMenuDinamico () {
   }
 }
 
+function actualizarReloj() {
+  const ahora = new Date()
+  horaActual.value = ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  fechaActual.value = ahora.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+}
+
 onMounted(() => {
   cargarMenuDinamico()
+  actualizarReloj()
+  timerReloj = setInterval(actualizarReloj, 1000)
 })
+
+onUnmounted(() => {
+  if (timerReloj) clearInterval(timerReloj)
+})
+
+async function ejecutarCambioEmpresa() {
+  if (!empresaSeleccionada.value) return
+  cargandoCambio.value = true
+  try {
+    await authStore.cambiarEmpresaActiva(empresaSeleccionada.value)
+    $q.notify({ type: 'positive', message: 'Entorno cambiado exitosamente.' })
+    // Recargar duro la app para limpiar caches de Axios/Pinia y traer nuevos datos
+    window.location.reload()
+  } catch (error) {
+    empresaSeleccionada.value = authStore.empresaActiva
+    $q.notify({ type: 'negative', message: error.message || 'Error al cambiar empresa.' })
+  } finally {
+    cargandoCambio.value = false
+  }
+}
+
+function cerrarSesion() {
+  authStore.cerrarSesion()
+  router.push('/login')
+}
 </script>
 
 <style lang="scss" scoped>
@@ -214,6 +343,9 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: rgba(141, 184, 154, 0.08); /* Fondo Sutil verde */
+  border-right: 1px solid rgba(141, 184, 154, 0.2);
+  padding: 20px 0;
   background: rgba(141, 184, 154, 0.08);
   border-right: 1px solid rgba(141, 184, 154, 0.2);
   padding: 20px 0;
@@ -257,40 +389,28 @@ onMounted(() => {
 
   &__footer {
     margin-top: auto;
-    padding: 14px 18px 0;
+    padding: 14px 18px 20px;
     border-top: 1px solid rgba(141, 184, 154, 0.15);
   }
+}
 
-  &__usuario {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.btn-logout {
+  border-radius: 8px;
+  font-size: 13px;
+  background: rgba(197, 19, 19, 0.08) !important;
+  color: #c51313 !important;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: rgba(197, 19, 19, 0.15) !important;
   }
+}
 
-  &__avatar {
-    width: 34px;
-    height: 34px;
-    background: #2C3D2E;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #8DB89A;
-    font-size: 11px;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-
-  &__usuario-nombre {
-    font-size: 12px;
-    font-weight: 700;
-    color: #1A1A1A;
-  }
-
-  &__usuario-rol {
-    font-size: 10px;
-    color: #8A8A8A;
-  }
+.border-bottom-sutil {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.font-mono {
+  font-family: 'Space Mono', 'Courier', monospace;
 }
 
 .nav-grupo {

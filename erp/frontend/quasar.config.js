@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url'
 
 export default defineConfig((_ctx) => {
   return {
-    boot: [],
+    boot: ['googleAuth', 'pinia'],
 
     css: ['app.scss'],
 
@@ -17,7 +17,7 @@ export default defineConfig((_ctx) => {
       vueRouterMode: 'hash',
 
       // Alias para que las rutas puedan importar con 'modulos/...'
-      extendViteConf (viteConf) {
+      extendViteConf(viteConf) {
         Object.assign(viteConf.resolve.alias, {
           modulos: fileURLToPath(new URL('./src/modulos', import.meta.url))
         })

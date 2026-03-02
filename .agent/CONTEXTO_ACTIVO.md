@@ -8,12 +8,12 @@
 
 ## Estado actual
 
-**Módulo en construcción:** Comercial — Menú dinámico + Maestros de Costos
-**Fase:** Fase 6 (UI) completada · Fase 7 (UI) en avance
-**Última tarea completada:** Codex: Refactor de `LayoutPrincipal.vue` con menú dinámico `sys_menu_v2` + `q-select` de Maestros de Costos en `FormularioProducto.vue`
-**Madrina a cargo:** AntiGravity (Arquitecta)
-**Próximo paso:** [CODEX] Finalizar UI de Fase 7 (`IntegracionWooCommerce.vue`) y habilitar protección Auth JWT de Fase 8 en `apiService.js` y `Login.vue`.
-**Fecha de última actualización:** 2026-02-27 (Sesión Nocturna Novedades)
+**Módulo en construcción:** Fase 8 Terminada (Autenticación y Seguridad Multi-tenant)
+**Fase:** Sistema Base listo
+**Última tarea completada:** Codex: Integración de `PaginaLogin.vue`, protección Vue Router, interceptor JWT y Topbar de Estado Multi-empresa. Fase 8 Finalizada.
+**Madrina a cargo:** AntiGravity (Espera instrucciones)
+**Próximo paso:** [SANTI] Probar el flujo de Login completo, ingresar ID de Google en el .env, y definir cuál será la Fase 9 a atacar.
+**Fecha de última actualización:** 2026-02-28 (Fase 8 Backend)
 
 ---
 

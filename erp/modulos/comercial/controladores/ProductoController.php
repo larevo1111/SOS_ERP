@@ -65,24 +65,27 @@ else {
     $datos = $cuerpo['datos'] ?? [];
 }
 
-// ── Validar token (R2_TOKEN del .env) ─────────────────────────────
-// Cargamos el .env a través de Conexion, que lo hace en su constructor.
-// Para validar el token antes de abrir BD, lo leemos directamente.
-$rutaEnv = dirname(__DIR__, 3) . '/.env';
-$tokenEsperado = '';
-if (file_exists($rutaEnv)) {
-    foreach (file($rutaEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
-        $linea = trim($linea);
-        if (str_starts_with($linea, 'R2_TOKEN=')) {
-            $tokenEsperado = trim(substr($linea, strlen('R2_TOKEN=')));
-            break;
-        }
-    }
+// ── Filtro de Seguridad Multi-tenant (OBLIGATORIO) ──────────────
+// El middleware ValidarJwt ya se ejecutó en rutas.php.
+// Extraemos la información del token y blindamos el payload ($datos)
+require_once __DIR__ . '/../../../infraestructura/autenticacion/ValidarJwt.php';
+use Infraestructura\Autenticacion\ValidarJwt;
+
+$usuarioRef = ValidarJwt::$usuarioActual;
+if (!$usuarioRef) {
+    http_response_code(401);
+    responder(false, null, 'Acceso denegado: Sesión no validada.', ['jwt_ausente']);
 }
 
-if (!$tokenEsperado || !hash_equals($tokenEsperado, $tokenEnviado)) {
-    http_response_code(401);
-    responder(false, null, 'Token inválido o ausente.', ['token_invalido']);
+// Inyección forzada en el arreglo de datos: esto propaga el blindaje
+// a GuardarProducto, ListarProductos, SubirMultimedia, etc.
+$datos['empresa'] = $usuarioRef->empresa_activa ?? '';
+$datos['usuario_creador'] = $usuarioRef->email ?? '';
+$datos['usuario_ult_modificacion'] = $usuarioRef->email ?? '';
+
+if (empty($datos['empresa'])) {
+    http_response_code(403);
+    responder(false, null, 'Bloqueo de seguridad: No seleccionaste una empresa activa en el token.', ['empresa_activa_ausente']);
 }
 
 // ── Enrutar por acción ────────────────────────────────────────────

@@ -140,7 +140,7 @@ CREATE TABLE `com_productos` (
   KEY `idx_uid_producto_padre` (`uid_producto_padre`),
   KEY `idx_slug` (`url_producto`),
   KEY `idx_estado_publicacion` (`estado_publicacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -153,7 +153,9 @@ LOCK TABLES `com_productos` WRITE;
 INSERT INTO `com_productos` VALUES
 (1,'OS-20260228003111-MAESTRO','os','Activo',NULL,'','Miel de Bosque Nativo (Maestro)','','publicado','https://origensilvestre.com/producto/miel-bosque','','','','Alimentos','Origen Silvestre','Miel pura de bosque nativo de Origen Silvestre.','Miel recolectada de forma sostenible en los bosques vírgenes del sur de Colombia.','',45000.00,0.00,NULL,NULL,'','','','','','','','Asociación de Apicultores del Sur','Cauca, Colombia','','','','santi@origensilvestre.com','santi@origensilvestre.com','2026-02-27 19:31:11','2026-02-27 19:31:11'),
 (2,'OS-20260228003111-V250G','os','Activo',NULL,'OS-20260228003111-MAESTRO','Miel de Bosque Nativo - 250g','','publicado','','OS-20260228003111-MAESTRO','Tamaño','250g','Alimentos','Origen Silvestre','','','',25000.00,0.00,NULL,NULL,'','','','','','','','','','','','','santi@origensilvestre.com','santi@origensilvestre.com','2026-02-27 19:31:11','2026-02-27 19:31:11'),
-(3,'OS-20260228003111-V500G','os','Activo',NULL,'OS-20260228003111-MAESTRO','Miel de Bosque Nativo - 500g','','publicado','','OS-20260228003111-MAESTRO','Tamaño','500g','Alimentos','Origen Silvestre','','','',40000.00,0.00,NULL,NULL,'','','','','','','','','','','','','santi@origensilvestre.com','santi@origensilvestre.com','2026-02-27 19:31:11','2026-02-27 19:31:11');
+(3,'OS-20260228003111-V500G','os','Activo',NULL,'OS-20260228003111-MAESTRO','Miel de Bosque Nativo - 500g','','publicado','','OS-20260228003111-MAESTRO','Tamaño','500g','Alimentos','Origen Silvestre','','','',40000.00,0.00,NULL,NULL,'','','','','','','','','','','','','santi@origensilvestre.com','santi@origensilvestre.com','2026-02-27 19:31:11','2026-02-27 19:31:11'),
+(4,'OS-20260301002235-28b14a','os','Activo',0,'','Miel Silvestre 500g',NULL,'borrador','','OS-TEST-MAESTRO','Peso','500g','','',NULL,NULL,'',35000.00,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'santi@origensilvestre.com','santi@origensilvestre.com','2026-02-28 19:22:35','2026-02-28 19:22:35'),
+(5,'ORI_SIL_2-20260302023132-08eadb','ori_sil_2','Activo',NULL,'PTCre_CHOOS90GRS_12','CHOCOBEETAL OS 90 GRS','CHOCOBEETAL OS','borrador','',NULL,'','','ENSA 1','OS.resd21','DESC CORTA','DESC LARGA','',99900.00,NULL,NULL,NULL,'- FASDF\n-ASDF','','','','ORIGEN PROD','','','PÌPE PELÑAEZ','FSDF','SIS CULT OR','TRANSFOR','','larevo1111@gmail.com','larevo1111@gmail.com','2026-03-01 21:31:32','2026-03-01 21:31:32');
 /*!40000 ALTER TABLE `com_productos` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -185,7 +187,8 @@ CREATE TABLE `com_productos_multimedia` (
   UNIQUE KEY `uk_uid` (`uid`),
   KEY `idx_uid_producto` (`uid_producto`),
   KEY `idx_empresa` (`empresa`),
-  KEY `idx_orden` (`orden`)
+  KEY `idx_orden` (`orden`),
+  CONSTRAINT `fk_multimedia_producto` FOREIGN KEY (`uid_producto`) REFERENCES `com_productos` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5263,7 +5266,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`u768061575_ssierra047`@`127.0.0.1` SQL SECURITY DEFINER */
+/*!50013 */
 /*!50001 VIEW `vw_costos_ruta_productos_pp` AS with recursive ruta as (select `p`.`Empresa` AS `empresa`,`p`.`uid` AS `uid_producto_final`,0 AS `nivel`,`p`.`uid` AS `uid_producto_hijo`,cast(NULL as char(255) charset utf8mb4) AS `uid_producto_padre`,cast(`p`.`uid_procedimiento` as char(255) charset utf8mb4) AS `uid_procedimiento_hijo`,cast(NULL as char(255) charset utf8mb4) AS `uid_procedimiento_padre`,cast(NULL as char(255) charset utf8mb4) AS `uid_rama` from `costos_encabezados_productos` `p` where `p`.`uid_procedimiento` is not null and trim(`p`.`uid_procedimiento`) <> '' union all select `r`.`empresa` AS `empresa`,`r`.`uid_producto_final` AS `uid_producto_final`,`r`.`nivel` + 1 AS `nivel`,cast(`pp`.`uid_producto_pp` as char(255) charset utf8mb4) AS `uid_producto_hijo`,cast(`r`.`uid_producto_hijo` as char(255) charset utf8mb4) AS `uid_producto_padre`,cast(`pprod`.`uid_procedimiento` as char(255) charset utf8mb4) AS `uid_procedimiento_hijo`,cast(`r`.`uid_procedimiento_hijo` as char(255) charset utf8mb4) AS `uid_procedimiento_padre`,case when `r`.`nivel` = 0 then cast(`pp`.`uid_producto_pp` as char(255) charset utf8mb4) else `r`.`uid_rama` end AS `uid_rama` from ((`ruta` `r` join `costos_procedimientos_pp` `pp` on(`pp`.`Empresa` = `r`.`empresa` and `pp`.`uid_procedimiento` = `r`.`uid_procedimiento_hijo` and `pp`.`uid_producto_pp` is not null and trim(`pp`.`uid_producto_pp`) <> '')) left join `costos_encabezados_productos` `pprod` on(`pprod`.`Empresa` = `r`.`empresa` and `pprod`.`uid` = `pp`.`uid_producto_pp`)) where `r`.`nivel` < 20)select `r`.`empresa` AS `empresa`,`r`.`uid_producto_final` AS `uid_producto_final`,`pf`.`Producto` AS `producto_final`,`r`.`uid_rama` AS `uid_rama`,`r`.`nivel` AS `nivel`,`r`.`uid_producto_hijo` AS `uid_producto_actual`,`ph`.`Producto` AS `producto_actual`,`r`.`uid_producto_padre` AS `uid_producto_padre`,`pp`.`Producto` AS `producto_padre`,`r`.`uid_procedimiento_hijo` AS `uid_procedimiento_actual`,`pr_hijo`.`Procedimiento` AS `procedimiento_actual`,`r`.`uid_procedimiento_padre` AS `uid_procedimiento_padre`,`pr_padre`.`Procedimiento` AS `procedimiento_padre` from (((((`ruta` `r` left join `costos_encabezados_productos` `pf` on(`pf`.`Empresa` = `r`.`empresa` and `pf`.`uid` = `r`.`uid_producto_final`)) left join `costos_encabezados_productos` `ph` on(`ph`.`Empresa` = `r`.`empresa` and `ph`.`uid` = `r`.`uid_producto_hijo`)) left join `costos_encabezados_productos` `pp` on(`pp`.`Empresa` = `r`.`empresa` and `pp`.`uid` = `r`.`uid_producto_padre`)) left join `costos_procedimientos` `pr_hijo` on(`pr_hijo`.`Empresa` = `r`.`empresa` and `pr_hijo`.`uid` = `r`.`uid_procedimiento_hijo`)) left join `costos_procedimientos` `pr_padre` on(`pr_padre`.`Empresa` = `r`.`empresa` and `pr_padre`.`uid` = `r`.`uid_procedimiento_padre`)) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -5281,7 +5284,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`u768061575_ssierra047`@`127.0.0.1` SQL SECURITY DEFINER */
+/*!50013 */
 /*!50001 VIEW `vw_sys_tablas` AS select `information_schema`.`tables`.`TABLE_NAME` AS `tabla`,row_number() over ( order by `information_schema`.`tables`.`TABLE_NAME`) AS `uid` from `information_schema`.`tables` where `information_schema`.`tables`.`TABLE_SCHEMA` = 'u768061575_os_comunidad' */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -5299,7 +5302,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`u768061575_ssierra047`@`127.0.0.1` SQL SECURITY DEFINER */
+/*!50013 */
 /*!50001 VIEW `vw_sys_tablas_campos` AS select concat(`information_schema`.`columns`.`TABLE_NAME`,'||',`information_schema`.`columns`.`COLUMN_NAME`) AS `uid`,`information_schema`.`columns`.`TABLE_NAME` AS `tabla`,`information_schema`.`columns`.`COLUMN_NAME` AS `columna` from `information_schema`.`columns` where `information_schema`.`columns`.`TABLE_SCHEMA` = 'u768061575_os_comunidad' order by `information_schema`.`columns`.`TABLE_NAME`,`information_schema`.`columns`.`ORDINAL_POSITION` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -5314,4 +5317,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-02-28  8:53:07
+-- Dump completed on 2026-03-02 11:00:16

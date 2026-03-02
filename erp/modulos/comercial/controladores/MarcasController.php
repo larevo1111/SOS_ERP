@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 function responderMarcas(bool $exito, $datos = null, string $mensaje = '', array $errores = []): void
 {
     echo json_encode([
-        'exito'   => $exito,
-        'datos'   => $datos ?? (object)[],
+        'exito' => $exito,
+        'datos' => $datos ?? (object)[],
         'mensaje' => $mensaje,
         'errores' => $errores,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -45,26 +45,23 @@ if (!$cuerpo) {
     responderMarcas(false, null, 'Petición inválida: se esperaba JSON.', ['sin_cuerpo']);
 }
 
-$tokenEnviado = $cuerpo['token'] ?? '';
-$accion       = trim($cuerpo['accion'] ?? '');
-$datos        = $cuerpo['datos'] ?? [];
+$accion = trim($cuerpo['accion'] ?? '');
+$datos = $cuerpo['datos'] ?? [];
 
-// ── Validar token R2_TOKEN ─────────────────────────────────────────
-$rutaEnv      = dirname(__DIR__, 3) . '/.env';
-$tokenEsperado = '';
-if (file_exists($rutaEnv)) {
-    foreach (file($rutaEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
-        $linea = trim($linea);
-        if (str_starts_with($linea, 'R2_TOKEN=')) {
-            $tokenEsperado = trim(substr($linea, strlen('R2_TOKEN=')));
-            break;
-        }
-    }
+// ── Filtro de Seguridad Multi-tenant (OBLIGATORIO) ──────────────
+require_once __DIR__ . '/../../../infraestructura/autenticacion/ValidarJwt.php';
+use Infraestructura\Autenticacion\ValidarJwt;
+
+$usuarioRef = ValidarJwt::$usuarioActual;
+if (!$usuarioRef) {
+    http_response_code(401);
+    responderMarcas(false, null, 'Acceso denegado: Sesión no validada.', ['jwt_ausente']);
 }
 
-if (!$tokenEsperado || !hash_equals($tokenEsperado, $tokenEnviado)) {
-    http_response_code(401);
-    responderMarcas(false, null, 'Token inválido o ausente.', ['token_invalido']);
+$datos['empresa'] = $usuarioRef->empresa_activa ?? '';
+if (empty($datos['empresa'])) {
+    http_response_code(403);
+    responderMarcas(false, null, 'Bloqueo: No hay empresa activa en el token.', ['empresa_activa_ausente']);
 }
 
 // ── Enrutar por acción ────────────────────────────────────────────
@@ -78,12 +75,17 @@ try {
             if ($busqueda !== '') {
                 $stmt = $pdo->prepare(
                     'SELECT id, uid, nombre FROM com_marcas
-                     WHERE nombre LIKE :busqueda
+                     WHERE empresa = :empresa AND nombre LIKE :busqueda
                      ORDER BY nombre ASC'
                 );
-                $stmt->execute([':busqueda' => '%' . $busqueda . '%']);
-            } else {
-                $stmt = $pdo->query('SELECT id, uid, nombre FROM com_marcas ORDER BY nombre ASC');
+                $stmt->execute([
+                    ':empresa' => $datos['empresa'],
+                    ':busqueda' => '%' . $busqueda . '%'
+                ]);
+            }
+            else {
+                $stmt = $pdo->prepare('SELECT id, uid, nombre FROM com_marcas WHERE empresa = :empresa ORDER BY nombre ASC');
+                $stmt->execute([':empresa' => $datos['empresa']]);
             }
             $marcas = $stmt->fetchAll();
             responderMarcas(true, ['marcas' => $marcas], 'Marcas obtenidas correctamente.');
@@ -93,7 +95,8 @@ try {
             responderMarcas(false, null, "Acción desconocida: {$accion}", ['accion_invalida']);
     }
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(500);
     responderMarcas(false, null, 'Error interno del servidor.', [$e->getMessage()]);
 }

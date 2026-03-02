@@ -720,11 +720,11 @@ const opcionesPublicacion = [
 ]
 
 const opcionesUso = [
-  { label: 'Portada',            value: 'Portada' },
-  { label: 'Galería',            value: 'Galeria' },
-  { label: 'Variación',          value: 'Variacion' },
-  { label: 'Galería secundaria', value: 'Galeria secundaria' },
-  { label: 'Otro',               value: 'Otro' }
+  { label: 'Principal (Portada)', value: 'Principal' },
+  { label: 'Galería',             value: 'Galeria' },
+  { label: 'Variación',           value: 'Variacion' },
+  { label: 'Galería secundaria',  value: 'Galeria secundaria' },
+  { label: 'Otro',                value: 'Otro' }
 ]
 
 function mapearMaestrosCosto (items = []) {
@@ -816,18 +816,37 @@ async function filtrarMarcas (valor, update, abort) {
 }
 
 async function cargarProducto (uid) {
-  // TODO: GET /api/comercial/productos/:uid
-  console.log('[FormularioProducto] Cargando producto:', uid)
+  try {
+    const respuesta = await llamar('comercial', 'productos', 'obtener_producto', { uid })
+    // respuesta contiene { producto, multimedia, variaciones }
+    if (respuesta?.producto) {
+      Object.assign(producto.value, respuesta.producto)
+      multimedia.value = respuesta.multimedia || []
+      variaciones.value = respuesta.variaciones || []
+
+      // Si el producto tiene una marca, asegurarse de que aparezca en las opciones
+      if (producto.value.marca && !opcionesMarcas.value.some(op => op.value === producto.value.marca)) {
+        opcionesMarcas.value = [
+          { label: producto.value.marca, value: producto.value.marca },
+          ...opcionesMarcas.value
+        ]
+      }
+    }
+  } catch (error) {
+    $q.notify({ type: 'negative', message: `Error al cargar el producto: ${error.message}`, icon: 'error' })
+  }
 }
 
 async function cargarMultimedia (uid) {
-  // TODO: GET /api/comercial/productos/:uid/multimedia
-  console.log('[FormularioProducto] Cargando multimedia:', uid)
+  // La multimedia ya se carga dentro de cargarProducto con obtener_producto.
+  // Esta función se mantiene como alias por si se llama sola en el futuro.
+  console.log('[FormularioProducto] Multimedia cargada junto con el producto:', uid)
 }
 
 async function cargarVariaciones (uidMaestro) {
-  // TODO: GET /api/comercial/productos/:uid/variaciones
-  console.log('[FormularioProducto] Cargando variaciones del Maestro:', uidMaestro)
+  // Las variaciones ya se cargan dentro de cargarProducto con obtener_producto.
+  // Esta función se mantiene como alias por si se llama sola en el futuro.
+  console.log('[FormularioProducto] Variaciones cargadas junto con el producto:', uidMaestro)
 }
 
 async function guardar () {
@@ -935,6 +954,15 @@ function abrirSubida () {
 }
 
 async function procesarArchivos (archivos) {
+  if (!producto.value.uid) {
+    $q.notify({
+      type: 'warning',
+      message: 'Guarda primero el producto antes de subir multimedia.',
+      icon: 'warning'
+    })
+    return
+  }
+
   for (const archivo of Array.from(archivos)) {
     const datosExtra = {
       uid_producto:    producto.value.uid,

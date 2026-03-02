@@ -20,19 +20,23 @@ class ListarVariaciones
     public function ejecutar(array $datos): array
     {
         $uidMaestro = trim($datos['uid_maestro'] ?? '');
+        $empresa = trim($datos['empresa'] ?? '');
 
         if ($uidMaestro === '') {
             return $this->respuesta(false, null, 'El campo uid_maestro es obligatorio.', ['uid_maestro_vacio']);
+        }
+        if ($empresa === '') {
+            return $this->respuesta(false, null, 'Fallo de seguridad: Empresa no especificada.', ['empresa_requerida']);
         }
 
         $stmt = $this->pdo->prepare(
             'SELECT id, uid, nombre, estado, precio_regular,
                     nombre_atributo_variacion, valor_atributo_variacion
              FROM com_productos
-             WHERE producto_principal_variacion = :uid_maestro
+             WHERE producto_principal_variacion = :uid_maestro AND empresa = :empresa
              ORDER BY id ASC'
         );
-        $stmt->execute([':uid_maestro' => $uidMaestro]);
+        $stmt->execute([':uid_maestro' => $uidMaestro, ':empresa' => $empresa]);
         $variaciones = $stmt->fetchAll();
 
         return $this->respuesta(true, ['variaciones' => $variaciones], 'Variaciones obtenidas correctamente.');
@@ -41,8 +45,8 @@ class ListarVariaciones
     private function respuesta(bool $exito, $datos, string $mensaje, array $errores = []): array
     {
         return [
-            'exito'   => $exito,
-            'datos'   => $datos ?? (object)[],
+            'exito' => $exito,
+            'datos' => $datos ?? (object)[],
             'mensaje' => $mensaje,
             'errores' => $errores,
         ];

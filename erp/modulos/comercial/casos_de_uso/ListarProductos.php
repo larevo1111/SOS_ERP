@@ -26,8 +26,9 @@ class ListarProductos
         $estado = trim($datos['estado'] ?? '');
         $soloMaestros = isset($datos['solo_maestros']) ? (bool)$datos['solo_maestros'] : true;
 
-        $sql = "SELECT p.*, 
-                (SELECT url_publica FROM com_productos_multimedia WHERE uid_producto = p.uid AND uso = 'Portada' LIMIT 1) as url_portada
+        $sql = "SELECT p.uid, p.nombre, p.categoria, p.marca, p.precio_regular, 
+                p.estado, p.estado_publicacion, p.producto_principal_variacion,
+                p.empresa, p.fecha_creacion
                 FROM com_productos p 
                 WHERE p.empresa = :empresa";
 
@@ -63,13 +64,15 @@ class ListarProductos
         $limite = isset($datos['limite']) ? (int)$datos['limite'] : 50;
         $sql .= " LIMIT $limite";
 
+        error_log("[DEBUG LISTAR_PROD] SQL: " . $sql);
+        error_log("[DEBUG LISTAR_PROD] Params: " . print_r($params, true));
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return $this->respuesta(true, $items, 'Listado generado correctamente.');
     }
-
     private function respuesta(bool $exito, $datos, string $mensaje, array $errores = []): array
     {
         return [

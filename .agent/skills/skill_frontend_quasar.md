@@ -8,9 +8,15 @@
 Este skill documenta las mejores prácticas y soluciones a problemas comunes en el desarrollo del frontend del ERP usando **Vue 3, Quasar y Vite**, asegurando que la arquitectura de carpetas y alias se mantenga bajo la política 5S.
 
 ## Reglas que nunca se rompen
-1. **Configuración de Alias**: Siempre usar el alias `modulos` para referenciar la carpeta `src/modulos/`. Esto evita rutas relativas largas y confusas.
-2. **Placeholders de Ruta**: Nunca dejar una ruta en `routes.js` que apunte a un componente inexistente. Si el módulo no está listo, crear un componente mínimo con un mensaje de "Próximamente".
-3. **Consistencia de Marca**: Usar siempre las variables de marca (`primary`, `secondary`, `positive`, etc.) definidas en `quasar.config.js` en lugar de colores hexadecimales directos en el CSS.
+1. **Configuración de Alias**: Siempre usar el alias `modulos` para rutas de `src/modulos/`. Evita rutas relativas largas.
+2. **Placeholders de Ruta**: Nunca dejar una ruta en `routes.js` que apunte a un componente inexistente. Crear un componente mínimo "Próximamente" si el módulo no está listo.
+3. **Consistencia de Marca**: Usar las variables de Quasar (`primary`, `secondary`) en lugar de colores hex directos.
+4. **Solo Google Auth (Política de Autenticación)**: 
+   - El ERP usa **exclusivamente Google OAuth** como método de autenticación. **No existe** formulario de correo/contraseña.
+   - El plugin es `vue3-google-login`, inicializado en `src/boot/googleAuth.js` con `VITE_GOOGLE_CLIENT_ID`.
+   - El componente es `<GoogleLogin :callback="fn" :buttonConfig="{...}" />`. El callback recibe `response.credential` que es el **id_token JWT** firmado por Google.
+   - El flujo siempre va: `GoogleLogin callback → authStore.autenticarGoogle(id_token) → backend /api/sistema/login → pantalla de selección empresa → authStore.seleccionarEmpresa(uid_empresa) → router.push('/')`.
+   - El parámetro que se envía al backend en `seleccionar_empresa` es el **uid de sys_empresa** (ej: `Ori_Sil_2`), nunca las siglas.
 
 ## Problemas conocidos y soluciones
 ### 1. Error de resolución de importación (Vite)
@@ -43,7 +49,21 @@ build: {
 - `src/layouts/LayoutPrincipal.vue`
 - `src/css/quasar.variables.scss`, `src/css/app.scss`
 
-### 4. Tabs personalizadas: usar `v-show`, no `q-tab-panels`
+### 4. Peticiones de API bloqueadas por CORS (OPTIONS Preflight) y JWT
+**Problema**: Al hacer un `fetch` con `Authorization: Bearer <token>`, el navegador hace primero una petición `OPTIONS` (CORS Preflight). Si el backend exige el JWT en todas las rutas, la petición `OPTIONS` falla con 401 porque **nunca** lleva headers de autorización. El navegador entonces bloquea la petición real.
+**Solución**: El enrutador principal (`rutas.php`) **DEBE** interceptar todas las peticiones `OPTIONS` al inicio del archivo y devolver HTTP 204 inmediantamente, antes de cualquier middleware de seguridad o carga de controladores:
+```php
+// ── Manejo Global de CORS y Preflight (OPTIONS) ──
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+```
+
+### 5. Tabs personalizadas: usar `v-show`, no `q-tab-panels`
 **Problema**: Se intentó usar `q-tab-panels` con una barra de tabs custom (sin `q-tabs`). Resultado: los paneles no responden porque `q-tab-panels` necesita estar vinculado a `q-tabs`.
 **Solución**: Con barra de tabs custom, controlar el panel activo con `v-show`:
 ```vue

@@ -12,14 +12,23 @@
 2. **Protocolo de Diseño Visual (Cero Asunciones)**: Antes de comenzar a codificar vistas complejas (como formularios principales o dashboards), **DEBE** existir un acuerdo claro sobre la estructura del frontend (boceto provisto por Santi). La Arquitecta no debe asumir cómo distribuir la interfaz. Si no hay un norte estructural claro, es obligatorio detenerse y solicitar el boceto estructural físico o bosquejo antes de diseñar el plan.
 3. **Protocolo de Comunicación con el Director**: Siempre explicar "Qué se hizo" y "Cómo afecta al negocio" usando analogías o ejemplos, evitando jerga técnica (o explicándola entre paréntesis si es vital).
 4. **Protocolo de Asignación**: Todo trabajo se basa en un plan en `.agent/planes/`. Se debe referenciar obligatoriamente la `GUIA_ESTILOS.md` y `Skills` relevantes.
-5. **Privacidad y Seguridad**: Credenciales solo en `.env`. Backup estructural solo en Hostinger (nunca en GitHub).
+5. **Privacidad y Seguridad — Credenciales Sensibles (⚠️ CRÍTICO)**:
+   - **NUNCA** escribir en código fuente, chats, planes, PRs, ni walkthroughs: contraseñas, API keys, JWT secrets, Client IDs/Secrets de OAuth, llaves de R2/Cloudflare, o cadenas de conexión a BD.
+   - La **única residencia permitida** de credenciales es el archivo `.env` de cada ambiente (protegido por `.gitignore`).
+   - Si un agente necesita una credencial para operar, debe pedírsela a Santi para que él la configure en el `.env` local. El agente nunca debe recibir credenciales en el chat ni hardcodearlas.
+   - Tipos de datos que **siempre van en `.env`**: `DB_PASS`, `JWT_SECRET`, `R2_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GEMINI_API_KEY`, `WC_CONSUMER_SECRET`, y cualquier token de API o contraseña.
 
 ---
 
 ## 3. Estándares de Ingeniería (Código y API)
 - **Idioma**: 100% Español. **Convenciones**: `PascalCase` (PHP/Vue), `snake_case` (DB/Campos), `camelCase` (JS).
-- **Lógica Multiempresa**: Campo `empresa` obligatorio en minúscula (ej: `os`).
-- **Filtro de Seguridad Multi-tenant (Empresa Activa)**: Toda tabla que tenga el campo `empresa` (todas, a excepción de las tablas de administración global como `sys_usuarios` o `sys_roles`) **DEBE** ser filtrada estrictamente en todas sus consultas SQL (Select, Insert, Update, Delete) utilizando el valor `empresa_activa` autenticado por el JWT del usuario. Un usuario solo puede ver y alterar los datos que pertenezcan a la empresa que tiene activa en ese momento. Los administradores globales tienen lógicas de bypass específicas si se requiere.
+- **Lógica Multiempresa y Auditoría Estricta (Bloqueo en Backend)**: 
+  1. **Filtro OBLIGATORIO (Select/Update/Delete)**: Toda tabla transaccional (ej. `com_productos`) DEBE filtrar estrictamente sus consultas SQL usando `empresa = :empresa` (el valor extraído del JWT del usuario). No hay excepciones. Un usuario jamás debe ver o afectar datos de otra empresa.
+  2. **Inyección Involuntaria (Insert/Update)**: Al crear o modificar un registro, el backend DEBE ignorar lo que envíe el cliente e inyectar por fuerza motriz los datos del JWT:
+     - `empresa` (obligatorio en inserts)
+     - `usuario_creador` (email del JWT, obligatorio en inserts)
+     - `usuario_ult_modificacion` (email del JWT, obligatorio en inserts y updates)
+  3. Las `fecha_creacion` y `fecha_ult_modificacion` son administradas estructuralmente por MariaDB (`CURRENT_TIMESTAMP`), por lo que no hace falta enviarlas desde PHP, a menos que el entorno obligue explícitamente a ello.
 - **Limpieza (Seiri)**: Los archivos de prueba (`test_...`, `info.php`) deben eliminarse inmediatamente tras verificar. Prohibido comitear "basura" de depuración.
 
 ### 3.1 Almacenamiento y API
@@ -32,8 +41,18 @@
 
 ## 4. Leyes de Base de Datos (MariaDB 11.8)
 - **Prefijos**: `sys_`, `com_`, `inv_`, `ven_`, `din_`.
-- **Campos Audit (Obligatorios)**: `id` (PK AI), `uid` (UNIQUE OS-YYYYMMDD-001), `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
+- **Doble Identificador Único (Obligatorio en todas las tablas)**:
+  - **`id`**: Entero auto-incremental gestionado por MySQL (`INT AUTO_INCREMENT PRIMARY KEY`). Uso **interno** (joins de rendimiento, paginación).
+  - **`uid`**: Código alfanumérico único. **Formato oficial obligatorio: `SIGLAS.YYMMDDHHMMSS`** (ej: `OS.260228175132`). El punto `.` separa las siglas del timestamp de 12 dígitos (año 2 díg. + mes + día + hora + minuto + segundo). Es el identificador **de negocio**: se usa en JOINs funcionales, en el API y en la URL. Las siglas son solo para garantizar la irrepetibilidad del código — **no indican pertenencia de empresa** (eso lo indica el campo `empresa`). ⚠️ El UID de la tabla `sys_empresa` (ej: `Ori_Sil_2`) sigue su propio formato y es el que va en el campo `empresa` de todas las tablas; no confundir con el UID de registros normales.
+- **Campos Audit (Obligatorios)**: `empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`.
 - **Tablas Prohibidas**: Estructuras de AppSheet (`costos_`, `prod_`, `din_`, `sys_`) son intocables.
+- **Convención de Empresa (⚠️ CRÍTICO)**:
+  - En `sys_empresa` el campo **`uid`** es el identificador real (PK) de la empresa — ej: `Ori_Sil_2`, `La_Tie_3`.
+  - El campo **`siglas`** es solo una abreviatura visual (ej: `OS`, `LT`) y **NO es el código identificador en ninguna relación**.
+  - El campo **`nombre_empresa`** es el nombre completo.
+  - Los **joins** hacia `sys_empresa` siempre se hacen con: `ON e.uid = tabla.empresa`.
+  - En el **Topbar** y en el **JWT** se presentan los 3 datos: `uid` (código), `nombre_empresa` (texto completo), `siglas` (abreviatura).
+  - El campo `empresa_activa` en el JWT guarda el `uid` de `sys_empresa`.
 
 ---
 
@@ -222,9 +241,27 @@ Para mantener la integridad de los datos y el orden (5S):
 - **Campos No Editables**: Los campos de auditoría y sistema (`empresa`, `usuario_creador`, `usuario_ult_modificacion`, `fecha_creacion`, `fecha_ult_modificacion`) son de **solo lectura**.
 - **Consistencia Visual**: Estos campos deben ser visibles en vistas de detalle o paneles de información, pero nunca habilitados para edición manual por el usuario.
 
+### 6.5.2 Política de las 3 Vistas (Ley del ERP)
+
+Todo módulo que administre registros **debe** implementar exactamente 3 vistas. Esta es una norma no negociable del ERP, aplicada en todos los módulos nuevos y existentes:
+
+| # | Tipo | URL | Componente | Skill de Referencia |
+|---|---|---|---|---|
+| 1 | **Listado/Catálogo** | `/:modulo/:entidades` | `Catalogo[Entidades].vue` | `skill_vista_listado.md` |
+| 2 | **Detalle** (solo lectura) | `/:modulo/:entidad/:uid/ver` | `Detalle[Entidad].vue` | `skill_vista_detalle.md` |
+| 3 | **Formulario** (editar/crear) | `/:modulo/:entidad/:uid` | `Formulario[Entidad].vue` | `skill_creacion_formularios.md` |
+
+**Regla de navegación:**
+- Clic en el **nombre** del registro en el listado → **Detalle**
+- Botón 👁 en el listado → **Detalle**
+- Botón ✏️ en el listado → **Formulario de edición**
+- Desde el **Detalle**, botón naranja "Editar [entidad]" → **Formulario de edición**
+
+Para implementar correctamente cada tipo de vista, leer el skill correspondiente ANTES de empezar a codificar.
+
 ---
 
-## 6.6 Soporte offline futuro
+
 
 El sistema está diseñado para soportar modo offline en el futuro.
 `fecha_ult_modificacion` permite saber qué registro es más reciente al sincronizar entre dispositivo y servidor. Regla de conflicto: el último en modificar gana.
@@ -279,8 +316,46 @@ Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se ne
 
 ## 6.9 Refinamiento Continuo y Bitácora
 - **Bitácora de Errores:** Todo incidente técnico (bloqueos, incompatibilidades, fallos de entorno) debe registrarse en **[.agent/bitacora_errores.md](file:///c:/Proyectos_code/SOS_ERP/.agent/bitacora_errores.md)** por el agente que lo resuelva.
+
+## 6.10 Filosofía de Mejora Continua (Kaizen) y Afinado de Skills
+El código no es lo único que evoluciona; la inteligencia operativa (los `Skills`) debe evolucionar con él.
+Es obligatorio para todos los agentes (AntiGravity, Codex, Claude Code) operar bajo la premisa de **Afinación Sistemática y Mejora Continua**:
+1. **Capitalizar los Errores:** Cada vez que se descubra un bug, un edge case (como fallos de CORS, filtros omitidos, o dependencias silenciosas), el agente **TIENE LA OBLIGACIÓN** de ir al Skill correspondiente en `.agent/skills/` y documentar la nueva regla o precaución en la sección "Problemas Conocidos".
+2. **Proponer Mejoras:** Si durante la ejecución se descubre una forma más óptima, limpia o segura de hacer algo (respetando la regla de Aislamiento y Multi-empresa), el agente debe aplicarla y luego actualizar la literatura del sistema.
+3. **El Manifiesto y los Skills NO son texto muerto:** Son protocolos vivos de blindaje antimisiles. Ningún error debe ocurrir dos veces por la misma causa gracias a esta práctica de autoinmunización.
 - **Flujo de Refinamiento:** La Madrina Arquitecta analizará semanalmente la bitácora para elevar soluciones recurrentes a este Manifiesto o a un Skill específico.
 - **Actualización Proactiva:** Ante cada nuevo error resuelto, la Madrina preguntará si debe ser documentado permanentemente.
+
+## 6.11 Principio BD-Primero (Obligatorio antes de desarrollar)
+
+> ⚠️ **NORMA INAMOVIBLE:** Antes de escribir cualquier INSERT, UPDATE, SELECT o código que interactúe con una tabla, el agente DEBE verificar su estructura real ejecutando `DESCRIBE nombre_tabla` en la BD. NO asumas columnas basándote en código existente, documentación desactualizada o suposiciones. La BD es la fuente de verdad.
+
+**Por qué existe esta regla:** Los errores más costosos en tokens y tiempo de esta misma conversación ocurrieron porque el PHP usaba nombres de columnas (`nombre_archivo`, `url_publica`) que no existían en la tabla real (`archivo_local`, `archivo_woocommerce`). El código documentado y la BD real estaban desincronizados.
+
+**Protocolo obligatorio:**
+1. `DESCRIBE nombre_tabla` → ver tipos, nombres exactos y constraints
+2. `SHOW CREATE TABLE nombre_tabla\G` → ver ENUMs, FKs, índices
+3. Si difiere del código, **actualizar el código y el SQL de documentación**
+
+## 6.12 Filosofía de Almacenamiento de Archivos (Portabilidad)
+
+> **NORMA INAMOVIBLE:** En BD solo se guarda la **ruta relativa dentro del bucket**, nunca la URL completa del proveedor.
+
+```
+✅ BD guarda:  empresas/ori_sil_2/productos/OS.260302.../foto.jpg
+❌ BD NO guarda: https://archivos.oscomunidad.com/empresas/ori_sil_2/...
+```
+
+La URL completa se construye en tiempo de ejecución:
+```php
+$urlCompleta = rtrim(getenv('R2_URL_PUBLICA'), '/') . '/' . $registro['archivo_local'];
+```
+
+**Beneficio:** Si se migra de Cloudflare R2 a AWS S3 o cualquier otro proveedor, solo se cambia la variable de entorno `R2_URL_PUBLICA`. La BD permanece intacta. Sin este principio, habría que hacer UPDATE masivo en miles de registros.
+
+El campo en BD se llama `archivo_local` (ruta en almacenamiento local/bucket) y `archivo_woocommerce` guarda el ID que WooCommerce asigna al sincronizar (vacío hasta sincronización).
+
+Ver: `skill_multimedia_r2.md` para el schema completo y ejemplos de código.
 
 ---
 

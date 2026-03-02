@@ -9,21 +9,25 @@
 //   VITE_API_URL   → URL base (ej: http://localhost/erp/api o https://erp.oscomunidad.com/api)
 //   VITE_API_TOKEN → Token secreto. Debe coincidir con R2_TOKEN en el .env del servidor.
 
-const URL_BASE = import.meta.env.VITE_API_URL   || '/erp/api'
-const TOKEN    = import.meta.env.VITE_API_TOKEN  || ''
+const URL_BASE = import.meta.env.VITE_API_URL || '/erp/api'
+const TOKEN = import.meta.env.VITE_API_TOKEN || ''
 
 // ── Llamada JSON estándar ─────────────────────────────────────────
 // Usar para: guardar_producto, obtener_producto, etc.
 // Lanza Error si exito=false para que el catch del componente lo maneje.
-async function llamar (modulo, area, accion, datos = {}) {
+async function llamar(modulo, area, accion, datos = {}) {
   const url = `${URL_BASE}/${modulo}/${area}`
 
   let respuesta
   try {
+    const jwt = localStorage.getItem('jwt_token') || ''
     respuesta = await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body:    JSON.stringify({ token: TOKEN, accion, datos }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': `Bearer ${jwt}`
+      },
+      body: JSON.stringify({ token: TOKEN, accion, datos }),
     })
   } catch {
     throw new Error('Sin conexión con el servidor. Verifica tu red.')
@@ -34,6 +38,13 @@ async function llamar (modulo, area, accion, datos = {}) {
   })
 
   if (!json.exito) {
+    if (respuesta.status === 401 || respuesta.status === 403) {
+      if (json.errores && (json.errores.includes('token_expirado') || json.errores.includes('jwt_ausente'))) {
+        localStorage.removeItem('jwt_token')
+        window.location.hash = '#/login'
+        throw new Error('Tu sesión ha expirado o es inválida. Ingresa de nuevo.')
+      }
+    }
     const detalles = json.errores?.length ? ` — ${json.errores.join(', ')}` : ''
     throw new Error((json.mensaje || 'Error en la API') + detalles)
   }
@@ -46,18 +57,25 @@ async function llamar (modulo, area, accion, datos = {}) {
 // Los datos extra van como campo JSON 'datos'; el archivo como 'archivo'.
 // IMPORTANTE: No poner Content-Type en los headers — el navegador lo
 // agrega automáticamente con el boundary correcto para el multipart.
-async function subirArchivo (modulo, area, accion, archivo, datosExtra = {}) {
+async function subirArchivo(modulo, area, accion, archivo, datosExtra = {}) {
   const url = `${URL_BASE}/${modulo}/${area}`
 
   const formulario = new FormData()
-  formulario.append('token',  TOKEN)
+  formulario.append('token', TOKEN)
   formulario.append('accion', accion)
-  formulario.append('datos',  JSON.stringify(datosExtra))
+  formulario.append('datos', JSON.stringify(datosExtra))
   formulario.append('archivo', archivo, archivo.name)
 
   let respuesta
   try {
-    respuesta = await fetch(url, { method: 'POST', body: formulario })
+    const jwt = localStorage.getItem('jwt_token') || ''
+    // Con fetch y FormData el navegador pone el header Content-Type multipart/form-data con el boundary correcto
+    // pero si podemos inyectar Authorization manualmente sin problema.
+    respuesta = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${jwt}` },
+      body: formulario
+    })
   } catch {
     throw new Error('Sin conexión con el servidor. Verifica tu red.')
   }
@@ -67,6 +85,11 @@ async function subirArchivo (modulo, area, accion, archivo, datosExtra = {}) {
   })
 
   if (!json.exito) {
+    if (respuesta.status === 401) {
+      localStorage.removeItem('jwt_token')
+      window.location.hash = '#/login'
+      throw new Error('Sesión finalizada. Inicia sesión de nuevo.')
+    }
     const detalles = json.errores?.length ? ` — ${json.errores.join(', ')}` : ''
     throw new Error((json.mensaje || 'Error al subir el archivo') + detalles)
   }

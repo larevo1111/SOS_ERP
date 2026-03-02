@@ -22,40 +22,51 @@ class ListarMaestrosCosto
     {
         // Filtro opcional por texto (para búsqueda en el q-select del frontend)
         $busqueda = trim($datos['busqueda'] ?? '');
+        $empresa = $datos['empresa'] ?? '';
+
+        if (empty($empresa)) {
+            return $this->respuesta(false, null, 'Error: filtro de empresa requerido.', ['empresa_ausente']);
+        }
 
         try {
             if ($busqueda !== '') {
                 $stmt = $this->pdo->prepare(
                     'SELECT `Id`, `uid`, `Producto`
                      FROM `costos_encabezados_productos`
-                     WHERE `Producto` LIKE :busqueda
+                     WHERE `Empresa` = :empresa AND `Producto` LIKE :busqueda
                      ORDER BY `Producto` ASC
                      LIMIT 100'
                 );
-                $stmt->execute([':busqueda' => '%' . $busqueda . '%']);
-            } else {
+                $stmt->execute([
+                    ':empresa' => $empresa,
+                    ':busqueda' => '%' . $busqueda . '%'
+                ]);
+            }
+            else {
                 $stmt = $this->pdo->prepare(
                     'SELECT `Id`, `uid`, `Producto`
                      FROM `costos_encabezados_productos`
+                     WHERE `Empresa` = :empresa
                      ORDER BY `Producto` ASC
                      LIMIT 200'
                 );
-                $stmt->execute();
+                $stmt->execute([':empresa' => $empresa]);
             }
 
             $maestros = $stmt->fetchAll();
 
             // Normalizar a camelCase consistente para el frontend
             $resultado = array_map(fn($fila) => [
-                'id'       => $fila['Id'],
-                'uid'      => $fila['uid'],
-                'producto' => $fila['Producto'],
+            'id' => $fila['Id'],
+            'uid' => $fila['uid'],
+            'producto' => $fila['Producto'],
             ], $maestros);
 
             return $this->respuesta(true, ['maestros' => $resultado],
                 count($resultado) . ' maestros encontrados.');
 
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return $this->respuesta(false, null, 'Error al consultar maestros de costo.', [$e->getMessage()]);
         }
     }
@@ -63,8 +74,8 @@ class ListarMaestrosCosto
     private function respuesta(bool $exito, $datos, string $mensaje, array $errores = []): array
     {
         return [
-            'exito'   => $exito,
-            'datos'   => $datos ?? (object)[],
+            'exito' => $exito,
+            'datos' => $datos ?? (object)[],
             'mensaje' => $mensaje,
             'errores' => $errores,
         ];

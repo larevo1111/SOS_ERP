@@ -13,6 +13,7 @@ Este archivo es el catálogo oficial de conocimientos institucionalizados del pr
 | **[skill_despliegue_produccion.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_despliegue_produccion.md)** | Despliegue Producción | Pasos para pasar el sistema de desarrollo a la web real. | Cuando se tenga una versión lista para el mundo. |
 | **[skill_frontend_quasar.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_frontend_quasar.md)** | Desarrollo Frontend con Quasar y Vue 3 | Estándares 5S, Composición, Layouts. | Al desarrollar o modificar la interfaz de usuario. |
 | **[skill_comunicacion_santi_ia.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_comunicacion_santi_ia.md)** | Comunicación Visual y Estructura (Santi ↔ IA) | Protocolo estricto para definición de UI basada en bocetos, cero asunciones lógicas. | Al definir o revisar requisitos de interfaz de usuario con la IA. |
+| **[skill_auditoria_bd.md](skill_auditoria_bd.md)** | 🛡️ Seguridad Multi-tenant y Auditoría de BD | Reglas inmutables de inyección forzada de `empresa`, `usuario_creador`, `usuario_ult_modificacion` desde el JWT. | OBLIGATORIO antes de tocar cualquier Caso de Uso o Controlador de Backend. |
 
 ---
 

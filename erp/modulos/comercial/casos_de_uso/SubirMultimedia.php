@@ -95,12 +95,12 @@ class SubirMultimedia
         $sql = '
             INSERT INTO com_productos_multimedia (
                 uid, empresa, uid_producto, tipo_archivo,
-                nombre_archivo, ruta_archivo, url_publica,
+                archivo_local, archivo_woocommerce,
                 uso, orden, estado,
                 usuario_creador, usuario_ult_modificacion
             ) VALUES (
                 :uid, :empresa, :uid_producto, :tipo_archivo,
-                :nombre_archivo, :ruta_archivo, :url_publica,
+                :archivo_local, :archivo_woocommerce,
                 :uso, :orden, :estado,
                 :usuario_creador, :usuario_ult_modificacion
             )
@@ -112,9 +112,12 @@ class SubirMultimedia
             ':empresa' => $empresa,
             ':uid_producto' => $uidProducto,
             ':tipo_archivo' => $tipoArchivo,
-            ':nombre_archivo' => $archivo['name'],
-            ':ruta_archivo' => $rutaEnBucket,
-            ':url_publica' => $urlPublica,
+            // archivo_local = ruta relativa dentro del bucket (SIN la URL base del proveedor).
+            // La URL completa se reconstruye en tiempo de ejecución: R2_URL_PUBLICA . '/' . archivo_local
+            // Esto permite cambiar de proveedor de almacenamiento sin tocar la BD.
+            ':archivo_local' => $rutaEnBucket,
+            // archivo_woocommerce = ID de WooCommerce, se llena al sincronizar. Vacío mientras tanto.
+            ':archivo_woocommerce' => '',
             ':uso' => $datos['uso'] ?? 'Galeria',
             ':orden' => $orden,
             ':estado' => 'Activo',
@@ -123,6 +126,13 @@ class SubirMultimedia
         ]);
 
         $registro = $this->buscarPorUid($uid);
+
+        // Enriquecer el registro con la URL pública calculada para que el frontend la pueda mostrar
+        if ($registro && !empty($registro['archivo_local'])) {
+            $r2BaseUrl = rtrim(getenv('R2_URL_PUBLICA') ?: '', '/');
+            $registro['url_publica_calculada'] = $r2BaseUrl . '/' . $registro['archivo_local'];
+        }
+
         return $this->respuesta(true, $registro, 'Archivo subido correctamente.');
     }
 

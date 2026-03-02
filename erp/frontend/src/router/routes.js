@@ -14,6 +14,11 @@ const routes = [
         component: () => import('modulos/comercial/CatalogoProductos.vue')
       },
       {
+        path: '/comercial/producto/:uid/ver',
+        name: 'ver-producto',
+        component: () => import('modulos/comercial/DetalleProducto.vue')
+      },
+      {
         path: '/comercial/producto/:uid',
         name: 'editar-producto',
         component: () => import('modulos/comercial/FormularioProducto.vue')
@@ -29,6 +34,11 @@ const routes = [
         component: () => import('modulos/comercial/IntegracionWooCommerce.vue')
       }
     ]
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('pages/PaginaLogin.vue')
   },
   {
     path: '/:catchAll(.*)*',

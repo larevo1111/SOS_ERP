@@ -44,27 +44,24 @@ if (!$cuerpo) {
     responderCostos(false, null, 'Petición inválida: se esperaba JSON.', ['sin_cuerpo']);
 }
 
-// ── Validar token R2_TOKEN (Temporal hasta Fase 8 JWT) ───────────────
-$tokenEnviado = $cuerpo['token'] ?? '';
-$rutaEnv = dirname(__DIR__, 3) . '/.env';
-$tokenEsperado = '';
-if (file_exists($rutaEnv)) {
-    foreach (file($rutaEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linea) {
-        $linea = trim($linea);
-        if (str_starts_with($linea, 'R2_TOKEN=')) {
-            $tokenEsperado = trim(substr($linea, strlen('R2_TOKEN=')));
-            break;
-        }
-    }
-}
-
-if (!$tokenEsperado || !hash_equals($tokenEsperado, $tokenEnviado)) {
-    http_response_code(401);
-    responderCostos(false, null, 'Token inválido o ausente.', ['token_invalido']);
-}
-
 $accion = trim($cuerpo['accion'] ?? '');
 $datos = $cuerpo['datos'] ?? [];
+
+// ── Filtro de Seguridad Multi-tenant (OBLIGATORIO) ──────────────
+require_once __DIR__ . '/../../../infraestructura/autenticacion/ValidarJwt.php';
+use Infraestructura\Autenticacion\ValidarJwt;
+
+$usuarioRef = ValidarJwt::$usuarioActual;
+if (!$usuarioRef) {
+    http_response_code(401);
+    responderCostos(false, null, 'Acceso denegado: Sesión no validada.', ['jwt_ausente']);
+}
+
+$datos['empresa'] = $usuarioRef->empresa_activa ?? '';
+if (empty($datos['empresa'])) {
+    http_response_code(403);
+    responderCostos(false, null, 'Bloqueo: No hay empresa activa en el token.', ['empresa_activa_ausente']);
+}
 
 // ── Enrutar por acción ────────────────────────────────────────────
 try {
