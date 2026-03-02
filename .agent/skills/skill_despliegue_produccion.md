@@ -50,23 +50,44 @@ ssh -t hostinger_erp 'cd ~/domains/oscomunidad.com/public_html/erp && source .en
 
 ## ⚠️ Problemas Conocidos y Soluciones
 
+### Git push aparece "colgado" por 30+ minutos (monitoring de background)
+**Causa:** El paso 5 incluye `git add -f frontend/dist/spa/` que tiene decenas de archivos JS/CSS compilados. Git debe indexar (hashear) cada archivo antes de hacer el push. Esto puede tardar legitimamente 5-15 minutos. Además, cuando el agente AI ejecuta comandos en background, el monitoring puede no reflejar el progreso real.
+
+**Síntomas:** El agente reporta el comando como `RUNNING` indefinidamente; el usuario no ve output.
+
+**Verificación:** Abrir una terminal nueva y ejecutar:
+```bash
+cd ~/.gemini/antigravity/scratch/SOS_ERP/erp
+git log --oneline -3
+git status --short
+```
+Si el último commit aparece en `origin/main` y el `status` está limpio → **el push SÍ se completó**, el agente simplemente no lo sabía.
+
+**Solución si realmente está colgado:**
+```bash
+# Cancelar el proceso y hacer push manual:
+cd ~/.gemini/antigravity/scratch/SOS_ERP/erp
+git add -A -- ':!frontend/dist'   # excluir dist si no se necesita actualizar
+git commit -m "docs: ..."
+git push
+```
+
+**Prevención:** Para el agente AI: siempre agregar `git log --oneline -2` al final del push para verificar que el commit está en origin. Para el workflow de despliegue: reducir lo que entra al dist commit separando el push de código del push del build.
+
 ### SSH git pull se queda colgado / timeout
-**Causa:** El `git pull` en Hostinger tarda si hay muchos archivos o si la conexión SSH tiene timeout bajo configurado. Si se ejecutó `npm run build` hay decenas de assets JS/CSS nuevos que subir.
-**Síntomas:** El comando no devuelve output por 30+ segundos, la terminal queda en estado `running`.
+**Causa:** El `git pull` en Hostinger tarda si hay muchos archivos o si la conexión SSH tiene timeout bajo configurado.
 **Soluciones:**
-1. Esperar 2-3 minutos: si hay muchos archivos, el git pull puede tardar legítimamente.
-2. Si el comando se cancela: volver a ejecutar `ssh hostinger_erp "cd ~/domains/... && git pull"` — git es idempotente, se puede repetir.
-3. Si el SSH cae por timeout, revisar `~/.ssh/config` y agregar:
+1. Esperar 2-3 minutos: si hay muchos archivos, es normal.
+2. Si cae por timeout, agregar a `~/.ssh/config`:
    ```
    Host hostinger_erp
      ServerAliveInterval 30
      ServerAliveCountMax 5
    ```
+3. Si se cancela: repetir `ssh hostinger_erp "cd ~/domains/... && git pull"` — es idempotente.
 
 ### Catálogo vacío en producción después del deploy
-**Causa frecuente:** La BD de producción no fue sobrescrita (Paso 7 omitido) o tiene estructura diferente a la local.
-**Diagnóstico:** Revisar si el error en producción es `SQLSTATE` o simplemente datos vacíos. Si es error SQL, el schema está desactualizado. Si son datos vacíos, la BD de prod no tiene los registros de test local (lo cual es NORMAL en producción).
-**Importante:** Los datos de test (CHOCOBEETAL, Miel de Bosque) son datos de **desarrollo local** y NO se deben subir a producción. Solo se despliega estructura SQL, no datos de prueba.
+**Causa frecuente:** La BD de producción no fue sobrescrita (Paso 7 omitido) o tiene estructura diferente. Los datos de test (CHOCOBEETAL, Miel de Bosque) son datos de desarrollo local y **NO se deben subir a producción**. Solo se despliega estructura SQL.
 
 ### `.htaccess` con variables rotas (`$1`)
 **Causa:** Usar heredoc por SSH desde PowerShell en Windows destroza las variables `$1`.
