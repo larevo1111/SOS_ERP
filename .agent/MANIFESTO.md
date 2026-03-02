@@ -357,7 +357,21 @@ El campo en BD se llama `archivo_local` (ruta en almacenamiento local/bucket) y 
 
 Ver: `skill_multimedia_r2.md` para el schema completo y ejemplos de código.
 
+## 6.13 Verificar SIEMPRE Antes de Declarar Éxito
+
+> ⚠️ **NORMA INAMOVIBLE:** Antes de reportar a Santi que algo funciona, el agente DEBE verificarlo visualmente usando el browser subagent o consultando la API directamente. Nunca declarar éxito basándose solo en que el código "debería funcionar" o en que el terminal no mostró errores.
+
+**Por qué existe esta regla:** Múltiples veces en esta sesión se reportó "está funcionando" cuando el catálogo seguía vacío para el usuario. Esto genera frustración, pérdida de confianza y gasto innecesario de tokens.
+
+**Protocolo de verificación obligatorio:**
+1. Para frontend: usar el browser subagent para navegar a la URL afectada y tomar un screenshot que confirme el resultado
+2. Para API backend: hacer una llamada de prueba con curl o desde el browser y confirmar la respuesta JSON
+3. Para BD: ejecutar un SELECT que confirme los datos insertados/actualizados
+4. Solo después de la verificación, reportar a Santi con el screenshot o evidencia como parte del mensaje
+
 ---
+
+
 
 ## 11. Infraestructura y ambientes
 

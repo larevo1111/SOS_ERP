@@ -1,68 +1,84 @@
-# skill_despliegue_produccion.md
+---
+description: Guía para desplegar el ERP a producción (erp.oscomunidad.com en Hostinger) desde el entorno de desarrollo local (Ubuntu).
+---
+
+# 🚀 Skill: Despliegue a Producción
 
 > [!IMPORTANT]
-> Este manual es para el **Director (Santi)**. Describe el proceso para "subir" (desplegar) la versión de desarrollo al servidor real de Hostinger.
+> **Entorno de ejecución:** Ubuntu local. Los comandos se ejecutan en bash desde `/home/osserver/.gemini/antigravity/scratch/SOS_ERP`.
+> **Workflow oficial**: usar `/desplegar_produccion` que auto-ejecuta los pasos marcados con `// turbo`.
 
-## Para qué sirve
-Poner el sistema en vivo en `https://erp.oscomunidad.com` para empezar a usarlo con datos reales.
+## Flujo Completo (7 pasos)
 
-> [!IMPORTANT]
-> **Entorno**: Windows 11. Los comandos de compilación (`npm run build`) se deben correr desde **CMD**, no desde PowerShell.
+### Paso 1 — Verificar conexión SSH
+```bash
+ssh hostinger_erp "echo 'Conexión a Hostinger Exitosa'"
+```
 
-## Problema conocido: .htaccess en Hostinger
+### Paso 2 — Backup de producción (MANDATORIO antes de sobrescribir BD)
+```bash
+ssh -t hostinger_erp 'source ~/domains/oscomunidad.com/public_html/erp/.env && mkdir -p ~/backups/bd && mariadb-dump --single-transaction -u "$DB_USER" -p"$DB_PASS" -h "${DB_HOST:-localhost}" -P "${DB_PORT:-3306}" "$DB_NAME" > ~/backups/bd/backup_$(date +%Y%m%d_%H%M%S)_pre_deploy.sql && echo "Backup completado"'
+```
 
-> [!CAUTION]
-> **NO uses `ssh hostinger_erp "cat > .htaccess <<EOF ... EOF"`** para crear el `.htaccess`.
-> El heredoc de SSH sobre PowerShell en Windows elimina las variables (`$1`) de las reglas de reescritura, rompiendo la carga de activos JS/CSS (Error MIME type mismatch → pantalla en blanco).
->
-> **Solución correcta**: Crear el `.htaccess` localmente y subirlo con `scp`:
-> ```bash
-> # Crear el archivo en /tmp/prod.htaccess
-> scp -P 65002 -i ~/.ssh/sos_erp /tmp/prod.htaccess u768061575@109.106.250.195:~/domains/oscomunidad.com/public_html/erp/.htaccess
-> ```
+### Paso 3 — Build del frontend
+```bash
+cd erp/frontend && npm run build
+```
+Resultado: `erp/frontend/dist/spa/` listo para producción.
 
-## Procedimiento de Despliegue (Paso a Paso)
+### Paso 4 — Exportar BD local
+```bash
+cd erp && ./scripts/db_export.sh
+```
 
-### 1. Preparar la Versión Final (Build)
-Antes de subir archivos, debemos "empaquetar" el código para que sea rápido y seguro.
-- Abre la terminal en: `c:/Proyectos_code/SOS_ERP/erp/frontend`.
-- Ejecuta:
-  ```bash
-  npm run build
-  ```
-- **Resultado**: Se creará una carpeta llamada `dist/spa`. **Aquí es donde vive tu ERP listo para el mundo.**
+### Paso 5 — Git push (código + build + BD)
+```bash
+cd erp && git add -f frontend/dist/spa/ && git add base_datos/sos_erp_sync.sql && git add -A && git commit -m "deploy: actualizacion codigo, build front y sync BD" && git push
+```
 
-### 2. Subir el Código al Servidor
-Usaremos el comando `git` que es lo más ordenado (5S):
-- En la raíz del proyecto (`SOS_ERP`):
-  ```bash
-  git add .
-  git commit -m "feat: preparar version para despliegue"
-  git push origin main
-  ```
-- Ahora, conéctate a tu servidor:
-  ```bash
-  ssh hostinger_erp
-  ```
-- Dentro del servidor, actualiza:
-  ```bash
-  cd ~/domains/oscomunidad.com/public_html/erp
-  git pull origin main
-  ```
+### Paso 6 — Pull en Hostinger
+```bash
+ssh hostinger_erp "cd ~/domains/oscomunidad.com/public_html/erp && git pull"
+```
 
-### 3. Sincronizar la Base de Datos
-Sigue los pasos del **[skill_sincronizacion_bd_win11.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_sincronizacion_bd_win11.md)** para asegurar que lo que guardaste hoy en local esté en la web.
-
-### 4. Configurar el "Enlace" Final
-Si es la primera vez, asegúrate de que el contenido de `erp/frontend/dist/spa` esté accesible desde la URL pública. 
-> **Nota técnica**: Normalmente apuntamos el dominio de Hostinger a esa carpeta específica.
+### Paso 7 — Sobrescribir BD en producción
+```bash
+ssh -t hostinger_erp 'cd ~/domains/oscomunidad.com/public_html/erp && source .env && mysql -u "$DB_USER" -p"$DB_PASS" -h "${DB_HOST:-localhost}" -P "${DB_PORT:-3306}" "$DB_NAME" < erp/base_datos/sos_erp_sync.sql'
+```
 
 ---
 
-## Regla de Oro del Despliegue
-**NUNCA** despliegues sin antes haber probado en local que todo funciona. El servidor es sagrado.
+## ⚠️ Problemas Conocidos y Soluciones
 
-## Tip: Caché del Navegador
-> [!TIP]
-> Si subes cambios al Frontend y Santi no los ve, es por la caché del navegador.
-> Dile que recargue usando **Ctrl + Shift + R** (Recarga Forzada) o que agregue un parámetro falso a la URL (ej. `erp.oscomunidad.com/?v=123`).
+### SSH git pull se queda colgado / timeout
+**Causa:** El `git pull` en Hostinger tarda si hay muchos archivos o si la conexión SSH tiene timeout bajo configurado. Si se ejecutó `npm run build` hay decenas de assets JS/CSS nuevos que subir.
+**Síntomas:** El comando no devuelve output por 30+ segundos, la terminal queda en estado `running`.
+**Soluciones:**
+1. Esperar 2-3 minutos: si hay muchos archivos, el git pull puede tardar legítimamente.
+2. Si el comando se cancela: volver a ejecutar `ssh hostinger_erp "cd ~/domains/... && git pull"` — git es idempotente, se puede repetir.
+3. Si el SSH cae por timeout, revisar `~/.ssh/config` y agregar:
+   ```
+   Host hostinger_erp
+     ServerAliveInterval 30
+     ServerAliveCountMax 5
+   ```
+
+### Catálogo vacío en producción después del deploy
+**Causa frecuente:** La BD de producción no fue sobrescrita (Paso 7 omitido) o tiene estructura diferente a la local.
+**Diagnóstico:** Revisar si el error en producción es `SQLSTATE` o simplemente datos vacíos. Si es error SQL, el schema está desactualizado. Si son datos vacíos, la BD de prod no tiene los registros de test local (lo cual es NORMAL en producción).
+**Importante:** Los datos de test (CHOCOBEETAL, Miel de Bosque) son datos de **desarrollo local** y NO se deben subir a producción. Solo se despliega estructura SQL, no datos de prueba.
+
+### `.htaccess` con variables rotas (`$1`)
+**Causa:** Usar heredoc por SSH desde PowerShell en Windows destroza las variables `$1`.
+**Solución:** Crear el `.htaccess` local y subirlo con `scp`:
+```bash
+scp -P 65002 -i ~/.ssh/sos_erp /tmp/prod.htaccess u768061575@109.106.250.195:~/domains/oscomunidad.com/public_html/erp/.htaccess
+```
+
+### Caché del navegador (usuario no ve cambios)
+Indicar a Santi que use **Ctrl + Shift + R** o agregar `?v=timestamp` a la URL.
+
+---
+
+## Regla de Oro
+**NUNCA despliegues sin haber verificado en local que todo funciona.** El servidor de producción es sagrado.
