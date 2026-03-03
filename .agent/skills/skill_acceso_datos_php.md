@@ -12,7 +12,21 @@ Este skill explica cómo interactuar con MariaDB desde el código PHP del ERP, a
 - **Error `ATTR_ERRMODE`**: Ojo con el typo común `ATTR_ERR_MODE` (incorrecto).
 - **Campos NOT NULL sin Default (Error 1364)**: Si una tabla heredada exige un valor (como `url_producto`), el desarrollador debe asegurarse de enviarlo en el `INSERT` o pedirle a Santi estandarizar la tabla con un `DEFAULT` si aplica.
 - **Rutas en Scripts Temporales**: Al ejecutar scripts desde la consola, asegurarse de usar rutas absolutas para los `require_once`.
-- **Reutilización de Parámetros Nombrados (Error `Invalid parameter number`)**: PDO en MariaDB puede fallar estructuralmente si se usa el mismo placeholder (ej. `:uid`) múltiples veces en una consulta (`WHERE a = :uid OR b = :uid`). *Solución*: Usar nombres únicos (`:uid1`, `:uid2`) y pasarlos todos en el `execute()`.
+- **Reutilización de Parámetros Nombrados (Error `Invalid parameter number`)**: PDO en MariaDB puede fallar estructuralmente si se usa el mismo placeholder (ej. `:uid`) múltiples veces en una consulta. *Solución*: Usar nombres únicos (`:uid1`, `:uid2`).
+- **⚠️ `LEFT JOIN LATERAL` NO COMPATIBLE (Error SQL 1064)**: La sintaxis `LEFT JOIN LATERAL (...)` falla en MariaDB local aunque la documentación diga que está soportada desde la v10.3. **Nunca usar LATERAL JOIN.** La alternativa correcta y compatible es el **subquery correlacionado en el SELECT**:
+  ```sql
+  -- ✅ CORRECTO — compatible con cualquier MariaDB
+  SELECT v.uid,
+         (SELECT archivo_local FROM com_productos_multimedia
+          WHERE uid_producto = v.uid AND uso = 'Variacion'
+          ORDER BY orden ASC LIMIT 1) AS miniatura_local
+  FROM com_productos v
+
+  -- ❌ INCORRECTO — causa Error 1064 en MariaDB local
+  SELECT v.uid, m.archivo_local
+  FROM com_productos v
+  LEFT JOIN LATERAL (SELECT ... LIMIT 1) m ON TRUE
+  ```
 
 ## Ejemplos de código correcto
 Conexión y consulta preparada:
