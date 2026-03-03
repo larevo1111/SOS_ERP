@@ -18,6 +18,7 @@ Para mantener la estética 5S y la coherencia de datos, la IA debe seguir estas 
 | `nombre` | Producto Base + Atributo | Miel Silvestre 500g |
 | `nombre_grupo_catalogo` | Nombre genérico de familia | Miel Silvestre |
 | `valor_atributo_variacion` | Normalización de unidades | 500 grs -> 500g |
+| **Coherencia de Unidades** | **Si el maestro o variaciones existentes usan una unidad (GRS, ML, KG, LT, UND…), la nueva sugerencia DEBE usar la misma. Nunca mezclar formatos ("130g" con "GRS").** | Maestro: `CHOCOBEETAL OS 90 GRS` → nueva: `CHOCOBEETAL OS 130 GRS` |
 
 ## 3. Síntesis y Diseño de Contexto (Regla Universal)
 Para que la IA genere sugerencias útiles, precisas y relevantes en cualquier campo del sistema (nombres, descripciones, variaciones, etc.), el contexto enviado al backend y el prompt allí construido deben seguir este patrón estructurado:

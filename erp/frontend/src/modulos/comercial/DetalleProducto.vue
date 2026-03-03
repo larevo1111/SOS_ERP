@@ -9,9 +9,9 @@
         <div class="cabecera__miga">
           <span class="cabecera__miga-link" @click="irAlCatalogo">Comercial</span>
           <q-icon name="chevron_right" size="14px" color="grey-4" />
-          <span class="cabecera__miga-link" @click="irAlCatalogo">Productos</span>
+          <span class="cabecera__miga-link" @click="irAlCatalogo">Catálogo Comercial</span>
           <q-icon name="chevron_right" size="14px" color="grey-4" />
-          <span class="cabecera__miga-actual">{{ producto.nombre || '…' }}</span>
+          <span class="cabecera__miga-actual">{{ (producto.nombre || '…') + ' — Detalle' }}</span>
         </div>
         <div class="cabecera__titulo-row">
           <div class="cabecera__titulo">{{ producto.nombre }}</div>

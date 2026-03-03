@@ -18,6 +18,24 @@ La Vista de Detalle es la segunda de las **3 vistas obligatorias** de todo módu
 3. **Galería de imágenes** (si el módulo tiene multimedia) con botón de agregar que valida que el producto esté guardado
 4. **Panel lateral** con variaciones/relaciones y datos de auditoría (UID, empresa, fechas)
 
+## Política Oficial de Migas de Navegación (Breadcrumb)
+
+> [!IMPORTANT]
+> La miga siempre debe coincidir EXACTAMENTE con el nombre del ítem de menú real (`sys_menu_v2`), no con el nombre interno de la entidad.
+
+**Estructura obligatoria:**
+`[Módulo] > [Nombre ítem del menú] > [Nombre del Registro] — [Modo]`
+
+| Nivel | Ejemplo Comercial |
+|---|---|
+| Módulo | `Comercial` |
+| Ítem del menú | `Catálogo Comercial` (NO "Productos") |
+| Registro + Modo | `CHOCOBEETAL OS 90 GRS — Detalle` |
+
+**Modos aceptados:** `— Detalle`, `— Edición`, o nada (para Nuevo Registro).
+
+Al crear la miga, verificar el nombre del ítem contra la tabla `sys_menu_v2` o el componente `LayoutPrincipal.vue` antes de hardcodear el texto.
+
 ## Galería en Vista de Detalle
 La vista de detalle puede permitir subir multimedia, pero **con la misma validación** que el formulario de edición: el producto debe existir en BD (tener UID) antes de subir archivos.
 

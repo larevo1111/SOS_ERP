@@ -58,12 +58,15 @@ class ObtenerProducto
                 SELECT v.uid, v.nombre, v.estado, v.nombre_atributo_variacion, v.valor_atributo_variacion, v.precio_regular,
                        m.archivo_local as miniatura_local
                 FROM com_productos v
-                LEFT JOIN (
-                    SELECT uid_producto, empresa, archivo_local 
+                LEFT JOIN LATERAL (
+                    SELECT archivo_local 
                     FROM com_productos_multimedia 
-                    WHERE uso = 'Variacion' 
+                    WHERE uid_producto = v.uid
+                      AND uso = 'Variacion'
+                      AND estado = 'Activo'
+                    ORDER BY orden ASC
                     LIMIT 1
-                ) m ON m.uid_producto = v.uid AND m.empresa = v.empresa
+                ) m ON TRUE
                 WHERE v.producto_principal_variacion = :uid
                   AND v.empresa = :empresa
                 ORDER BY v.id ASC
@@ -75,6 +78,9 @@ class ObtenerProducto
             foreach ($variaciones as &$v) {
                 if (!empty($v['miniatura_local'])) {
                     $v['miniatura_url'] = $r2BaseUrl . '/' . $v['miniatura_local'];
+                }
+                else {
+                    $v['miniatura_url'] = null;
                 }
             }
             unset($v);

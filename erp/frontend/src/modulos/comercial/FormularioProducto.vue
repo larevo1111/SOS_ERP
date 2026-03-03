@@ -11,10 +11,10 @@
         <div class="cabecera__miga">
           <span class="cabecera__miga-link" @click="cancelar">Comercial</span>
           <q-icon name="chevron_right" size="14px" color="grey-4" />
-          <span class="cabecera__miga-link" @click="cancelar">Productos</span>
+          <span class="cabecera__miga-link" @click="cancelar">Catálogo Comercial</span>
           <q-icon name="chevron_right" size="14px" color="grey-4" />
           <span class="cabecera__miga-actual">
-            {{ producto.nombre || 'Nuevo producto' }}
+            {{ producto.uid ? (producto.nombre || '…') + ' — Edición' : 'Nuevo Producto' }}
           </span>
         </div>
 
