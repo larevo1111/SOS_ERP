@@ -84,14 +84,14 @@
 
             <div class="identif-hero">
               <!-- Foto principal -->
-              <div class="identif-hero__foto-col">
+              <div class="identif-hero__foto-col" style="width: 160px; flex-shrink: 0;">
                 <div
                   class="galeria-item cursor-pointer"
-                  style="width: 160px; height: 160px; flex-shrink: 0;"
+                  style="width: 100%;"
                   @click="fotoPrincipal && abrirLightbox(fotoPrincipal)"
                 >
                   <template v-if="fotoPrincipal">
-                    <img :src="urlArchivo(fotoPrincipal)" alt="Foto principal" loading="lazy" style="width:100% !important;height:100% !important;object-fit:cover !important;display:block !important;" />
+                    <img :src="urlArchivo(fotoPrincipal)" alt="Foto principal" loading="lazy" />
                     <div class="galeria-item__zoom"><q-icon name="zoom_in" size="24px" color="white" /></div>
                     
                     <div class="galeria-item__nombre" :title="fotoPrincipal.nombre_archivo || 'Nombre SEO'" style="cursor: text; z-index: 20;" @click.stop>
@@ -103,10 +103,18 @@
                         @blur="actualizarNombreMultimedia(fotoPrincipal)"
                         @keyup.enter="$event.target.blur()"
                       />
+                      <q-icon
+                        name="auto_awesome"
+                        color="grey-6"
+                        size="11px"
+                        class="cursor-pointer q-ml-xs hover-icon-ia"
+                        title="Sugerir nombre con IA"
+                        @click.stop="solicitarNombreImagenIA(fotoPrincipal)"
+                      />
                     </div>
                   </template>
                   <template v-else>
-                    <div class="identif-hero__placeholder" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F8F7F5">
+                    <div style="width:100%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F8F7F5">
                       <q-icon name="image" size="36px" color="grey-3" />
                       <div class="text-caption text-grey-4 q-mt-xs">Sin imagen</div>
                     </div>
