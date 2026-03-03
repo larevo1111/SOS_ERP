@@ -70,3 +70,66 @@ Cada ítem de la lista en un panel lateral debe mostrar:
   </div>
 </div>
 ```
+
+---
+
+## 5. 🔠 Estándar Tipográfico: Campo Nombre de Imagen (OBLIGATORIO EN TODAS LAS VISTAS)
+
+> [!IMPORTANT]
+> LA REFERENCIA OFICIAL es la **pestaña Galería** en el Formulario de Producto. Todos los campos de nombre de imagen en TODA la aplicación (Vista Detalle, popups de variación, formularios) **DEBEN** verse idénticos a esa galería.
+
+### Reglas de Estilo (inamovibles)
+- **Sin borde del browser**: `border: none; outline: none;` — el input no debe mostrar el recuadro negro del browser.
+- **Fondo transparente**: `background: transparent;`
+- **Tipografía**: `font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;`
+- **Tamaño de fuente**: `font-size: 10.5px;` — pequeño, como una leyenda discreta.
+- **Color**: `#7A7A7A` (gris natural, nunca negro).
+- **Placeholder**: `font-style: italic; font-size: 10px; color: #C8C4BE;`
+
+### CSS estándar (copiar sin modificar a todos los componentes que lo necesiten)
+```scss
+.galeria__nombre {
+  padding: 4px 6px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 0 0 10px 10px;
+}
+
+.input-nombre-nativo {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #7A7A7A;
+  letter-spacing: 0.2px;
+  min-width: 0;
+  padding: 0 2px;
+  transition: color 0.15s;
+
+  &::placeholder {
+    color: #C8C4BE;
+    font-style: italic;
+    font-size: 10px;
+  }
+
+  &:focus { color: #C55E00; }
+}
+```
+
+### Estructura HTML estándar
+```html
+<!-- Siempre envolver el input con galeria__nombre + icono IA como q-icon -->
+<div class="galeria__nombre row items-center no-wrap">
+  <input v-model="archivo.nombre_archivo"
+    class="input-nombre-nativo col"
+    placeholder="Nombre SEO"
+    @blur="actualizarNombreMultimedia(archivo)"
+    @keyup.enter="$event.target.blur()"
+  />
+  <q-icon name="auto_awesome" color="grey-5" size="14px"
+    class="cursor-pointer q-ml-xs"
+    @click="solicitarNombreImagenIA(archivo)" />
+</div>
+```

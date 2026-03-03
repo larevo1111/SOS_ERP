@@ -804,16 +804,17 @@
             </div>
 
             <!-- Campo nombre de la imagen -->
-            <div class="row items-center no-wrap q-mt-sm">
+            <div class="galeria__nombre row items-center no-wrap">
               <input
                 v-model="variacionDraft.nombre_imagen_variacion"
                 class="input-nombre-nativo col"
                 placeholder="Nombre SEO de la imagen"
               />
-              <q-btn
-                flat round dense size="xs"
-                icon="auto_awesome" color="deep-orange-9"
-                class="q-ml-xs"
+              <q-icon
+                name="auto_awesome"
+                color="grey-5"
+                size="14px"
+                class="cursor-pointer q-ml-xs"
                 title="Sugerir nombre con IA"
                 @click="solicitarAsistenciaIA('nombre_archivo', { ...variacionDraft, _tipo: 'variacion' })"
               />

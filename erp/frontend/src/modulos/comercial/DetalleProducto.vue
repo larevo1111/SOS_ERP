@@ -103,13 +103,21 @@
                   <div v-if="fotoPrincipal" class="identif-hero__badge">★ Principal</div>
                 </div>
                 <!-- Campo editable: nombre de la imagen principal -->
-                <div v-if="fotoPrincipal" class="row items-center no-wrap q-mt-xs" style="width:160px">
+                <div v-if="fotoPrincipal" class="galeria__nombre row items-center no-wrap" style="width:160px">
                   <input
                     v-model="fotoPrincipal.nombre_archivo"
                     class="input-nombre-nativo col"
                     placeholder="Nombre SEO"
                     @blur="actualizarNombreMultimedia(fotoPrincipal)"
                     @keyup.enter="$event.target.blur()"
+                  />
+                  <q-icon
+                    name="auto_awesome"
+                    color="grey-5"
+                    size="14px"
+                    class="cursor-pointer q-ml-xs"
+                    title="Sugerir nombre con IA"
+                    @click="solicitarNombreImagenIA(fotoPrincipal)"
                   />
                 </div>
               </div>
@@ -713,6 +721,27 @@ async function actualizarNombreMultimedia (archivo) {
     $q.notify({ type: 'positive', message: 'Nombre de imagen guardado', timeout: 1200 })
   } catch (e) {
     $q.notify({ type: 'warning', message: 'Error guardando nombre: ' + e.message })
+  }
+}
+
+async function solicitarNombreImagenIA (archivo) {
+  if (!archivo?.uid) return
+  try {
+    const nombreProd = producto.value.nombre || ''
+    const respuesta = await llamar('comercial', 'asistente_comercial', 'asistir_campo', {
+      campo_peticion: 'nombre_archivo',
+      nombre_grupo_catalogo: producto.value.nombre_grupo_catalogo || nombreProd,
+      producto_costos: nombreProd,
+      uso: archivo.uso || 'Principal',
+      nombre_actual: archivo.nombre_archivo || ''
+    })
+    if (respuesta?.sugerencia) {
+      archivo.nombre_archivo = respuesta.sugerencia
+      await actualizarNombreMultimedia(archivo)
+    }
+    if (respuesta?.nota) $q.notify({ type: 'info', message: respuesta.nota, icon: 'auto_awesome', timeout: 3000 })
+  } catch (e) {
+    $q.notify({ type: 'warning', message: 'Error IA: ' + e.message })
   }
 }
 
@@ -1411,5 +1440,39 @@ onMounted(cargarProducto)
   justify-content: center;
   background: #F7F5F2;
   img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+// ── Estándar de nombre de imagen (compartido con galeria en Formulario) ───────
+// REFERENCIA OFICIAL: Esta es la tipografía y el estilo que deben usar TODOS
+// los campos de nombre de imagen en todas las vistas (Detalle, Formulario, Popups).
+.galeria__nombre {
+  padding: 4px 6px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 0 0 10px 10px;
+}
+
+.input-nombre-nativo {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #7A7A7A;
+  letter-spacing: 0.2px;
+  min-width: 0;
+  padding: 0 2px;
+  transition: color 0.15s;
+
+  &::placeholder {
+    color: #C8C4BE;
+    font-style: italic;
+    font-size: 10px;
+  }
+
+  &:focus {
+    color: #C55E00;
+  }
 }
 </style>
