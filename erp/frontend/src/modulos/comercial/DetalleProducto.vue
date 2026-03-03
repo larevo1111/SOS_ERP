@@ -86,40 +86,31 @@
               <!-- Foto principal -->
               <div class="identif-hero__foto-col">
                 <div
-                  class="identif-hero__imagen"
-                  :class="{ 'identif-hero__imagen--clic': fotoPrincipal }"
+                  class="galeria-item cursor-pointer"
+                  style="width: 160px; height: 160px; flex-shrink: 0;"
                   @click="fotoPrincipal && abrirLightbox(fotoPrincipal)"
                 >
-                   <img v-if="fotoPrincipal"
-                    :src="urlArchivo(fotoPrincipal)"
-                    alt="Foto principal"
-                    style="width:100%;height:100%;object-fit:cover;display:block;" />
-                  <div v-else class="identif-hero__placeholder">
-                    <q-icon name="image" size="36px" color="grey-3" />
-                    <div class="text-caption text-grey-4 q-mt-xs">Sin imagen</div>
-                  </div>
-                  <div v-if="fotoPrincipal" class="identif-hero__zoom">
-                    <q-icon name="zoom_in" size="24px" color="white" />
-                  </div>
-                  <div v-if="fotoPrincipal" class="identif-hero__badge">★ Principal</div>
-                </div>
-                <!-- Campo editable: nombre de la imagen principal -->
-                <div v-if="fotoPrincipal" class="galeria__nombre row items-center no-wrap" style="width:160px">
-                  <input
-                    v-model="fotoPrincipal.nombre_archivo"
-                    class="input-nombre-nativo col"
-                    placeholder="Nombre SEO"
-                    @blur="actualizarNombreMultimedia(fotoPrincipal)"
-                    @keyup.enter="$event.target.blur()"
-                  />
-                  <q-icon
-                    name="auto_awesome"
-                    color="grey-5"
-                    size="14px"
-                    class="cursor-pointer q-ml-xs"
-                    title="Sugerir nombre con IA"
-                    @click="solicitarNombreImagenIA(fotoPrincipal)"
-                  />
+                  <template v-if="fotoPrincipal">
+                    <img :src="urlArchivo(fotoPrincipal)" alt="Foto principal" loading="lazy" style="width:100% !important;height:100% !important;object-fit:cover !important;display:block !important;" />
+                    <div class="galeria-item__zoom"><q-icon name="zoom_in" size="24px" color="white" /></div>
+                    
+                    <div class="galeria-item__nombre" :title="fotoPrincipal.nombre_archivo || 'Nombre SEO'" style="cursor: text; z-index: 20;" @click.stop>
+                      <q-icon name="image_search" size="10px" class="q-mr-xs" style="opacity:0.5" />
+                      <input
+                        v-model="fotoPrincipal.nombre_archivo"
+                        placeholder="Nombre SEO"
+                        style="color: inherit; font-size: inherit; font-weight: inherit; background: transparent; border: none; outline: none; padding: 0; width: 100%; text-overflow: ellipsis;"
+                        @blur="actualizarNombreMultimedia(fotoPrincipal)"
+                        @keyup.enter="$event.target.blur()"
+                      />
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="identif-hero__placeholder" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F8F7F5">
+                      <q-icon name="image" size="36px" color="grey-3" />
+                      <div class="text-caption text-grey-4 q-mt-xs">Sin imagen</div>
+                    </div>
+                  </template>
                 </div>
               </div>
 
@@ -762,7 +753,9 @@ async function verVariacion (v) {
     if (respuesta?.producto) {
       variacionVer.value = respuesta.producto
       variacionBackup = JSON.parse(JSON.stringify(respuesta.producto))
+      // Buscar imagen: prioridad 'Variacion', fallback a 'Principal' o cualquier otra activa
       const foto = respuesta.multimedia?.find(m => m.uso === 'Variacion')
+                || respuesta.multimedia?.find(m => m.estado === 'Activo')
       if (foto) {
         variacionVer.value.miniatura_url = foto.url_publica_calculada || foto.archivo_local
         previewArchivoVariacion.value = variacionVer.value.miniatura_url
