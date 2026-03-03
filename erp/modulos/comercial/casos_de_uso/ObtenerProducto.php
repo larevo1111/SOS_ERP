@@ -52,21 +52,21 @@ class ObtenerProducto
         unset($m);
 
         // 3. Obtener variaciones si es un producto maestro
+        // NOTA TÉCNICA: Se usa subquery correlacionado en el SELECT (NO LEFT JOIN LATERAL),
+        // porque LATERAL no está disponible en todas las configuraciones de MariaDB local.
+        // El subquery correlacionado es 100% compatible y produce el mismo resultado.
         $variaciones = [];
         if (!$producto['producto_principal_variacion']) {
             $stmtV = $this->pdo->prepare("
                 SELECT v.uid, v.nombre, v.estado, v.nombre_atributo_variacion, v.valor_atributo_variacion, v.precio_regular,
-                       m.archivo_local as miniatura_local
+                       (SELECT archivo_local
+                        FROM com_productos_multimedia
+                        WHERE uid_producto = v.uid
+                          AND uso = 'Variacion'
+                          AND estado = 'Activo'
+                        ORDER BY orden ASC
+                        LIMIT 1) AS miniatura_local
                 FROM com_productos v
-                LEFT JOIN LATERAL (
-                    SELECT archivo_local 
-                    FROM com_productos_multimedia 
-                    WHERE uid_producto = v.uid
-                      AND uso = 'Variacion'
-                      AND estado = 'Activo'
-                    ORDER BY orden ASC
-                    LIMIT 1
-                ) m ON TRUE
                 WHERE v.producto_principal_variacion = :uid
                   AND v.empresa = :empresa
                 ORDER BY v.id ASC
@@ -76,12 +76,10 @@ class ObtenerProducto
 
             // Inyectar URL pública para las miniaturas de variaciones
             foreach ($variaciones as &$v) {
-                if (!empty($v['miniatura_local'])) {
-                    $v['miniatura_url'] = $r2BaseUrl . '/' . $v['miniatura_local'];
-                }
-                else {
-                    $v['miniatura_url'] = null;
-                }
+                $v['miniatura_url'] = !empty($v['miniatura_local'])
+                    ? $r2BaseUrl . '/' . $v['miniatura_local']
+                    : null;
+                unset($v['miniatura_local']);
             }
             unset($v);
         }
