@@ -791,9 +791,9 @@
             Guarda el producto maestro primero para poder adjuntar imagen.
           </div>
           <template v-else>
-            <div v-if="previewArchivoVariacion" class="q-mb-sm">
+            <div v-if="previewArchivoVariacion" class="q-mb-xs">
               <img :src="previewArchivoVariacion"
-                style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;display:block;" />
+                style="width:100%;height:160px;object-fit:cover;border-radius:8px;display:block;" />
               <q-btn flat dense no-caps size="xs" icon="close" label="Quitar imagen" color="negative"
                 class="q-mt-xs" @click="limpiarArchivoVariacion" />
             </div>
@@ -802,6 +802,23 @@
               <q-icon name="add_photo_alternate" size="32px" color="grey-3" />
               <div class="q-mt-xs text-grey-5 text-caption">Clic para adjuntar imagen</div>
             </div>
+
+            <!-- Campo nombre de la imagen -->
+            <div class="row items-center no-wrap q-mt-sm">
+              <input
+                v-model="variacionDraft.nombre_imagen_variacion"
+                class="input-nombre-nativo col"
+                placeholder="Nombre SEO de la imagen"
+              />
+              <q-btn
+                flat round dense size="xs"
+                icon="auto_awesome" color="deep-orange-9"
+                class="q-ml-xs"
+                title="Sugerir nombre con IA"
+                @click="solicitarAsistenciaIA('nombre_archivo', { ...variacionDraft, _tipo: 'variacion' })"
+              />
+            </div>
+
             <input
               ref="inputArchivoVariacion"
               type="file"

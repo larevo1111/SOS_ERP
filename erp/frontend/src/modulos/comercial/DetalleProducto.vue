@@ -102,8 +102,15 @@
                   </div>
                   <div v-if="fotoPrincipal" class="identif-hero__badge">★ Principal</div>
                 </div>
-                <div v-if="fotoPrincipal?.nombre_archivo" class="identif-hero__caption" :title="fotoPrincipal.nombre_archivo">
-                  <q-icon name="image_search" size="10px" class="q-mr-xs" style="opacity:0.45" />{{ fotoPrincipal.nombre_archivo }}
+                <!-- Campo editable: nombre de la imagen principal -->
+                <div v-if="fotoPrincipal" class="row items-center no-wrap q-mt-xs" style="width:160px">
+                  <input
+                    v-model="fotoPrincipal.nombre_archivo"
+                    class="input-nombre-nativo col"
+                    placeholder="Nombre SEO"
+                    @blur="actualizarNombreMultimedia(fotoPrincipal)"
+                    @keyup.enter="$event.target.blur()"
+                  />
                 </div>
               </div>
 
@@ -693,6 +700,21 @@ function abrirLightbox (archivo) {
 function irAlCatalogo () { router.push({ name: 'catalogo-productos' }) }
 function irAEditar    () { router.push({ name: 'editar-producto', params: { uid: route.params.uid } }) }
 function irAGaleria   () { router.push({ name: 'editar-producto', params: { uid: route.params.uid }, query: { tab: 'galeria' } }) }
+
+// ── Nombre de imagen (editable desde la Vista Detalle) ───────────
+async function actualizarNombreMultimedia (archivo) {
+  if (!archivo?.uid || !archivo?.nombre_archivo) return
+  try {
+    await llamar('comercial', 'productos', 'actualizar_nombre_multimedia', {
+      uid: archivo.uid,
+      empresa: producto.value.empresa,
+      nombre_archivo: archivo.nombre_archivo
+    })
+    $q.notify({ type: 'positive', message: 'Nombre de imagen guardado', timeout: 1200 })
+  } catch (e) {
+    $q.notify({ type: 'warning', message: 'Error guardando nombre: ' + e.message })
+  }
+}
 
 async function verVariacion (v) {
   try {
