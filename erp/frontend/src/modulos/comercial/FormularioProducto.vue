@@ -287,6 +287,18 @@
                   Clic para subir la foto principal del producto
                 </div>
               </div>
+              <div v-if="fotoPrincipal" class="galeria__nombre row items-center no-wrap">
+                <input
+                  v-model="fotoPrincipal.nombre_archivo"
+                  class="input-nombre-nativo col"
+                  placeholder="Nombre SEO"
+                  @blur="actualizarNombreMultimedia(fotoPrincipal)"
+                  @keyup.enter="$event.target.blur()"
+                />
+                <q-icon name="auto_awesome" color="grey-5" size="14px"
+                  class="cursor-pointer q-ml-xs" title="Sugerir nombre con IA"
+                  @click="sugerirNombreMultimediaIA(fotoPrincipal)" />
+              </div>
             </template>
           </div>
         </div>
@@ -1111,10 +1123,11 @@ async function editarVariacion (v) {
         fecha_oferta_desde: prod.fecha_oferta_desde,
         fecha_oferta_hasta: prod.fecha_oferta_hasta
       }
+      // Limpiar solo el input físico (no el preview), luego cargar la foto existente
+      archivoVariacionPendiente.value = null
+      if (inputArchivoVariacion.value) inputArchivoVariacion.value.value = ''
       const foto = respuesta.multimedia?.find(m => m.uso === 'Variacion')
       previewArchivoVariacion.value = foto ? (foto.url_publica_calculada || foto.archivo_local) : ''
-      
-      limpiarArchivoVariacion() // limpia input file físico pero mantiene preview
       popupVariacionAbierto.value = true
     }
   } catch (e) {

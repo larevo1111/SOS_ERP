@@ -90,9 +90,10 @@
                   :class="{ 'identif-hero__imagen--clic': fotoPrincipal }"
                   @click="fotoPrincipal && abrirLightbox(fotoPrincipal)"
                 >
-                  <img v-if="fotoPrincipal"
+                   <img v-if="fotoPrincipal"
                     :src="urlArchivo(fotoPrincipal)"
-                    alt="Foto principal" />
+                    alt="Foto principal"
+                    style="width:100%;height:100%;object-fit:cover;display:block;" />
                   <div v-else class="identif-hero__placeholder">
                     <q-icon name="image" size="36px" color="grey-3" />
                     <div class="text-caption text-grey-4 q-mt-xs">Sin imagen</div>
@@ -529,12 +530,12 @@
             <div class="col">
               <div class="text-caption text-grey-5 q-mb-xs">{{ variacionVer.nombre_atributo_variacion }}</div>
               <div class="text-body1 text-weight-medium q-mb-sm">{{ variacionVer.valor_atributo_variacion }}</div>
-              <div v-if="variacionVer.precio_regular" class="row items-center justify-between">
-                <div class="text-caption text-grey-7">Precio Regular</div>
-                <div class="text-subtitle2 text-weight-bold">{{ formatearPrecio(variacionVer.precio_regular) }}</div>
+              <div v-if="variacionVer.precio_regular" class="q-mt-xs">
+                <div class="text-caption text-grey-5">Precio Regular</div>
+                <div class="text-subtitle2 text-weight-bold text-dark">{{ formatearPrecio(variacionVer.precio_regular) }}</div>
               </div>
-              <div v-if="variacionVer.precio_oferta" class="row items-center justify-between q-mt-xs">
-                <div class="text-caption text-orange-7">Precio Oferta</div>
+              <div v-if="variacionVer.precio_oferta" class="q-mt-xs">
+                <div class="text-caption text-orange-6">Precio Oferta</div>
                 <div class="text-subtitle2 text-orange-8">{{ formatearPrecio(variacionVer.precio_oferta) }}</div>
               </div>
             </div>
@@ -603,6 +604,16 @@
               <q-btn flat dense no-caps size="xs" icon="close" label="Quitar" color="negative"
                 @click="limpiarArchivoVariacion" />
             </div>
+          </div>
+          <!-- Campo nombre de la imagen en modo edición -->
+          <div class="galeria__nombre row items-center no-wrap q-mx-sm q-mb-sm">
+            <input
+              v-model="variacionVer.nombre_imagen_variacion"
+              class="input-nombre-nativo col"
+              placeholder="Nombre SEO de la imagen"
+            />
+            <q-icon name="auto_awesome" color="grey-5" size="14px"
+              class="cursor-pointer q-ml-xs" title="Sugerir nombre con IA" />
           </div>
           <input
             ref="inputArchivoVariacion"
