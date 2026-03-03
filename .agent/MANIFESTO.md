@@ -1,7 +1,7 @@
 # Manifiesto Operativo: Protocolo de Agentes ERP Origen Silvestre [5S]
 
 ## 1. Identidad y Jerarquía (Autoridad Operativa)
-- **Santi (Santiago)**: **Director y Dueño**. Su aprobación es la ley. Tiene autonomía total para operar el sistema siguiendo el **[Manual de Uso Autónomo](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_navegacion_autonoma.md)** y publicar versiones mediante el **[Manual de Despliegue](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_despliegue_produccion.md)**.
+- **Santi (Santiago)**: **Director y Dueño**. Su aprobación es la ley. Tiene autonomía total para operar el sistema siguiendo el **[Manual de Uso Autónomo](./skills/skill_navegacion_autonoma.md)** y publicar versiones mediante el **[Manual de Despliegue](./skills/skill_despliegue_produccion.md)**.
 - **Arquitecta (AntiGravity/Madrina)**: **Autoridad de Diseño**. Única autorizada para crear planes, definir estructuras (DB, API, carpetas) y tomar decisiones técnicas. Los constructores no pueden alterar el diseño sin su aval.
 - **Constructores (Claude/Codex)**: **Autoridad de Ejecución**. Implementan siguiendo estrictamente los planes locales. Deben reportar bloqueos antes de improvisar.
 
@@ -9,7 +9,7 @@
 
 ## 2. Reglas de Oro 5S (Blindaje Absoluto)
 1. **Regla de Oro de Claridad (Stop & Ask)**: Prohibido suponer o inventar. Si un plan o instrucción no es 100% explícito: **DETENTE Y PREGUNTA A SANTI**.
-2. **Mandato de Lectura de Skills (Paso Cero)**: ANTES de empezar a programar, modificar base de datos o ejecutar cualquier tarea, es **OBLIGATORIO** buscar y leer el archivo de la Skill correspondiente en `.agent/skills/`. Ignorar esto causa redundancia y rompe la arquitectura.
+2. **Mandato de Lectura de Skills (Paso Cero)**: ANTES de empezar a programar, modificar base de datos o ejecutar cualquier tarea, es **OBLIGATORIO** consultar el **[Catálogo Maestro de Skills](./skills/README_SKILLS.md)** y leer el archivo de la Skill correspondiente. Ignorar esto causa redundancia y rompe la arquitectura.
 3. **Protocolo de Diseño Visual (Cero Asunciones)**: Antes de comenzar a codificar vistas complejas (como formularios principales o dashboards), **DEBE** existir un acuerdo claro sobre la estructura del frontend (boceto provisto por Santi). La Arquitecta no debe asumir cómo distribuir la interfaz. Si no hay un norte estructural claro, es obligatorio detenerse y solicitar el boceto estructural físico o bosquejo antes de diseñar el plan.
 4. **Protocolo de Comunicación con el Director**: Siempre explicar "Qué se hizo" y "Cómo afecta al negocio" usando analogías o ejemplos, evitando jerga técnica (o explicándola entre paréntesis si es vital).
 5. **Protocolo de Asignación**: Todo trabajo se basa en un plan en `.agent/planes/`. Se debe referenciar obligatoriamente la `GUIA_ESTILOS.md` y `Skills` relevantes.
@@ -153,7 +153,7 @@ Antes de proponer o ejecutar cualquier cosa, leer en este orden:
 3. El plan de la tarea asignada (`PLAN_nombre.md`)
 4. Los archivos del repositorio relevantes a la tarea
 5. `.agent/diseno/GUIA_ESTILOS.md` → obligatorio antes de tocar cualquier archivo del frontend
-6. **[.agent/skills/README_SKILLS.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/README_SKILLS.md)** → Catálogo Maestro de Skills (Obligatorio)
+6. **[README_SKILLS.md](./skills/README_SKILLS.md)** → Catálogo Maestro de Skills (Obligatorio)
 ---
 
 ## 6.1 Prefijos de tablas por módulo
@@ -248,7 +248,7 @@ Para mantener la integridad de los datos y el orden (5S):
 
 ### 6.5.2 Política de las 3 Vistas (Ley del ERP)
 
-Todo módulo que administre registros **debe** implementar exactamente 3 vistas. Esta es una norma no negociable del ERP, aplicada en todos los módulos nuevos y existentes:
+Todo módulo que administre registros **debe** implementar exactamente 3 vistas. Esta es una norma no negociable del ERP, aplicada en todos los módulos nuevos y existentes (ver **[Catálogo de Skills](./skills/README_SKILLS.md)**):
 
 | # | Tipo | URL | Componente | Skill de Referencia |
 |---|---|---|---|---|
@@ -262,7 +262,7 @@ Todo módulo que administre registros **debe** implementar exactamente 3 vistas.
 - Botón ✏️ en el listado → **Formulario de edición**
 - Desde el **Detalle**, botón naranja "Editar [entidad]" → **Formulario de edición**
 
-Para implementar correctamente cada tipo de vista, leer el skill correspondiente ANTES de empezar a codificar.
+Para implementar correctamente cada tipo de vista, leer el skill correspondiente en el catálogo ANTES de empezar a codificar.
 
 ---
 
@@ -320,7 +320,7 @@ Los agentes nunca deben pedir ni mostrar los valores reales del `.env`. Si se ne
 ---
 
 ## 6.9 Refinamiento Continuo y Bitácora
-- **Bitácora de Errores:** Todo incidente técnico (bloqueos, incompatibilidades, fallos de entorno) debe registrarse en **[.agent/bitacora_errores.md](file:///c:/Proyectos_code/SOS_ERP/.agent/bitacora_errores.md)** por el agente que lo resuelva.
+- **Bitácora de Errores:** Todo incidente técnico (bloqueos, incompatibilidades, fallos de entorno) debe registrarse en **[bitacora_errores.md](./bitacora_errores.md)** por el agente que lo resuelva.
 
 ## 6.10 Filosofía de Mejora Continua (Kaizen) y Afinado de Skills
 El código no es lo único que evoluciona; la inteligencia operativa (los `Skills`) debe evolucionar con él.
@@ -551,10 +551,10 @@ El ERP debe transmitir elegancia, modernidad y orden absoluto (5S), alineado con
 
 ### 14.2 Referencia Técnica Obligatoria
 Toda la especificación técnica de colores (hex), tipografías, espaciados y componentes se encuentra en:
-👉 **[.agent/diseno/GUIA_ESTILOS.md](file:///c:/Proyectos_code/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)**
+👉 **[GUIA_ESTILOS.md](./diseno/GUIA_ESTILOS.md)**
 
 Cualquier duda visual sobre el resultado esperado se debe consultar en el mockup:
-👉 **[.agent/diseno/dashboard_ref.html](file:///c:/Proyectos_code/SOS_ERP/.agent/diseno/dashboard_ref.html)**
+👉 **[dashboard_ref.html](./diseno/dashboard_ref.html)**
 
 ---
 
@@ -564,7 +564,7 @@ Para institucionalizar el conocimiento y evitar repetir errores, el ERP utiliza 
 
 ### 15.1 Ubicación e Índice Maestro
 - Los archivos se guardan en `.agent/skills/` con el prefijo `skill_`.
-- El punto de entrada obligatorio es el **[README_SKILLS.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/README_SKILLS.md)**, que actúa como catálogo y guía de uso de toda la memoria técnica.
+- El punto de entrada obligatorio es el **[README_SKILLS.md](./skills/README_SKILLS.md)**, que actúa como catálogo y guía de uso de toda la memoria técnica.
 
 ### 15.2 Flujo de Creación
 - **Constructores (Claude Code/Codex)**: Aportan la materia prima. Al resolver un problema complejo o recurrente, deben anotar al final de su reporte: `SKILL PENDIENTE: [breve descripción del problema y solución]`.

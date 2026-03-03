@@ -1,23 +1,45 @@
-# Índice Maestro de Skills: SOS ERP
+# 🗂️ Índice Maestro de Skills: SOS ERP [5S]
 
-Este archivo es el catálogo oficial de conocimientos institucionalizados del proyecto. Sirve para que cualquier agente sepa qué manuales existen, cuál es su alcance y cuándo deben usarse.
-
-## Catálogo de Skills
-
-| Skill | Nombre | Alcance / Descripción | Cuándo Usarlo |
-|---|---|---|---|
-| **[skill_entorno_espejo.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_entorno_espejo.md)** | Infraestructura Local | Configuración de MariaDB, PHP, SSH, Puertos y Límites de Memoria. | Antes de preparar una nueva estación o ante errores de conexión/servidor. |
-| **[skill_acceso_datos_php.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_acceso_datos_php.md)** | Desarrollo de Datos | Uso de la clase `Conexion.php`, manejo de PDO, excepciones y campos de auditoría. | Al desarrollar consultas SQL o lógica que interactúe con la base de datos. |
-| **[skill_sincronizacion_bd_win11.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_sincronizacion_bd_win11.md)** | Sincronización DB (Win11) | Procedimiento seguro desde Windows 11 para mover bases de datos a Hostinger. | Siempre que se necesite subir cambios a Hostinger desde una estación Windows. |
-| **[skill_navegacion_autonoma.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_navegacion_autonoma.md)** | Uso Autónomo (Santi) | Manual para encender y cargar datos en el ERP sin ayuda de la IA. | Para el uso diario del sistema en ambiente local. |
-| **[skill_despliegue_produccion.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_despliegue_produccion.md)** | Despliegue Producción | Pasos para pasar el sistema de desarrollo a la web real. | Cuando se tenga una versión lista para el mundo. |
-| **[skill_frontend_quasar.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_frontend_quasar.md)** | Desarrollo Frontend con Quasar y Vue 3 | Estándares 5S, Composición, Layouts. | Al desarrollar o modificar la interfaz de usuario. |
-| **[skill_comunicacion_santi_ia.md](file:///c:/Proyectos_code/SOS_ERP/.agent/skills/skill_comunicacion_santi_ia.md)** | Comunicación Visual y Estructura (Santi ↔ IA) | Protocolo estricto para definición de UI basada en bocetos, cero asunciones lógicas. | Al definir o revisar requisitos de interfaz de usuario con la IA. |
-| **[skill_auditoria_bd.md](skill_auditoria_bd.md)** | 🛡️ Seguridad Multi-tenant y Auditoría de BD | Reglas inmutables de inyección forzada de `empresa`, `usuario_creador`, `usuario_ult_modificacion` desde el JWT. | OBLIGATORIO antes de tocar cualquier Caso de Uso o Controlador de Backend. |
+Este archivo es el **Catálogo Oficial de Conocimientos Institucionalizados**. Sirve para que cualquier agente (IA o Humano) sepa qué manuales existen, cuál es su alcance y cuándo deben usarse obligatoriamente para no romper la arquitectura.
 
 ---
 
-## Protocolo de Mantenimiento
-- **Registro**: Cada skill nuevo debe ser añadido a esta tabla.
-- **Auditoría**: La Madrina Arquitecta revisa este índice periódicamente basándose en la **Bitácora de Errores**.
-- **Acceso**: Todo agente debe consultar este índice antes de iniciar una tarea técnica.
+## 🏛️ Categoría: Arquitectura y Backend (Gobernanza de Datos)
+
+| Skill | Nombre | Alcance / Descripción | Cuándo Usarlo |
+|---|---|---|---|
+| **[skill_multimedia_r2.md](skill_multimedia_r2.md)** | **Fontanería Multimedia (Back)** | Gestión de buckets R2, rutas relativas en BD, límites de 500MB y seguridad S3. | Al programar subidas, borrados o consultas de archivos en PHP. |
+| **[skill_auditoria_bd.md](skill_auditoria_bd.md)** | **Seguridad y Auditoría** | Filtro multi-tenant (`empresa`) e inyección forzada de campos de auditoría. | **OBLIGATORIO** para cualquier Query SQL o Caso de Uso. |
+| **[skill_acceso_datos_php.md](skill_acceso_datos_php.md)** | **Acceso a Datos** | Uso de PDO, clase Conexion, manejo de excepciones y limpieza de datos. | Al desarrollar lógica de negocio en el backend. |
+| **[skill_acceso_datos_php.md](skill_acceso_datos_php.md)** | **Integración IA** | Cómo la IA del ERP interactúa con las funciones y el contexto. | Al modificar el Asistente o herramientas de IA. |
+
+---
+
+## 🎨 Categoría: Frontend y Experiencia de Usuario (Estética 5S)
+
+| Skill | Nombre | Alcance / Descripción | Cuándo Usarlo |
+|---|---|---|---|
+| **[skill_diseno_ui_ux.md](skill_diseno_ui_ux.md)** | **Estética y Encuadre (Front)** | **Regla de Oro del Encuadre (`object-fit: cover`)**, colores Orígenes y layouts de popups. | Antes de tocar CSS o estructurar visualmente un componente. |
+| **[skill_subregistros_variaciones.md](skill_subregistros_variaciones.md)** | **Patrón de Subregistros** | Edición *In-Situ* dentro de popups, panel lateral con miniaturas y flujos atómicos. | Al manejar Variaciones, Items de combos o cualquier relación Padre-Hijo. |
+| **[skill_vista_listado.md](skill_vista_listado.md)** | **Vista Catálogo / Lista** | Estándares para tablas, filtros rápidos y acciones masivas. | Al crear o modificar buscadores de entidades. |
+| **[skill_vista_detalle.md](skill_vista_detalle.md)** | **Vista Detalle (Lectura)** | Layout de solo-lectura, pestañas y paneles laterales de información. | Al diseñar la vista profunda de un registro. |
+| **[skill_creacion_formularios.md](skill_creacion_formularios.md)** | **Formularios (Edición)** | Validación de campos, manejo de estados y guardado asíncrono. | Al crear o editar registros (Formularios). |
+| **[skill_frontend_quasar.md](skill_frontend_quasar.md)** | **Framework Quasar** | Uso de componentes Quasar, composición de Vue 3 y layouts globales. | Guía técnica general de desarrollo frontend. |
+
+---
+
+## 🚀 Categoría: Operaciones e Infraestructura
+
+| Skill | Nombre | Alcance / Descripción | Cuándo Usarlo |
+|---|---|---|---|
+| **[skill_despliegue_produccion.md](skill_despliegue_produccion.md)** | **Pipeline de Despliegue** | Paso a paso para subir cambios a Hostinger de forma segura. | Al finalizar una fase y querer verla en la web real. |
+| **[skill_sincronizacion_bd.md](skill_sincronizacion_bd.md)** | **Sincronización DB** | Movimiento de datos entre Local, Windows y Producción. | Ante desajustes de datos o cambios de estación de trabajo. |
+| **[skill_entorno_espejo.md](skill_entorno_espejo.md)** | **Configuración Local** | Setup de MariaDB, PHP y Apache en la estación de trabajo. | Al preparar un equipo nuevo para desarrollar. |
+| **[skill_navegacion_autonoma.md](skill_navegacion_autonoma.md)** | **Manual de Uso (Santi)** | Cómo el director opera el ERP sin asistencia técnica. | Referencia para flujo de negocio puro. |
+
+---
+
+## 📜 Protocolo de Mantenimiento Kaizen
+1. **Registro Obligatorio**: Todo Skill nuevo o actualizado **debe** reflejarse en este índice.
+2. **Separación de Poderes**: Si una Skill toca Back y Front (como Multimedia), se divide en dos: una para la lógica (Back) y otra para el diseño (Front).
+3. **Paso Cero**: Todo agente debe consultar este índice antes de iniciar cualquier tarea para leer su "Mantis de Combate" correspondiente.
