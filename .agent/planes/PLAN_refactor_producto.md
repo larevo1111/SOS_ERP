@@ -36,7 +36,7 @@ Este plan aborda la reestructuración de la vista de creación y edición de pro
 > [!NOTE] 
 > **Referencia Visual Obligatoria**: Antes de tocar el código de FormularioProducto.vue, el Constructor debe abrir y estudiar el archivo físico `.agent/bocetos/boceto_formulario_producto.png`. El código de la interfaz debe ser una representación técnica fiel de esa estructura lógica.
 
-#### [MODIFICAR] [FormularioProducto.vue](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/frontend/src/modulos/comercial/FormularioProducto.vue)
+#### [MODIFICAR] [FormularioProducto.vue](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/erp/frontend/src/modulos/comercial/FormularioProducto.vue)
 *   **Alineamiento Estricto al Boceto Visual**:
     *   **Pestañas Finales**: `General`, `Contenido`, `Galeria`, `Auditoria`. (Se elimina "Precios", e "Historia/Contenido" se fusiona).
     *   **Pestaña General (Lado Izquierdo)**:
@@ -54,7 +54,7 @@ Este plan aborda la reestructuración de la vista de creación y edición de pro
 
 ### [Backend - API]
 
-#### [MODIFICAR] [ProductoController.php](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/modulos/comercial/controladores/ProductoController.php)
+#### [MODIFICAR] [ProductoController.php](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/erp/modulos/comercial/controladores/ProductoController.php)
 *   **Nueva Acción `listar_variaciones`**: Acción súper ligera que reciba el `uid_maestro` y devuelva el listado de subproductos asociados (`SELECT id, uid, nombre, estado, precio_regular, nombre_atributo_variacion, valor_atributo_variacion FROM com_productos WHERE producto_principal_variacion = ?`). Esto alimenta el panel lateral.
 *   **Nueva Acción `guardar_variacion_express`**: Un endpoint simplificado (o reusar `guardar_producto`) que recibe los datos provenientes del "Popup Variación", guardando y asegurando la vinculación padre-hijo correctamente bajo la misma tabla `com_productos`.
 *   **[NUEVO] Controlador IA**: `AsistenteComercialController.php` (Acción: `sugerir_datos`). Recibe contexto parcial del frontend y llama a la API de **Gemini** mediante cURL para devolver sugerencias estructuradas (nombres comerciales o limpieza de atributos).

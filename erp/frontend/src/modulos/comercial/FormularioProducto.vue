@@ -471,7 +471,7 @@
           <input
             ref="inputArchivo"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip"
             multiple
             style="display:none"
             @change="procesarArchivos($event.target.files)"
@@ -510,14 +510,35 @@
                 <div class="galeria__preview">
                   <img v-if="archivo.tipo_archivo === 'imagen'"
                     :src="urlArchivo(archivo)" :alt="archivo.uso" />
+                  <video v-else-if="archivo.tipo_archivo === 'video'"
+                    :src="urlArchivo(archivo)"
+                    autoplay loop muted playsinline
+                    style="width:100%; height:100%; object-fit:cover"
+                  ></video>
                   <div v-else class="galeria__preview-icono">
-                    <q-icon name="videocam" size="32px" color="grey-5" />
+                    <q-icon name="description" size="32px" color="blue-grey-5" />
                   </div>
                 </div>
                 <div class="galeria__acciones">
                   <q-icon name="drag_indicator" class="cursor-move" color="grey-4" size="20px" />
                   <q-btn flat round dense size="sm" icon="delete" color="negative"
                     @click="eliminarArchivo(archivo)" />
+                </div>
+                <div class="galeria__nombre row items-center no-wrap">
+                  <input v-model="archivo.nombre_archivo"
+                    class="input-nombre-nativo col"
+                    placeholder="Nombre SEO"
+                    @blur="actualizarNombreMultimedia(archivo)"
+                    @keyup.enter="$event.target.blur()"
+                  />
+                  <q-icon
+                    name="auto_awesome"
+                    color="grey-5"
+                    size="14px"
+                    class="cursor-pointer q-ml-xs hover-icon-ia"
+                    title="Sugerir nombre con IA"
+                    @click="sugerirNombreMultimediaIA(archivo)"
+                  />
                 </div>
               </div>
             </div>
@@ -556,14 +577,35 @@
                 <div class="galeria__preview">
                   <img v-if="archivo.tipo_archivo === 'imagen'"
                     :src="urlArchivo(archivo)" :alt="archivo.uso" />
+                  <video v-else-if="archivo.tipo_archivo === 'video'"
+                    :src="urlArchivo(archivo)"
+                    autoplay loop muted playsinline
+                    style="width:100%; height:100%; object-fit:cover"
+                  ></video>
                   <div v-else class="galeria__preview-icono">
-                    <q-icon name="videocam" size="32px" color="grey-5" />
+                    <q-icon name="description" size="32px" color="blue-grey-5" />
                   </div>
                 </div>
                 <div class="galeria__acciones">
                   <q-icon name="drag_indicator" class="cursor-move" color="grey-4" size="20px" />
                   <q-btn flat round dense size="sm" icon="delete" color="negative"
                     @click="eliminarArchivo(archivo)" />
+                </div>
+                <div class="galeria__nombre row items-center no-wrap">
+                  <input v-model="archivo.nombre_archivo"
+                    class="input-nombre-nativo col"
+                    placeholder="Nombre SEO"
+                    @blur="actualizarNombreMultimedia(archivo)"
+                    @keyup.enter="$event.target.blur()"
+                  />
+                  <q-icon
+                    name="auto_awesome"
+                    color="grey-5"
+                    size="14px"
+                    class="cursor-pointer q-ml-xs hover-icon-ia"
+                    title="Sugerir nombre con IA"
+                    @click="sugerirNombreMultimediaIA(archivo)"
+                  />
                 </div>
               </div>
             </div>
@@ -1023,6 +1065,7 @@ async function guardar () {
     // El backend devuelve el registro completo (con uid, fechas, etc.)
     Object.assign(producto.value, resultado)
     $q.notify({ type: 'positive', message: 'Producto guardado correctamente', icon: 'check_circle' })
+    router.back()
   } catch (error) {
     $q.notify({ type: 'negative', message: error.message, icon: 'error' })
   } finally {
@@ -1332,7 +1375,7 @@ async function procesarArchivos (archivos) {
   // Si se sube una nueva Principal, mover la anterior a Galeria (solo puede haber una)
   if (uso === 'Principal' && fotoPrincipal.value) {
     fotoPrincipal.value.uso = 'Galeria'
-    // TODO: PATCH /api/comercial/multimedia/:uid → uso = 'Galeria'
+    llamar('comercial', 'productos', 'cambiar_uso_multimedia', { uid: fotoPrincipal.value.uid, uso: 'Galeria' }).catch(e => console.error(e))
   }
 
   for (const archivo of Array.from(archivos)) {
@@ -1364,9 +1407,17 @@ function eliminarArchivo (archivo) {
     message: '¿Seguro? Esta acción no se puede deshacer.',
     cancel: { label: 'Cancelar', flat: true },
     ok: { label: 'Eliminar', color: 'negative', unelevated: true }
-  }).onOk(() => {
-    multimedia.value = multimedia.value.filter(m => m.uid !== archivo.uid)
-    // TODO: DELETE /api/comercial/multimedia/:uid
+  }).onOk(async () => {
+    try {
+      $q.loading.show({ message: 'Eliminando archivo...' })
+      await llamar('comercial', 'productos', 'eliminar_multimedia', { uid: archivo.uid })
+      multimedia.value = multimedia.value.filter(m => m.uid !== archivo.uid)
+      $q.notify({ type: 'positive', message: 'Archivo eliminado correctamente' })
+    } catch (e) {
+      $q.notify({ type: 'negative', message: 'Error al eliminar: ' + e.message })
+    } finally {
+      $q.loading.hide()
+    }
   })
 }
 
@@ -1386,6 +1437,61 @@ function limpiarArchivoVariacion () {
   previewArchivoVariacion.value = ''
 }
 
+// ── Gestión nombres multimedia ──────────────────────────────────
+async function actualizarNombreMultimedia (archivo) {
+  try {
+    await llamar('comercial', 'productos', 'actualizar_nombre_multimedia', {
+      uid: archivo.uid,
+      empresa: producto.value.empresa,
+      nombre_archivo: archivo.nombre_archivo
+    })
+    $q.notify({ type: 'positive', message: 'Nombre guardado', timeout: 1000 })
+  } catch (e) {
+    $q.notify({ type: 'warning', message: 'Error guardando nombre: ' + e.message })
+  }
+}
+
+async function sugerirNombreMultimediaIA (archivo) {
+  try {
+    const nombreProd = producto.value.nombre || producto.value.nombre_grupo_catalogo || 'Producto'
+    const uso = archivo.uso
+    const instruccion = `Eres experto en SEO y WooCommerce. Genera un nombre de archivo optimizado (slug-style) para esta imagen/video.
+- Producto: "${nombreProd}"
+- Rol de la imagen: "${uso}"
+- Nombre actual: "${archivo.nombre_archivo || ''}"
+
+REGLAS STRICTAS:
+- Solo texto en minúsculas.
+- Separado por guiones cortos (kebab-case).
+- Sin extensión de archivo (ej. .jpg).
+- Ejemplo: miel-silvestre-pura-frente
+Devuelve SOLO el nombre.`
+
+    const respuesta = await llamar('comercial', 'asistente', 'sugerir_datos', {
+      contexto: {
+        campo_peticion: 'nombre_archivo',
+        instruccion,
+        nombre_producto: nombreProd
+      }
+    })
+
+    if (respuesta?.sugerencia) {
+      archivo.nombre_archivo = respuesta.sugerencia
+      await actualizarNombreMultimedia(archivo)
+      $q.notify({
+        type: 'positive',
+        message: 'Nombre optimizado SEO',
+        icon: 'auto_awesome',
+        color: 'deep-orange-9',
+        timeout: 2000
+      })
+    }
+  } catch (error) {
+    console.error(error)
+    $q.notify({ type: 'warning', message: 'Error en la IA: ' + error.message })
+  }
+}
+
 function alIniciarArrastre (evento, archivo) {
   archivoEnArrastre.value = archivo
   evento.dataTransfer.effectAllowed = 'move'
@@ -1399,8 +1505,12 @@ function alSoltar (evento, archivoDestino) {
   lista.splice(iDestino, 0, lista.splice(iOrigen, 1)[0])
   lista.forEach((item, i) => { item.orden = i + 1 })
   multimedia.value = lista
+  
+  const uidsOrdenados = lista.map(m => m.uid)
+  llamar('comercial', 'productos', 'reordenar_multimedia', { lista: uidsOrdenados }).catch(e => {
+    $q.notify({ type: 'negative', message: 'Error guardando orden: ' + e.message })
+  })
   archivoEnArrastre.value = null
-  // TODO: PATCH /api/comercial/multimedia/reordenar
 }
 
 function formatearFecha (fecha) {

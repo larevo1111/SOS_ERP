@@ -75,7 +75,7 @@ class ListarProductos
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Construir URL pública de la foto principal (ruta relativa → URL completa)
-        $r2BaseUrl = rtrim(getenv('R2_URL_PUBLICA') ?: '', '/');
+        $r2BaseUrl = rtrim($datos['storage_url_publica'] ?? '', '/');
         foreach ($items as &$item) {
             $item['foto_principal'] = !empty($item['foto_principal_local'])
                 ? $r2BaseUrl . '/' . $item['foto_principal_local']

@@ -26,7 +26,7 @@ export default defineConfig((_ctx) => {
 
     devServer: {
       open: true,
-      port: 9000
+      port: 5173
     },
 
     framework: {

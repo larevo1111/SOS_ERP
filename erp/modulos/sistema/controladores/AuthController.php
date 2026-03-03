@@ -127,6 +127,7 @@ switch ($accion) {
                 $esValida = true;
                 $nombreEmpresaElegida = $empArr['nombre_empresa'] ?? $empresaElegida;
                 $siglasEmpresaElegida = $empArr['siglas'] ?? '';
+                $storageUrlPublicaElegida = $empArr['storage_url_publica'] ?? '';
                 break;
             }
         }
@@ -137,16 +138,17 @@ switch ($accion) {
         // Emitir Token Final — incluye uid, nombre_empresa y siglas de la empresa activa
         $ahora = time();
         $finalPayload = [
-            'sub'            => $tempData['email'],
-            'email'          => $tempData['email'],
-            'nombre'         => $tempData['nombre'],
-            'foto'           => $tempData['foto'],
-            'Nivel_Acceso'   => $tempData['nivel'],
-            'empresa_activa' => $empresaElegida,         // uid de sys_empresa (ej: 'Ori_Sil_2')
-            'empresa_nombre' => $nombreEmpresaElegida,   // nombre completo (ej: 'Origen Silvestre')
+            'sub' => $tempData['email'],
+            'email' => $tempData['email'],
+            'nombre' => $tempData['nombre'],
+            'foto' => $tempData['foto'],
+            'Nivel_Acceso' => $tempData['nivel'],
+            'empresa_activa' => $empresaElegida, // uid de sys_empresa (ej: 'Ori_Sil_2')
+            'empresa_nombre' => $nombreEmpresaElegida, // nombre completo (ej: 'Origen Silvestre')
             'empresa_siglas' => $siglasEmpresaElegida ?? '', // abreviatura (ej: 'OS')
-            'iat'            => $ahora,
-            'exp'            => $ahora + 86400 * 7       // 7 días
+            'empresa_storage_url_publica' => rtrim($storageUrlPublicaElegida, '/'),
+            'iat' => $ahora,
+            'exp' => $ahora + 86400 * 7 // 7 días
         ];
 
         $tokenFinal = JWT::encode($finalPayload, $jwtSecret, 'HS256');
@@ -187,7 +189,8 @@ function validarIdentidadYEmpresas($pdo, $email, $jwtSecret)
             SELECT 
                 e.uid          as uid_empresa,
                 e.nombre_empresa,
-                e.siglas
+                e.siglas,
+                e.storage_url_publica
             FROM sys_usuarios_empresas ue
             INNER JOIN sys_empresa e ON e.uid = ue.empresa
             WHERE ue.usuario = :email AND ue.estado = 'Activo'

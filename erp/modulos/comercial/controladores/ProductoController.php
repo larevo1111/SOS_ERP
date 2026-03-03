@@ -12,6 +12,10 @@ require_once __DIR__ . '/../casos_de_uso/ObtenerProducto.php';
 require_once __DIR__ . '/../casos_de_uso/ListarProductos.php';
 require_once __DIR__ . '/../casos_de_uso/ListarVariaciones.php';
 require_once __DIR__ . '/../casos_de_uso/GuardarVariacionExpress.php';
+require_once __DIR__ . '/../casos_de_uso/EliminarMultimedia.php';
+require_once __DIR__ . '/../casos_de_uso/CambiarUsoMultimedia.php';
+require_once __DIR__ . '/../casos_de_uso/ReordenarMultimedia.php';
+require_once __DIR__ . '/../casos_de_uso/ActualizarNombreMultimedia.php';
 
 use Infraestructura\BaseDatos\Conexion;
 
@@ -82,6 +86,7 @@ if (!$usuarioRef) {
 $datos['empresa'] = $usuarioRef->empresa_activa ?? '';
 $datos['usuario_creador'] = $usuarioRef->email ?? '';
 $datos['usuario_ult_modificacion'] = $usuarioRef->email ?? '';
+$datos['storage_url_publica'] = $usuarioRef->empresa_storage_url_publica ?? '';
 
 if (empty($datos['empresa'])) {
     http_response_code(403);
@@ -122,6 +127,26 @@ try {
 
         case 'guardar_variacion_express':
             $caso = new GuardarVariacionExpress($pdo);
+            $resultado = $caso->ejecutar($datos);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'eliminar_multimedia':
+            $caso = new EliminarMultimedia($pdo);
+            $resultado = $caso->ejecutar($datos);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'cambiar_uso_multimedia':
+            $caso = new CambiarUsoMultimedia($pdo);
+            $resultado = $caso->ejecutar($datos);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'reordenar_multimedia':
+            $caso = new ReordenarMultimedia($pdo);
+            $resultado = $caso->ejecutar($datos);
+            responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
+
+        case 'actualizar_nombre_multimedia':
+            $caso = new ActualizarNombreMultimedia($pdo);
             $resultado = $caso->ejecutar($datos);
             responder($resultado['exito'], $resultado['datos'], $resultado['mensaje'], $resultado['errores']);
 

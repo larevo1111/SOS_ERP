@@ -6,14 +6,14 @@ Este plan define la experiencia de navegación para que Santi pueda gestionar el
 
 ### [Backend - API]
 
-#### [MODIFICAR] [ProductoController.php](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/modulos/comercial/controladores/ProductoController.php)
+#### [MODIFICAR] [ProductoController.php](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/erp/modulos/comercial/controladores/ProductoController.php)
 *   **Nueva Acción: `listar`**: Consultará la tabla `com_productos`.
 *   **Filtros**: Soportará filtrado por `empresa` (obligatorio), `marca`, `categoria` y `estado`.
 *   **Buscador**: Búsqueda por texto libre en el nombre del producto.
 
 ### [Frontend - Componentes]
 
-#### [NEW] [CatalogoProductos.vue](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/frontend/src/modulos/comercial/CatalogoProductos.vue)
+#### [NEW] [CatalogoProductos.vue](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/erp/frontend/src/modulos/comercial/CatalogoProductos.vue)
 *   **Tabla Dinámica (`q-table`)**:
     *   Columnas: Miniatura (R2), Nombre, SKU/UID, Marca, Precio, Stock (futuro), Estado.
     *   **Estética 5S**: Bordes suaves, espaciado generoso, colores de la marca.
@@ -22,7 +22,7 @@ Este plan define la experiencia de navegación para que Santi pueda gestionar el
 
 ### [Frontend - Navegación]
 
-#### [MODIFICAR] [routes.js](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/frontend/src/router/routes.js)
+#### [MODIFICAR] [routes.js](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/erp/frontend/src/router/routes.js)
 *   Vincular la ruta principal de comercial al catálogo:
     *   `/comercial/productos` → `CatalogoProductos.vue`
     *   `/comercial/productos/nuevo` → `FormularioProducto.vue`

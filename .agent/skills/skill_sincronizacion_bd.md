@@ -18,6 +18,34 @@ Este skill describe el procedimiento estándar para subir cambios de la base de 
 
 ## Procedimiento Paso a Paso
 
+### 0. Actualizar Archivo de Inicialización (ANTES DE DESARROLLAR)
+Para asegurar que `inicializacion.sql` siempre tenga la foto real de la base de datos, se debe ejecutar un volcado estructural (solo esquema, sin datos) antes de cualquier desarrollo.
+
+**Desde Hostinger (Producción):**
+```bash
+mariadb-dump -u u768061575_ssierra047 -p \
+  --no-data \
+  --routines \
+  --events \
+  --skip-lock-tables \
+  --ssl-verify-server-cert=false \
+  -h 109.106.250.195 \
+  u768061575_os_comunidad \
+  > estructura_erp.sql
+```
+
+**Desde Local (Desarrollo Ubuntu/WSL):**
+```bash
+mariadb-dump -u larevo1111 -p \
+  --no-data \
+  --routines \
+  --events \
+  --skip-lock-tables \
+  -h localhost \
+  sos_erp_local \
+  > erp/modulos/sistema/base_datos/inicializacion.sql
+```
+
 ### 1. Exportar en Local (Windows CMD)
 ```bash
 cmd /c "mariadb-dump -u root --skip-lock-tables --hex-blob sos_erp_local > local_to_prod.sql"

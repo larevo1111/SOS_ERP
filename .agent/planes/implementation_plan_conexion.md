@@ -6,14 +6,14 @@ Este plan detalla cómo uniremos el frontend con la API backend para que el **M�
 
 ### [Frontend - Comunicación]
 
-#### [NEW] [apiService.js](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/frontend/src/servicios/apiService.js)
+#### [NEW] [apiService.js](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/erp/frontend/src/servicios/apiService.js)
 *   **Gestor Central**: Clase o módulo literal para realizar peticiones `POST` al ERP.
 *   **Seguridad**: Inyectará automáticamente el `token` de seguridad en cada petición (obtenido de una constante global).
 *   **Enrutamiento**: Manejará la URL base `/api/` de forma dinámica.
 
 ### [Frontend - Formulario de Producto]
 
-#### [MODIFICAR] [FormularioProducto.vue](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/erp/frontend/src/modulos/comercial/FormularioProducto.vue)
+#### [MODIFICAR] [FormularioProducto.vue](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/erp/frontend/src/modulos/comercial/FormularioProducto.vue)
 *   **Carga Inicial**: Si hay un `uid` en la URL, solicitar los datos del producto a la API.
 *   **Acción Guardar**: 
     1. Recopilar datos de todas las pestañas.

@@ -99,8 +99,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { llamar } from '../../servicios/apiService.js'
+import { useAuthStore } from '../../stores/authStore.js'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const busqueda = ref('')
 const soloMaestros = ref(true)
@@ -121,14 +123,13 @@ async function cargarProductos () {
   cargando.value = true
   try {
     const params = {
-      empresa: 'Origen Silvestre', // Provisional, debería venir del store de auth
+      empresa: authStore.empresaActiva,
       busqueda: busqueda.value,
       solo_maestros: soloMaestros.value
     }
     const data = await llamar('comercial', 'productos', 'listar_productos', params)
     productos.value = data || []
   } catch (e) {
-    // Si la conexion HTTP falla en este entorno en crudo (auth no configurada 100%), no romper la UI
     console.error('Error cargando catalogo:', e)
   } finally {
     cargando.value = false

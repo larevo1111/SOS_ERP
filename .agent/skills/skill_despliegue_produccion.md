@@ -5,7 +5,7 @@ description: Guía para desplegar el ERP a producción (erp.oscomunidad.com en H
 # 🚀 Skill: Despliegue a Producción
 
 > [!IMPORTANT]
-> **Entorno de ejecución:** Ubuntu local. Los comandos se ejecutan en bash desde `/home/osserver/.gemini/antigravity/scratch/SOS_ERP`.
+> **Entorno de ejecución:** Ubuntu local. Los comandos se ejecutan en bash desde `/home/osserver/Proyectos_Antigravity/SOS_ERP`.
 > **Workflow oficial**: usar `/desplegar_produccion` que auto-ejecuta los pasos marcados con `// turbo`.
 
 ## Flujo Completo (7 pasos)

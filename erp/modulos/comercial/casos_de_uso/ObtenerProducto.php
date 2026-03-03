@@ -42,6 +42,15 @@ class ObtenerProducto
         $stmtM->execute([':uid' => $uid]);
         $multimedia = $stmtM->fetchAll(PDO::FETCH_ASSOC);
 
+        // Inyectar URL pública calculada a la multimedia (Filosofía Multi-Tenant S3)
+        $r2BaseUrl = rtrim($datos['storage_url_publica'] ?? '', '/');
+        foreach ($multimedia as &$m) {
+            if (!empty($m['archivo_local'])) {
+                $m['url_publica_calculada'] = $r2BaseUrl . '/' . $m['archivo_local'];
+            }
+        }
+        unset($m);
+
         // 3. Obtener variaciones si es un producto maestro
         $variaciones = [];
         if (!$producto['producto_principal_variacion']) {

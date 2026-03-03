@@ -67,10 +67,14 @@
 - **Skills**: Documentar lecciones en `.agent/skills/`. **REGLA DE ORO:** Está PROHIBIDO actualizar o crear un Skill si el problema no ha sido previamente solucionado y VERIFICADO visualmente (screenshot o log de éxito). No se documentan teorías ni suposiciones. Incluir `Estado`, `Autor` y `Fecha`.
 - **Contexto**: `CONTEXTO_ACTIVO.md` corto y real.
 
-## 7. Política de Sincronización de Base de Datos y Accesos
+## 7. Política Estricta de Entornos y Sincronización de Base de Datos
+
+**REGLA DE ORO DE ENTORNOS (⚠️ CRÍTICO - LECTURA OBLIGATORIA):**
+NUNCA, bajo ninguna circunstancia, el agente debe conectarse directamente a la base de datos de producción (Hostinger, u otra IP externa) para realizar alteraciones de esquema (DDL) o modificaciones de datos. Todo el desarrollo, el testing, la codificación y los cambios estructurales a la base de datos se realizan EXCLUSIVAMENTE en el entorno local (`sos_erp_local` y localhost). Los cambios a producción fluyen únicamente a través del pipeline de despliegue (`/desplegar_produccion`) para el código, y ejecutando el script oficial para la sincronización de la DB. Está absolutamente prohibido omitir este principio.
 
 Para garantizar que el ecosistema (Hostinger, Ubuntu Local, Windows 11) se mantenga en sincronía y no existan desfaces estructurales ni de datos de prueba:
 
+0. **Actualización de `inicializacion.sql`**: ANTE de comenzar a desarrollar cualquier feature, el agente debe verificar y sincronizar la estructura real de la base de datos hacia el archivo `inicializacion.sql` ejecutando un comando de exportación estructural (solo estructura, no datos) directamente con `mysqldump` (ver comandos exactos en `skill_sincronizacion_bd.md`).
 1. **La Base de Datos viaja por Git**: Toda alteración a la base de datos (nuevas tablas, migraciones, registros de prueba complejos) debe exportarse al archivo `erp/base_datos/sos_erp_sync.sql` usando el script oficial.
 2. **Mandamiento de Exportación**: Si alteras la BD en tu entorno, ejecuta `./erp/scripts/db_export.sh`, haz `git commit` y `git push`.
 3. **Mandamiento de Importación**: Al cambiar de equipo (ej. de Hostinger a Ubuntu o de Ubuntu a Windows 11), después de hacer `git pull`, debes ejecutar `./erp/scripts/db_import.sh` para absorber los cambios estructurales.

@@ -21,12 +21,27 @@ BD guarda:   empresas/ori_sil_2/productos/OS.260302101558/20260302-a1b2.jpg
 NO guarda:   https://archivos.oscomunidad.com/empresas/ori_sil_2/...
 ```
 
-La URL completa se reconstruye en tiempo de ejecución:
+La URL completa se reconstruye dinámicamente en tiempo de ejecución leyendo la configuración de la empresa:
 ```php
-$urlCompleta = rtrim(getenv('R2_URL_PUBLICA'), '/') . '/' . $registro['archivo_local'];
+// El middleware JWT inyecta la URL base configurada en `sys_empresa` para el tenant actual
+$urlCompleta = rtrim($datos['storage_url_publica'] ?? '', '/') . '/' . $registro['archivo_local'];
 ```
 
-**¿Por qué?** Porque si mañana cambias de Cloudflare R2 a AWS S3 o Hostinger Storage, solo cambias la variable de entorno `R2_URL_PUBLICA`. La BD no se toca. Sin este principio, tendrías que hacer UPDATE masivo en miles de registros.
+**¿Por qué? (Nueva Arquitectura Multi-Tenant 2026)**
+1. **Portabilidad Total:** Si una empresa cambia de proveedor (AWS S3, R2, GCP), solo cambian los datos en la tabla `sys_empresa`. Los miles de registros de `com_productos_multimedia` quedan intactos, ya que solo guardan la ruta `empresas/ori_sil_2/...`
+2. **Seguridad Absoluta:** Las claves maestras S3 (`storage_access_key`, `storage_secret_key`) residen *exclusivamente* en la base de datos `sys_empresa` y solo son llamadas puntualmente por el backend al subir o borrar. **JAMÁS** van en el JWT ni llegan al frontend.
+3. **Alto Rendimiento:** Solo el frontend y GETS (`ListarProductos`, `ObtenerProducto`) necesitan la URL base pública (`storage_url_publica`). Esta viaja encriptada en el JWT en el momento del inicio de sesión (evitando miles de consultas a la BD en cada carga de listado).
+
+### 1.1 Configuración de la URL Pública (Lección Crítica)
+
+⚠️ **NUNCA** guardes en la base de datos la URL de la API S3 de Cloudflare (ej. `https://893354e...r2.cloudflarestorage.com/...`). 
+Esta URL es un **Endpoint S3** y requiere firmas criptográficas en cada petición. Si la usas como URL pública, **todas las imágenes se verán rotas en el frontend** devolviendo un error HTTP 400 Bad Request.
+
+✅ **FORMA CORRECTA:** Debes guardar **exclusivamente** el Dominio Público configurado en el panel de Cloudflare R2.
+- **Opción A (R2.dev):** `https://pub-96a13c5af89340e494b461e0384f879c.r2.dev` (Ideal para desarrollo/pruebas).
+- **Opción B (Custom Domain):** `https://archivos.mi-erp.com` (Exigido para Producción).
+
+Esta URL pública real es la que se guarda en la tabla `sys_empresa` en la columna `storage_url_publica`.
 
 ## 2. Schema Real de com_productos_multimedia (Verificado 2026-03-02)
 
@@ -36,7 +51,7 @@ $urlCompleta = rtrim(getenv('R2_URL_PUBLICA'), '/') . '/' . $registro['archivo_l
 |---|---|---|
 | `uid` | VARCHAR(80) | Formato `SIGLAS.YYMMDDHHMMSS` |
 | `uid_producto` | VARCHAR(80) | FK → `com_productos.uid` (ON DELETE CASCADE) |
-| `tipo_archivo` | ENUM(`imagen,video,documento,html`) | Auto-detectado del MIME type |
+| `tipo_archivo` | ENUM(`imagen,video,documento,html`) | Auto-detectado del MIME type. Soporta PDF, Word, Excel y ZIP. |
 | `uso` | ENUM(`Principal,Galeria,Variacion,Galeria secundaria,Otro`) | Definido por sección de la UI |
 | `archivo_local` | VARCHAR(500) | **Ruta relativa en el bucket** (sin URL base) |
 | `archivo_woocommerce` | VARCHAR(500) | ID de WooCommerce (vacío hasta sincronización) |
@@ -115,3 +130,23 @@ const urlImagen = archivo.url_publica_calculada || archivo.archivo_woocommerce |
 - **`Unknown column 'nombre_archivo' in INSERT INTO`**: Las columnas reales son `archivo_local` y `archivo_woocommerce`. Los nombres `nombre_archivo`, `ruta_archivo`, `url_publica` NO existen en la BD.
 - **Archivos huérfanos en R2**: Ocurren cuando el PHP crea el archivo en R2 pero el INSERT falla. Solución: el PHP debe intentar eliminar el archivo de R2 si el INSERT falla (try-catch).
 - **Error de FK al insertar multimedia**: Ocurre cuando `uid_producto` no existe en `com_productos`. Verificar que el producto se guardó antes de subir multimedia.
+
+## 7. Configuración de Límite de Tamaño de Archivos (500 MB)
+
+El sistema está configurado actualmente para aceptar archivos (imágenes, PDFs, videos) de hasta **500 MB**.
+Si en algún momento el cliente requiere subir archivos más grandes o arroja un error de que el archivo supera el límite permitido, se deben actualizar EXACTAMENTE estos dos lugares:
+
+1. **Configuración del Servidor PHP (`php.ini`)**
+   Ruta en producción/local: `/etc/php/8.3/apache2/php.ini` (o la versión correspondiente).
+   Cambiar las siguientes directivas y **reiniciar Apache** (`sudo systemctl restart apache2`):
+   ```ini
+   upload_max_filesize = 500M
+   post_max_size = 500M
+   ```
+
+2. **Backend PHP (Regla de Negocio)**
+   Archivo: `erp/modulos/comercial/casos_de_uso/SubirMultimedia.php`
+   Actualizar la constante que valida por seguridad antes de subir a R2:
+   ```php
+   private const TAMANO_MAXIMO = 500 * 1024 * 1024; // 500 MB
+   ```

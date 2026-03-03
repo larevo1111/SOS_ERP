@@ -45,14 +45,14 @@
 
 ## 📚 Referencias Obligatorias
 
-- 🎨 **Diseño**: [.agent/diseno/GUIA_ESTILOS.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)
+- 🎨 **Diseño**: [.agent/diseno/GUIA_ESTILOS.md](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/.agent/diseno/GUIA_ESTILOS.md)
 - ⚡ **Skills clave**:
   - `skill_multimedia_r2.md` — multimedia y R2
   - `skill_vista_listado.md` — vistas de catálogo
   - `skill_vista_detalle.md` — vista de detalle
   - `skill_auditoria_bd.md` — bugs conocidos de BD
   - `skill_despliegue_produccion.md` — cómo desplegar
-- 📜 **Plan activo**: [.agent/planes/PLAN_refactor_producto.md](file:///home/osserver/.gemini/antigravity/scratch/SOS_ERP/.agent/planes/PLAN_refactor_producto.md)
+- 📜 **Plan activo**: [.agent/planes/PLAN_refactor_producto.md](file:///home/osserver/Proyectos_Antigravity/SOS_ERP/.agent/planes/PLAN_refactor_producto.md)
 
 ---
 

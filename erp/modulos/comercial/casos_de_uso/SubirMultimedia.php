@@ -24,10 +24,16 @@ class SubirMultimedia
         'image/gif' => 'gif',
         'video/mp4' => 'mp4',
         'video/webm' => 'webm',
+        'application/pdf' => 'pdf',
+        'application/msword' => 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+        'application/vnd.ms-excel' => 'xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+        'application/zip' => 'zip',
     ];
 
-    // Tamaño máximo: 20 MB
-    private const TAMANO_MAXIMO = 20 * 1024 * 1024;
+    // Tamaño máximo: 500 MB
+    private const TAMANO_MAXIMO = 500 * 1024 * 1024;
 
     public function __construct(PDO $pdo)
     {
@@ -71,8 +77,12 @@ class SubirMultimedia
             return $this->respuesta(false, null, "El archivo supera el límite de {$mb} MB.", ['tamano_excedido']);
         }
 
-        // ── Determinar tipo de archivo (imagen o video) ───────────
-        $tipoArchivo = str_starts_with($mimeType, 'video/') ? 'video' : 'imagen';
+        // ── Determinar tipo de archivo (imagen, video, o documento) ───────────
+        $tipoArchivo = 'documento';
+        if (str_starts_with($mimeType, 'image/'))
+            $tipoArchivo = 'imagen';
+        if (str_starts_with($mimeType, 'video/'))
+            $tipoArchivo = 'video';
 
         // ── Generar nombre y ruta dentro del bucket ───────────────
         // Ruta: empresas/{empresa}/productos/{uid_producto}/{timestamp}-{random}.{ext}
@@ -80,9 +90,18 @@ class SubirMultimedia
         $nombreUnico = date('YmdHis') . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
         $rutaEnBucket = "empresas/{$empresa}/productos/{$uidProducto}/{$nombreUnico}";
 
-        // ── Subir a Cloudflare R2 ─────────────────────────────────
+        // ── Obtener configuración de almacenamiento del tenant ───────────────
+        $stmtStorage = $this->pdo->prepare("SELECT storage_proveedor, storage_endpoint, storage_bucket, storage_access_key, storage_secret_key, storage_url_publica FROM sys_empresa WHERE uid = :empresa LIMIT 1");
+        $stmtStorage->execute([':empresa' => $empresa]);
+        $storageInfo = $stmtStorage->fetch(PDO::FETCH_ASSOC);
+
+        if (!$storageInfo || empty($storageInfo['storage_endpoint'])) {
+            return $this->respuesta(false, null, 'Configuración de almacenamiento incompleta para esta empresa.', ['storage_faltante']);
+        }
+
+        // ── Subir a Storage S3 Compatible ─────────────────────────────────
         try {
-            $urlPublica = $this->subirAR2($archivo['tmp_name'], $mimeType, $rutaEnBucket);
+            $urlPublica = $this->subirAlStorage($archivo['tmp_name'], $mimeType, $rutaEnBucket, $storageInfo);
         }
         catch (Exception $e) {
             return $this->respuesta(false, null, 'Error al subir el archivo: ' . $e->getMessage(), ['error_r2']);
@@ -94,17 +113,22 @@ class SubirMultimedia
 
         $sql = '
             INSERT INTO com_productos_multimedia (
-                uid, empresa, uid_producto, tipo_archivo,
+                uid, empresa, uid_producto, tipo_archivo, nombre_archivo,
                 archivo_local, archivo_woocommerce,
                 uso, orden, estado,
                 usuario_creador, usuario_ult_modificacion
             ) VALUES (
-                :uid, :empresa, :uid_producto, :tipo_archivo,
+                :uid, :empresa, :uid_producto, :tipo_archivo, :nombre_archivo,
                 :archivo_local, :archivo_woocommerce,
                 :uso, :orden, :estado,
                 :usuario_creador, :usuario_ult_modificacion
             )
         ';
+
+        // Extraer nombre original sin extensión para el campo nombre_archivo
+        $nombreOriginal = pathinfo($archivo['name'] ?? 'archivo', PATHINFO_FILENAME);
+        // Limpiar para que sea amigable
+        $nombreLimpio = trim(preg_replace('/[^a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚ-]/', ' ', $nombreOriginal));
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
@@ -112,6 +136,7 @@ class SubirMultimedia
             ':empresa' => $empresa,
             ':uid_producto' => $uidProducto,
             ':tipo_archivo' => $tipoArchivo,
+            ':nombre_archivo' => $nombreLimpio,
             // archivo_local = ruta relativa dentro del bucket (SIN la URL base del proveedor).
             // La URL completa se reconstruye en tiempo de ejecución: R2_URL_PUBLICA . '/' . archivo_local
             // Esto permite cambiar de proveedor de almacenamiento sin tocar la BD.
@@ -129,25 +154,27 @@ class SubirMultimedia
 
         // Enriquecer el registro con la URL pública calculada para que el frontend la pueda mostrar
         if ($registro && !empty($registro['archivo_local'])) {
-            $r2BaseUrl = rtrim(getenv('R2_URL_PUBLICA') ?: '', '/');
+            $r2BaseUrl = rtrim($storageInfo['storage_url_publica'] ?? '', '/');
             $registro['url_publica_calculada'] = $r2BaseUrl . '/' . $registro['archivo_local'];
         }
 
         return $this->respuesta(true, $registro, 'Archivo subido correctamente.');
     }
 
-    // ── Subida a Cloudflare R2 via API S3-compatible ──────────────
+    // ── Subida a Storage S3-compatible ──────────────
     // Implementa AWS Signature V4 con PHP nativo (sin SDK externo).
-    private function subirAR2(string $rutaTmp, string $mimeType, string $clave): string
+    private function subirAlStorage(string $rutaTmp, string $mimeType, string $clave, array $storageInfo): string
     {
-        $accountId = getenv('R2_ACCOUNT_ID');
-        $accessKey = getenv('R2_ACCESS_KEY');
-        $secretKey = getenv('R2_SECRET_KEY');
-        $bucket = getenv('R2_BUCKET');
-        $urlPublica = rtrim(getenv('R2_URL_PUBLICA') ?: '', '/');
+        $accessKey = $storageInfo['storage_access_key'];
+        $secretKey = $storageInfo['storage_secret_key'];
+        $bucket = $storageInfo['storage_bucket'];
+        $urlPublica = rtrim($storageInfo['storage_url_publica'] ?? '', '/');
 
-        if (!$accountId || !$accessKey || !$secretKey || !$bucket) {
-            throw new \RuntimeException('Faltan variables R2 en el archivo .env.');
+        $parsedUrl = parse_url($storageInfo['storage_endpoint']);
+        $host = $parsedUrl['host'] ?? '';
+
+        if (!$host || !$accessKey || !$secretKey || !$bucket) {
+            throw new \RuntimeException('Configuración de almacenamiento incompleta en la base de datos.');
         }
 
         $contenido = file_get_contents($rutaTmp);
@@ -158,7 +185,7 @@ class SubirMultimedia
         $fechaHora = $ahora->format('Ymd\THis\Z'); // 20260227T143055Z
         $fecha = $ahora->format('Ymd'); // 20260227
 
-        $host = "{$accountId}.r2.cloudflarestorage.com";
+        // $host ya viene parseado de la configuración
         $claveUri = rawurlencode($clave);
         // Preservar las barras del path sin codificarlas
         $claveUri = str_replace('%2F', '/', $claveUri);

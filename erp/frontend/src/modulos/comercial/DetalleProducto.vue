@@ -276,9 +276,23 @@
               <div class="galeria-grid">
                 <div v-for="f in fotosGaleria" :key="f.uid"
                   class="galeria-item cursor-pointer" @click="abrirLightbox(f)">
-                  <img :src="urlArchivo(f)" :alt="f.uso" loading="lazy" />
-                  <div class="galeria-item__zoom">
-                    <q-icon name="zoom_in" size="20px" color="white" />
+                  <template v-if="f.tipo_archivo === 'imagen'">
+                    <img :src="urlArchivo(f)" :alt="f.uso" loading="lazy" />
+                    <div class="galeria-item__zoom"><q-icon name="zoom_in" size="20px" color="white" /></div>
+                  </template>
+                  <template v-else-if="f.tipo_archivo === 'video'">
+                    <div class="galeria-item__icono" style="background:#F3F1EE;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="videocam" size="32px" color="grey-6" /></div>
+                    <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
+                  </template>
+                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
+                    {{ f.nombre_archivo }}
+                  </div>
+                  <template v-else>
+                    <div class="galeria-item__icono" style="background:#E5F0FF;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="description" size="32px" color="blue-6" /></div>
+                    <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
+                  </template>
+                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
+                    {{ f.nombre_archivo }}
                   </div>
                 </div>
               </div>
@@ -298,9 +312,23 @@
               <div class="galeria-grid">
                 <div v-for="f in fotosGaleriaSecundaria" :key="f.uid"
                   class="galeria-item cursor-pointer" @click="abrirLightbox(f)">
-                  <img :src="urlArchivo(f)" :alt="f.uso" loading="lazy" />
-                  <div class="galeria-item__zoom">
-                    <q-icon name="zoom_in" size="20px" color="white" />
+                  <template v-if="f.tipo_archivo === 'imagen'">
+                    <img :src="urlArchivo(f)" :alt="f.uso" loading="lazy" />
+                    <div class="galeria-item__zoom"><q-icon name="zoom_in" size="20px" color="white" /></div>
+                  </template>
+                  <template v-else-if="f.tipo_archivo === 'video'">
+                    <div class="galeria-item__icono" style="background:#F3F1EE;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="videocam" size="32px" color="grey-6" /></div>
+                    <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
+                  </template>
+                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
+                    {{ f.nombre_archivo }}
+                  </div>
+                  <template v-else>
+                    <div class="galeria-item__icono" style="background:#E5F0FF;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="description" size="32px" color="blue-6" /></div>
+                    <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
+                  </template>
+                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
+                    {{ f.nombre_archivo }}
                   </div>
                 </div>
               </div>
@@ -320,9 +348,23 @@
               <div class="galeria-grid">
                 <div v-for="f in fotosVariacion" :key="f.uid"
                   class="galeria-item cursor-pointer" @click="abrirLightbox(f)">
-                  <img :src="urlArchivo(f)" :alt="f.uso" loading="lazy" />
-                  <div class="galeria-item__zoom">
-                    <q-icon name="zoom_in" size="20px" color="white" />
+                  <template v-if="f.tipo_archivo === 'imagen'">
+                    <img :src="urlArchivo(f)" :alt="f.uso" loading="lazy" />
+                    <div class="galeria-item__zoom"><q-icon name="zoom_in" size="20px" color="white" /></div>
+                  </template>
+                  <template v-else-if="f.tipo_archivo === 'video'">
+                    <div class="galeria-item__icono" style="background:#F3F1EE;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="videocam" size="32px" color="grey-6" /></div>
+                    <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
+                  </template>
+                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
+                    {{ f.nombre_archivo }}
+                  </div>
+                  <template v-else>
+                    <div class="galeria-item__icono" style="background:#E5F0FF;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="description" size="32px" color="blue-6" /></div>
+                    <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
+                  </template>
+                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
+                    {{ f.nombre_archivo }}
                   </div>
                 </div>
               </div>
@@ -498,7 +540,12 @@ function urlArchivo (archivo) {
 }
 
 function abrirLightbox (archivo) {
-  lightboxSrc.value = urlArchivo(archivo)
+  const url = urlArchivo(archivo)
+  if (archivo.tipo_archivo !== 'imagen') {
+    window.open(url, '_blank')
+    return
+  }
+  lightboxSrc.value = url
   lightboxAbierto.value = true
 }
 
@@ -916,6 +963,24 @@ onMounted(cargarProducto)
     justify-content: center;
     opacity: 0;
     transition: opacity 0.2s;
+  }
+
+  &__nombre {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(2px);
+    padding: 6px 4px;
+    font-size: 10px;
+    color: #7A7A7A;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top: 1px solid #eee;
+    z-index: 10;
   }
 
   &:hover {
