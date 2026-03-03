@@ -694,7 +694,7 @@
             v-for="variacion in variaciones"
             :key="variacion.uid"
             class="variacion-item"
-            @click="irAVariacion(variacion.uid)"
+            @click="editarVariacion(variacion)"
           >
             <div class="variacion-item__cabecera">
               <div class="variacion-item__nombre">{{ variacion.nombre }}</div>
@@ -718,7 +718,9 @@
     <q-dialog v-model="popupVariacionAbierto" persistent @hide="limpiarArchivoVariacion">
       <q-card class="popup-variacion">
         <q-card-section class="row items-center justify-between q-pb-sm">
-          <div class="text-subtitle1 text-weight-bold">Nueva Variación</div>
+          <div class="text-subtitle1 text-weight-bold">
+            {{ variacionDraft.uid ? 'Edición Variación' : 'Nueva Variación' }}
+          </div>
           <q-btn icon="close" flat round dense color="grey-6" @click="popupVariacionAbierto = false" />
         </q-card-section>
 
@@ -1074,10 +1076,36 @@ async function guardar () {
 }
 
 function cancelar () { router.back() }
-function irAVariacion (uid) { router.push({ name: 'editar-producto', params: { uid } }) }
+
+async function editarVariacion (v) {
+  try {
+    const respuesta = await llamar('comercial', 'productos', 'obtener_producto', { uid: v.uid })
+    if (respuesta?.producto) {
+      const prod = respuesta.producto
+      variacionDraft.value = {
+        uid: prod.uid,
+        uid_producto_padre: prod.uid_producto_padre || prod.producto_principal_variacion || '',
+        nombre: prod.nombre,
+        nombre_atributo_variacion: prod.nombre_atributo_variacion,
+        valor_atributo_variacion: prod.valor_atributo_variacion,
+        precio_regular: prod.precio_regular,
+        precio_oferta: prod.precio_oferta,
+        fecha_oferta_desde: prod.fecha_oferta_desde,
+        fecha_oferta_hasta: prod.fecha_oferta_hasta
+      }
+      const foto = respuesta.multimedia?.find(m => m.uso === 'Variacion')
+      previewArchivoVariacion.value = foto ? (foto.url_publica_calculada || foto.archivo_local) : ''
+      
+      limpiarArchivoVariacion() // limpia input file físico pero mantiene preview
+      popupVariacionAbierto.value = true
+    }
+  } catch (e) {
+    $q.notify({ type: 'negative', message: 'Error cargando variación: ' + e.message })
+  }
+}
 
 function abrirPopupVariacion () {
-  const uidPadre     = producto.value.uid_producto_padre || ''
+  const uidPadre     = producto.value.uid_producto_padre || producto.value.uid || ''
   const opcionCostos = opcionesMaestrosCosto.value.find(op => op.value === uidPadre)
   // Pre-llenar nombre: preferimos el nombre de costos, fallback al grupo/catálogo o nombre del producto
   const nombreSugerido = opcionCostos?.nombre
@@ -1119,15 +1147,22 @@ async function guardarVariacionExpress () {
       estado_publicacion: 'borrador'
     }
     const variacionGuardada = await llamar('comercial', 'productos', 'guardar_producto', payload)
-    variaciones.value.unshift(variacionGuardada)
+    
+    // Si ya existía, la actualizamos en la vista. Si es nueva, va al inicio.
+    const i = variaciones.value.findIndex(v => v.uid === variacionGuardada.uid)
+    if (i >= 0) {
+      variaciones.value[i] = variacionGuardada
+    } else {
+      variaciones.value.unshift(variacionGuardada)
+    }
 
-    // Si hay imagen pendiente, subirla al maestro con uso='Variacion'
-    if (archivoVariacionPendiente.value && producto.value.uid) {
+    // Si hay imagen pendiente, subirla a la VARIACIÓN (hijo) con uso='Variacion'
+    if (archivoVariacionPendiente.value && variacionGuardada.uid) {
       const datosImagen = {
-        uid_producto:    producto.value.uid,
+        uid_producto:    variacionGuardada.uid,
         empresa:         producto.value.empresa,
         usuario_creador: producto.value.usuario_creador || 'sistema',
-        orden:           multimedia.value.length + 1,
+        orden:           1,
         uso:             'Variacion'
       }
       const registro = await subirArchivo('comercial', 'productos', 'subir_multimedia', archivoVariacionPendiente.value, datosImagen)
@@ -1529,7 +1564,9 @@ onMounted(async () => {
   if (uid) {
     await cargarProducto(uid)
     await cargarMultimedia(uid)
-    if (esMaestro.value) await cargarVariaciones(uid)
+    if (esMaestro.value) {
+      await cargarVariaciones(uid)
+    }
   }
 })
 </script>
@@ -1548,6 +1585,16 @@ onMounted(async () => {
   width: 100%;
   max-width: 760px;
   border-radius: 14px;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CARD DE SECCIÓN (formulario)
+// ══════════════════════════════════════════════════════════════════
+.card-origenes {
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1725,9 +1772,9 @@ onMounted(async () => {
   &__titulo {
     font-size: 10.5px;
     font-weight: 800;
-    letter-spacing: 0.9px;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    color: #9A9A9A;
+    color: #AAAAAA;
     white-space: nowrap;
   }
 
@@ -1831,14 +1878,17 @@ onMounted(async () => {
   }
 
   &__item {
-    border: 1px solid #E0DDD8;
-    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
     overflow: hidden;
-    background: #F8F7F5;
-    transition: box-shadow 0.15s;
+    background: #FAFAF9;
+    transition: box-shadow 0.2s, transform 0.2s;
     position: relative;
 
-    &:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); }
+    &:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09);
+      transform: translateY(-1px);
+    }
     &--principal { border: 2px solid #E8750A; }
   }
 
@@ -1878,6 +1928,55 @@ onMounted(async () => {
     align-items: center;
     justify-content: space-between;
     padding: 4px 10px 8px;
+  }
+
+  // Fila del nombre SEO — caption minimalista sin caja negra
+  &__nombre {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px 9px;
+    background: rgba(248, 247, 245, 0.8);
+    border-top: 1px solid #F3F1EE;
+  }
+}
+
+// ── Input de nombre SEO (elimina borde negro del browser) ──────────
+.input-nombre-nativo {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #7A7A7A;
+  letter-spacing: 0.2px;
+  min-width: 0;
+  padding: 0 2px;
+  transition: color 0.15s;
+
+  &::placeholder {
+    color: #C8C4BE;
+    font-style: italic;
+    font-size: 10px;
+  }
+
+  &:focus {
+    color: #C55E00;
+  }
+}
+
+// ── Ícono IA en nombre multimedia ─────────────────────────────────
+.hover-icon-ia {
+  flex-shrink: 0;
+  transition: color 0.15s, opacity 0.15s;
+  opacity: 0.45;
+  cursor: pointer;
+
+  &:hover {
+    color: #E8750A !important;
+    opacity: 1;
   }
 }
 
@@ -1926,12 +2025,13 @@ onMounted(async () => {
   border-radius: 10px;
   border: 1px solid #F0EDE8;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.18s;
 
   &:hover {
-    background: rgba(232, 117, 10, 0.04);
-    border-color: rgba(232, 117, 10, 0.25);
-    transform: translateX(2px);
+    background: rgba(232, 117, 10, 0.03);
+    border-color: rgba(232, 117, 10, 0.22);
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(232, 117, 10, 0.06);
   }
 
   &__cabecera {

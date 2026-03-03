@@ -30,8 +30,14 @@ Santi (el Director del Proyecto) ha notado que, si bien la funcionalidad de guar
 - **REGLA DE ORO:** NO modifiques variables reactivas (`v-model`), estructuras de datos del payload, ni la lógica profunda de Javascript. Estás operando en modo "Diseñador Senior".
 
 ### 4. Actualización del Skill de Diseño (POST-EJECUCIÓN)
-- Una vez que Santi apruebe tus cambios de diseño, **DEBES** documentar los estándares que aplicaste (tipografía, colores minimalistas, cómo manejar captions de imágenes) en el skill correspondiente de frontend (ej. `skill_frontend.md` o crear uno nuevo `skill_diseño_ui.md`).
+- Una vez que Santi apruebe tus cambios de diseño, **DEBES** documentar los estándares que aplicaste (tipografía, colores minimalistas, cómo manejar captions de imágenes) en el skill correspondiente de frontend (ej. `skill_frontend.md` o crear uno nuevo `skill_diseno_ui_ux.md`).
+
+### 5. Diseño de Miniaturas y Edición en Lista de Variaciones (FormularioProducto.vue / DetalleProducto.vue)
+- En la vista de FormularioProducto.vue, hay una lista lateral llamada "Variaciones" (clases `.panel-variaciones__lista` / `.variacion-item`). El backend ahora envía correctamente un campo `miniatura_url` con la imagen de cada variación.
+- **Tu tarea:** Rediseña esa lista de variaciones. Debe aparecer la miniatura de la variación (si existe) en un diseño redondo o cuadrado achatado elegante (thumbnail) al lado izquierdo o arriba del nombre, integrando también el `nombre_archivo` (SEO) de forma sutil.
+- Asegúrate de que, al darle al ícono del lápiz o hacer clic en la variación, el popup permita no solo ver su información, sino que se visualice y pueda cambiarse la foto si el usuario lo desea.
+- Revisa el trabajo anterior. Santi considera que el diseño podría aún ser más pro, enfócate de nuevo en los fonts, weights, contrastes y sombras.
 
 ---
 
-**Nota para Claude Code:** Santi espera que sorprendas con tu capacidad de diseño experto. Empieza revisando la estructura CSS de `.galeria-item` y `.galeria__nombre` en ambos archivos `.vue`. Sube el nivel.
+**Nota para Claude Code:** Santi espera que sorprendas con tu capacidad de diseño experto. Empieza revisando la estructura CSS de las vistas de detalle y formulario. Sube el nivel de todo, sin dañar el Backend.

@@ -55,12 +55,29 @@ class ObtenerProducto
         $variaciones = [];
         if (!$producto['producto_principal_variacion']) {
             $stmtV = $this->pdo->prepare("
-                SELECT uid, nombre, estado, nombre_atributo_variacion, valor_atributo_variacion, precio_regular 
-                FROM com_productos 
-                WHERE uid_producto_padre = :uid AND empresa = :empresa
+                SELECT v.uid, v.nombre, v.estado, v.nombre_atributo_variacion, v.valor_atributo_variacion, v.precio_regular,
+                       m.archivo_local as miniatura_local
+                FROM com_productos v
+                LEFT JOIN (
+                    SELECT uid_producto, empresa, archivo_local 
+                    FROM com_productos_multimedia 
+                    WHERE uso = 'Variacion' 
+                    LIMIT 1
+                ) m ON m.uid_producto = v.uid AND m.empresa = v.empresa
+                WHERE v.producto_principal_variacion = :uid
+                  AND v.empresa = :empresa
+                ORDER BY v.id ASC
             ");
             $stmtV->execute([':uid' => $uid, ':empresa' => $empresa]);
             $variaciones = $stmtV->fetchAll(PDO::FETCH_ASSOC);
+
+            // Inyectar URL pública para las miniaturas de variaciones
+            foreach ($variaciones as &$v) {
+                if (!empty($v['miniatura_local'])) {
+                    $v['miniatura_url'] = $r2BaseUrl . '/' . $v['miniatura_local'];
+                }
+            }
+            unset($v);
         }
 
         return $this->respuesta(true, [

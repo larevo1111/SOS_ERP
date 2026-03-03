@@ -84,22 +84,27 @@
 
             <div class="identif-hero">
               <!-- Foto principal -->
-              <div
-                class="identif-hero__imagen"
-                :class="{ 'identif-hero__imagen--clic': fotoPrincipal }"
-                @click="fotoPrincipal && abrirLightbox(fotoPrincipal)"
-              >
-                <img v-if="fotoPrincipal"
-                  :src="urlArchivo(fotoPrincipal)"
-                  alt="Foto principal" />
-                <div v-else class="identif-hero__placeholder">
-                  <q-icon name="image" size="36px" color="grey-3" />
-                  <div class="text-caption text-grey-4 q-mt-xs">Sin imagen</div>
+              <div class="identif-hero__foto-col">
+                <div
+                  class="identif-hero__imagen"
+                  :class="{ 'identif-hero__imagen--clic': fotoPrincipal }"
+                  @click="fotoPrincipal && abrirLightbox(fotoPrincipal)"
+                >
+                  <img v-if="fotoPrincipal"
+                    :src="urlArchivo(fotoPrincipal)"
+                    alt="Foto principal" />
+                  <div v-else class="identif-hero__placeholder">
+                    <q-icon name="image" size="36px" color="grey-3" />
+                    <div class="text-caption text-grey-4 q-mt-xs">Sin imagen</div>
+                  </div>
+                  <div v-if="fotoPrincipal" class="identif-hero__zoom">
+                    <q-icon name="zoom_in" size="24px" color="white" />
+                  </div>
+                  <div v-if="fotoPrincipal" class="identif-hero__badge">★ Principal</div>
                 </div>
-                <div v-if="fotoPrincipal" class="identif-hero__zoom">
-                  <q-icon name="zoom_in" size="24px" color="white" />
+                <div v-if="fotoPrincipal?.nombre_archivo" class="identif-hero__caption" :title="fotoPrincipal.nombre_archivo">
+                  <q-icon name="image_search" size="10px" class="q-mr-xs" style="opacity:0.45" />{{ fotoPrincipal.nombre_archivo }}
                 </div>
-                <div v-if="fotoPrincipal" class="identif-hero__badge">★ Principal</div>
               </div>
 
               <!-- Campos de identificación -->
@@ -284,15 +289,12 @@
                     <div class="galeria-item__icono" style="background:#F3F1EE;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="videocam" size="32px" color="grey-6" /></div>
                     <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
                   </template>
-                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
-                    {{ f.nombre_archivo }}
-                  </div>
                   <template v-else>
                     <div class="galeria-item__icono" style="background:#E5F0FF;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="description" size="32px" color="blue-6" /></div>
                     <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
                   </template>
                   <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
-                    {{ f.nombre_archivo }}
+                    <q-icon name="image_search" size="10px" class="q-mr-xs" style="opacity:0.5" />{{ f.nombre_archivo }}
                   </div>
                 </div>
               </div>
@@ -320,15 +322,12 @@
                     <div class="galeria-item__icono" style="background:#F3F1EE;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="videocam" size="32px" color="grey-6" /></div>
                     <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
                   </template>
-                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
-                    {{ f.nombre_archivo }}
-                  </div>
                   <template v-else>
                     <div class="galeria-item__icono" style="background:#E5F0FF;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="description" size="32px" color="blue-6" /></div>
                     <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
                   </template>
                   <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
-                    {{ f.nombre_archivo }}
+                    <q-icon name="image_search" size="10px" class="q-mr-xs" style="opacity:0.5" />{{ f.nombre_archivo }}
                   </div>
                 </div>
               </div>
@@ -356,15 +355,12 @@
                     <div class="galeria-item__icono" style="background:#F3F1EE;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="videocam" size="32px" color="grey-6" /></div>
                     <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
                   </template>
-                  <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
-                    {{ f.nombre_archivo }}
-                  </div>
                   <template v-else>
                     <div class="galeria-item__icono" style="background:#E5F0FF;width:100%;height:100%;display:flex;align-items:center;justify-content:center"><q-icon name="description" size="32px" color="blue-6" /></div>
                     <div class="galeria-item__zoom"><q-icon name="open_in_new" size="20px" color="white" /></div>
                   </template>
                   <div v-if="f.nombre_archivo" class="galeria-item__nombre" :title="f.nombre_archivo">
-                    {{ f.nombre_archivo }}
+                    <q-icon name="image_search" size="10px" class="q-mr-xs" style="opacity:0.5" />{{ f.nombre_archivo }}
                   </div>
                 </div>
               </div>
@@ -440,9 +436,6 @@
               {{ variaciones.length }} registrada{{ variaciones.length !== 1 ? 's' : '' }}
             </div>
           </div>
-          <q-btn flat round dense icon="edit" size="sm" color="grey-6" @click="irAEditar">
-            <q-tooltip>Editar para agregar variaciones</q-tooltip>
-          </q-btn>
         </div>
 
         <div v-if="variaciones.length === 0"
@@ -451,15 +444,22 @@
         </div>
 
         <div v-for="v in variaciones" :key="v.uid"
-          class="variacion-item" @click="irADetalle(v.uid)">
-          <div class="variacion-item__nombre">{{ v.nombre }}</div>
-          <div class="variacion-item__atributo text-caption text-grey-6"
-            v-if="v.nombre_atributo_variacion">
-            {{ v.nombre_atributo_variacion }}: <strong>{{ v.valor_atributo_variacion }}</strong>
+          class="variacion-item" @click="verVariacion(v)">
+          <!-- Miniatura de la variación -->
+          <div class="variacion-item__thumb">
+            <img v-if="v.miniatura_url" :src="v.miniatura_url" alt="" />
+            <q-icon v-else name="category" size="16px" color="grey-4" />
           </div>
-          <div class="variacion-item__precio text-caption q-mt-xs"
-            v-if="v.precio_regular">
-            {{ formatearPrecio(v.precio_regular) }}
+          <div class="variacion-item__info">
+            <div class="variacion-item__nombre">{{ v.nombre }}</div>
+            <div class="variacion-item__atributo text-caption text-grey-6"
+              v-if="v.nombre_atributo_variacion">
+              {{ v.nombre_atributo_variacion }}: <strong>{{ v.valor_atributo_variacion }}</strong>
+            </div>
+            <div class="variacion-item__precio text-caption q-mt-xs"
+              v-if="v.precio_regular">
+              {{ formatearPrecio(v.precio_regular) }}
+            </div>
           </div>
         </div>
       </div>
@@ -488,6 +488,132 @@
       </div>
     </q-dialog>
 
+    <!-- ════════════════════════════════════════════════════════════
+         POPUP VARIACION (SOLO LECTURA Y EDICION INLINE)
+    ═════════════════════════════════════════════════════════════ -->
+    <q-dialog v-model="popupVariacionAbierto" @hide="editandoVariacion = false">
+      <q-card style="min-width: 350px; max-width: 600px; width: 100%; border-radius: 12px;">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6 text-subtitle1 text-weight-bold">
+            <span v-if="!editandoVariacion">{{ variacionVer.nombre }}</span>
+            <span v-else>Edición Variación</span>
+          </div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup color="grey-6" />
+        </q-card-section>
+
+        <!-- VIEW MODE -->
+        <q-card-section v-if="!editandoVariacion" class="q-pt-md">
+          <div class="row items-start no-wrap q-gutter-md">
+            <!-- Miniatura encuadrada -->
+            <div class="variacion-popup-thumb">
+              <img v-if="variacionVer.miniatura_url" :src="variacionVer.miniatura_url" alt="Variación" />
+              <q-icon v-else name="category" size="28px" color="grey-4" />
+            </div>
+            <!-- Datos -->
+            <div class="col">
+              <div class="text-caption text-grey-5 q-mb-xs">{{ variacionVer.nombre_atributo_variacion }}</div>
+              <div class="text-body1 text-weight-medium q-mb-sm">{{ variacionVer.valor_atributo_variacion }}</div>
+              <div v-if="variacionVer.precio_regular" class="row items-center justify-between">
+                <div class="text-caption text-grey-7">Precio Regular</div>
+                <div class="text-subtitle2 text-weight-bold">{{ formatearPrecio(variacionVer.precio_regular) }}</div>
+              </div>
+              <div v-if="variacionVer.precio_oferta" class="row items-center justify-between q-mt-xs">
+                <div class="text-caption text-orange-7">Precio Oferta</div>
+                <div class="text-subtitle2 text-orange-8">{{ formatearPrecio(variacionVer.precio_oferta) }}</div>
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+
+        <!-- EDIT MODE -->
+        <q-card-section v-else class="q-pt-md">
+          <q-select
+            v-model="variacionVer.uid_producto_padre"
+            :options="opcionesMaestrosCosto"
+            :loading="cargandoMaestrosCosto"
+            label="Producto de Costos *"
+            outlined dense
+            class="q-mb-sm"
+            emit-value map-options
+            use-input fill-input hide-selected
+            input-debounce="250"
+            @filter="filtrarMaestrosCosto"
+          />
+
+          <div class="row items-center justify-between q-mb-xs">
+            <div class="text-caption text-weight-medium">Nombre variación *</div>
+          </div>
+          <q-input v-model="variacionVer.nombre" outlined dense class="q-mb-sm"
+            placeholder="Ej: Miel Silvestre 500g" />
+
+          <div class="row items-center justify-between q-mb-xs">
+            <div class="text-caption text-weight-medium">Tipo de atributo</div>
+          </div>
+          <q-input v-model="variacionVer.nombre_atributo_variacion" outlined dense class="q-mb-sm"
+            placeholder="Ej: Peso, Tamaño, Sabor" />
+
+          <div class="row items-center justify-between q-mb-xs">
+            <div class="text-caption text-weight-medium">Valor del atributo</div>
+          </div>
+          <q-input v-model="variacionVer.valor_atributo_variacion" outlined dense class="q-mb-md"
+            placeholder="Ej: 500g, Grande, Naranja" />
+
+          <div class="text-caption text-weight-medium text-grey-7 q-mb-sm">Precios</div>
+          <div class="row q-col-gutter-sm">
+            <div class="col-12 col-md-6">
+              <q-input v-model.number="variacionVer.precio_regular" label="precio_regular" outlined dense type="number" />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input v-model.number="variacionVer.precio_oferta" label="precio_oferta" outlined dense type="number" />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input v-model="variacionVer.fecha_oferta_desde" label="fecha_oferta_desde" outlined dense type="date" />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input v-model="variacionVer.fecha_oferta_hasta" label="fecha_oferta_hasta" outlined dense type="date" />
+            </div>
+          </div>
+
+          <div class="text-caption text-weight-medium q-mb-sm q-mt-md">Imagen de la variación</div>
+          <div class="row items-center q-gutter-md q-mb-sm">
+            <div class="variacion-popup-thumb" style="cursor: pointer" @click="inputArchivoVariacion?.click()">
+              <img v-if="previewArchivoVariacion" :src="previewArchivoVariacion" alt="" />
+              <div v-else class="column items-center justify-center" style="width:100%;height:100%;">
+                <q-icon name="add_photo_alternate" size="24px" color="grey-4" />
+                <div class="text-caption text-grey-5" style="font-size:9px">Añadir</div>
+              </div>
+            </div>
+            <div v-if="previewArchivoVariacion">
+              <q-btn flat dense no-caps size="xs" icon="close" label="Quitar" color="negative"
+                @click="limpiarArchivoVariacion" />
+            </div>
+          </div>
+          <input
+            ref="inputArchivoVariacion"
+            type="file"
+            style="display:none"
+            accept="image/jpeg,image/png,image/webp"
+            @change="seleccionarArchivoVariacion($event.target.files)"
+          />
+        </q-card-section>
+
+        <q-separator />
+        
+        <!-- ACTIONS -->
+        <q-card-actions align="right" class="q-pa-md">
+          <template v-if="!editandoVariacion">
+            <q-btn flat label="Cerrar" color="grey-7" v-close-popup no-caps />
+            <q-btn unelevated icon="edit" label="Editar esta variación" color="primary" @click="editandoVariacion = true" no-caps />
+          </template>
+          <template v-else>
+            <q-btn flat label="Cancelar" color="grey-7" @click="cancelarEdicionVariacion" no-caps />
+            <q-btn unelevated icon="save" label="Guardar variación" color="orange-9" @click="guardarVariacionInline" :loading="guardandoVariacion" no-caps />
+          </template>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -495,7 +621,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { llamar } from '../../servicios/apiService.js'
+import { llamar, subirArchivo } from '../../servicios/apiService.js'
 
 const route  = useRoute()
 const router = useRouter()
@@ -515,6 +641,20 @@ const multimedia      = ref([])
 const variaciones     = ref([])
 const lightboxAbierto = ref(false)
 const lightboxSrc     = ref('')
+
+const popupVariacionAbierto = ref(false)
+const variacionVer = ref({})
+const editandoVariacion = ref(false)
+const guardandoVariacion = ref(false)
+let variacionBackup = null
+
+const opcionesMaestrosCosto = ref([])
+const maestrosCostoRaw = ref([])
+const cargandoMaestrosCosto = ref(false)
+
+const archivoVariacionLocal = ref(null)
+const previewArchivoVariacion = ref('')
+const inputArchivoVariacion = ref(null)
 
 const esMaestro = computed(() => !producto.value.producto_principal_variacion)
 
@@ -553,7 +693,130 @@ function abrirLightbox (archivo) {
 function irAlCatalogo () { router.push({ name: 'catalogo-productos' }) }
 function irAEditar    () { router.push({ name: 'editar-producto', params: { uid: route.params.uid } }) }
 function irAGaleria   () { router.push({ name: 'editar-producto', params: { uid: route.params.uid }, query: { tab: 'galeria' } }) }
-function irADetalle   (uid) { router.push({ name: 'ver-producto', params: { uid } }) }
+
+async function verVariacion (v) {
+  try {
+    const respuesta = await llamar('comercial', 'productos', 'obtener_producto', { uid: v.uid })
+    if (respuesta?.producto) {
+      variacionVer.value = respuesta.producto
+      variacionBackup = JSON.parse(JSON.stringify(respuesta.producto))
+      const foto = respuesta.multimedia?.find(m => m.uso === 'Variacion')
+      if (foto) {
+        variacionVer.value.miniatura_url = foto.url_publica_calculada || foto.archivo_local
+        previewArchivoVariacion.value = variacionVer.value.miniatura_url
+      } else {
+        previewArchivoVariacion.value = ''
+      }
+      archivoVariacionLocal.value = null
+      editandoVariacion.value = false
+      popupVariacionAbierto.value = true
+      
+      if (maestrosCostoRaw.value.length === 0) {
+        consultarMaestrosCosto()
+      }
+    }
+  } catch (error) {
+    $q.notify({ type: 'negative', message: `Error cargando variación: ${error.message}` })
+  }
+}
+
+function cancelarEdicionVariacion () {
+  if (variacionBackup) {
+    Object.assign(variacionVer.value, JSON.parse(JSON.stringify(variacionBackup)))
+  }
+  editandoVariacion.value = false
+  limpiarArchivoVariacion()
+}
+
+function seleccionarArchivoVariacion (archivos) {
+  if (!archivos || archivos.length === 0) return
+  const arch = archivos[0]
+  archivoVariacionLocal.value = arch
+  previewArchivoVariacion.value = URL.createObjectURL(arch)
+}
+
+function limpiarArchivoVariacion () {
+  archivoVariacionLocal.value = null
+  previewArchivoVariacion.value = ''
+  if (variacionVer.value.miniatura_url) {
+    previewArchivoVariacion.value = variacionVer.value.miniatura_url
+  }
+  if (inputArchivoVariacion.value) inputArchivoVariacion.value.value = ''
+}
+
+async function guardarVariacionInline () {
+  if (!variacionVer.value.nombre) {
+    $q.notify({ type: 'warning', message: 'El nombre de la variación es requerido' })
+    return
+  }
+  guardandoVariacion.value = true
+  try {
+    const respuesta = await llamar('comercial', 'productos', 'guardar_producto', variacionVer.value)
+    if (respuesta?.exito) {
+      if (archivoVariacionLocal.value) {
+        await subirArchivo(archivoVariacionLocal.value, 'comercial', variacionVer.value.uid, {
+          uso: 'Variacion',
+          uid_producto_padre: producto.value.uid,
+          titulo: variacionVer.value.nombre
+        })
+      }
+      
+      $q.notify({ type: 'positive', message: 'Variación guardada', icon: 'check' })
+      variacionBackup = JSON.parse(JSON.stringify(respuesta.datos))
+      editandoVariacion.value = false
+      
+      // Refrescar el detalle para traer imagen nueva
+      await cargarProducto()
+      await cargarMultimedia()
+      await cargarVariaciones()
+      
+      // Update ui in popup
+      const newFoto = multimedia.value.find(m => m.uid_producto === variacionVer.value.uid && m.uso === 'Variacion')
+      if (newFoto) {
+        variacionVer.value.miniatura_url = newFoto.url_publica_calculada || newFoto.archivo_local
+        previewArchivoVariacion.value = variacionVer.value.miniatura_url
+      }
+    }
+  } catch (error) {
+    $q.notify({ type: 'negative', message: 'Error al guardar: ' + error.message })
+  } finally {
+    guardandoVariacion.value = false
+  }
+}
+
+async function consultarMaestrosCosto () {
+  cargandoMaestrosCosto.value = true
+  try {
+    const respuesta = await llamar('comercial', 'productos', 'listar_productos', { soloMaestros: true, todo: true })
+    if (respuesta?.productos) {
+      maestrosCostoRaw.value = respuesta.productos
+        .filter(p => !p.producto_principal_variacion)
+        .map(p => ({
+          label: `${p.nombre} | Cod: ${p.uid}`,
+          value: p.uid
+        }))
+      opcionesMaestrosCosto.value = maestrosCostoRaw.value
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    cargandoMaestrosCosto.value = false
+  }
+}
+
+function filtrarMaestrosCosto (val, update) {
+  if (val === '') {
+    update(() => { opcionesMaestrosCosto.value = maestrosCostoRaw.value })
+    return
+  }
+  update(() => {
+    const aguja = val.toLowerCase()
+    opcionesMaestrosCosto.value = maestrosCostoRaw.value.filter(
+      o => o.label.toLowerCase().includes(aguja)
+    )
+  })
+}
+
 
 // ── Carga de datos ───────────────────────────────────────────────
 async function cargarProducto () {
@@ -758,7 +1021,8 @@ onMounted(cargarProducto)
   border-radius: 16px;
   padding: 20px 24px;
   border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s;
 }
 
 // ── Encabezados de sección ────────────────────────────────────────
@@ -778,11 +1042,11 @@ onMounted(cargarProducto)
   }
 
   &__titulo {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10.5px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: #9A9A9A;
+    letter-spacing: 1px;
+    color: #AAAAAA;
     white-space: nowrap;
   }
 
@@ -808,11 +1072,11 @@ onMounted(cargarProducto)
 }
 
 .campo-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #AAAAAA;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #BBBBBB;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   flex-shrink: 0;
   min-width: 110px;
 }
@@ -847,14 +1111,22 @@ onMounted(cargarProducto)
     flex-direction: column;
   }
 
-  &__imagen {
+  &__foto-col {
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__imagen {
     width: 160px;
     height: 160px;
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
     background: #F8F7F5;
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
     position: relative;
     display: flex;
     align-items: center;
@@ -865,13 +1137,13 @@ onMounted(cargarProducto)
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: transform 0.25s;
+      transition: transform 0.28s ease;
     }
 
     &--clic {
       cursor: pointer;
       &:hover {
-        img { transform: scale(1.04); }
+        img { transform: scale(1.05); }
         .identif-hero__zoom { opacity: 1; }
       }
     }
@@ -880,7 +1152,7 @@ onMounted(cargarProducto)
   &__zoom {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.30);
+    background: rgba(0, 0, 0, 0.28);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -899,7 +1171,23 @@ onMounted(cargarProducto)
     font-weight: 700;
     text-align: center;
     padding: 4px 0;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  &__caption {
+    font-size: 9.5px;
+    font-weight: 500;
+    color: #AAAAAA;
+    letter-spacing: 0.25px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__placeholder {
@@ -940,24 +1228,26 @@ onMounted(cargarProducto)
 
 .galeria-item {
   position: relative;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 1;
   background: #F8F7F5;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s, transform 0.2s;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.2s;
+    transition: transform 0.28s ease;
   }
 
   &__zoom {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.30);
+    background: rgba(0, 0, 0, 0.26);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -965,26 +1255,34 @@ onMounted(cargarProducto)
     transition: opacity 0.2s;
   }
 
+  // Caption del nombre_archivo: flotante en la parte inferior, ultra-minimalista
   &__nombre {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(2px);
-    padding: 6px 4px;
-    font-size: 10px;
-    color: #7A7A7A;
+    background: rgba(255, 255, 255, 0.93);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 5px 8px;
+    font-size: 9.5px;
+    font-weight: 500;
+    color: #8A8A8A;
+    letter-spacing: 0.2px;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    border-top: 1px solid #eee;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &:hover {
-    img { transform: scale(1.04); }
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+    img { transform: scale(1.05); }
     .galeria-item__zoom { opacity: 1; }
   }
 }
@@ -1039,22 +1337,57 @@ onMounted(cargarProducto)
 }
 
 .variacion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   border: 1px solid #F0EDE8;
   margin-bottom: 6px;
-  transition: all 0.15s;
+  transition: all 0.18s;
 
   &:last-child { margin-bottom: 0; }
 
   &:hover {
-    border-color: #E8750A;
-    background: #FFF8F0;
+    border-color: rgba(232, 117, 10, 0.30);
+    background: rgba(232, 117, 10, 0.03);
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(232, 117, 10, 0.06);
   }
 
+  &__thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #EBEBEB;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F7F5F2;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__info { flex: 1; min-width: 0; }
   &__nombre { font-size: 13px; font-weight: 600; color: #2A2A2A; }
   &__atributo { margin-top: 2px; }
   &__precio { color: #3A7A35; font-weight: 600; }
+}
+
+// Thumbnail encuadrado para los popups de variación (tanto lectura como edición)
+.variacion-popup-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  border: 1px solid #EBEBEB;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F7F5F2;
+  img { width: 100%; height: 100%; object-fit: cover; }
 }
 </style>

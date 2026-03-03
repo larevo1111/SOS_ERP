@@ -100,6 +100,11 @@ Si `cargarProducto` solo tiene un `console.log` pero **no llama** a la API, el f
   **Causa**: La consulta SQL del listado tenía una subquery que referenciaba una tabla o columna que no existe en ese ambiente de base de datos.
   **Solución**: Eliminar la subquery y usar solo columnas explícitas de la tabla principal. Las imágenes de portada solo se recuperan en la vista de detalle (`obtener_producto`).
 
-- **El formulario de edición aparece vacío al abrir un producto existente**
   **Causa**: Las funciones `cargarProducto`, `cargarMultimedia` y `cargarVariaciones` en el componente Vue eran placeholders (`TODO`) que nunca hacían ninguna llamada al API.
   **Solución**: Implementar `cargarProducto` para que llame a `obtener_producto` y luego use `Object.assign(producto.value, respuesta.producto)` para poblar el formulario con los datos.
+
+- **Los Productos Maestros desaparecen del Listado Principal**
+  **Causa**: Filtrar los maestros en el backend (`ListarProductos`) exigiendo que `uid_producto_padre IS NULL`. En la arquitectura del ERP comercial:
+    - `uid_producto_padre`: Define el **Producto de Costos / Receta Base** (ej. `PTCre_CHOOS90GRS_12`). Los Maestros SÍ pueden y suelen tener este campo lleno.
+    - `producto_principal_variacion`: Define al **Padre de WooCommerce** si el registro es una Variación. 
+  **Solución**: Para filtrar Maestros reales, la cláusula SQL solo debe exigir `(producto_principal_variacion IS NULL OR producto_principal_variacion = '')`. ¡Nunca involucrar `uid_producto_padre` en esta jerarquía visual!

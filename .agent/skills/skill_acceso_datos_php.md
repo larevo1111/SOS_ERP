@@ -12,6 +12,7 @@ Este skill explica cómo interactuar con MariaDB desde el código PHP del ERP, a
 - **Error `ATTR_ERRMODE`**: Ojo con el typo común `ATTR_ERR_MODE` (incorrecto).
 - **Campos NOT NULL sin Default (Error 1364)**: Si una tabla heredada exige un valor (como `url_producto`), el desarrollador debe asegurarse de enviarlo en el `INSERT` o pedirle a Santi estandarizar la tabla con un `DEFAULT` si aplica.
 - **Rutas en Scripts Temporales**: Al ejecutar scripts desde la consola, asegurarse de usar rutas absolutas para los `require_once`.
+- **Reutilización de Parámetros Nombrados (Error `Invalid parameter number`)**: PDO en MariaDB puede fallar estructuralmente si se usa el mismo placeholder (ej. `:uid`) múltiples veces en una consulta (`WHERE a = :uid OR b = :uid`). *Solución*: Usar nombres únicos (`:uid1`, `:uid2`) y pasarlos todos en el `execute()`.
 
 ## Ejemplos de código correcto
 Conexión y consulta preparada:

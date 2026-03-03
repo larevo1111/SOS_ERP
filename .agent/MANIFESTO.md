@@ -9,10 +9,11 @@
 
 ## 2. Reglas de Oro 5S (Blindaje Absoluto)
 1. **Regla de Oro de Claridad (Stop & Ask)**: Prohibido suponer o inventar. Si un plan o instrucción no es 100% explícito: **DETENTE Y PREGUNTA A SANTI**.
-2. **Protocolo de Diseño Visual (Cero Asunciones)**: Antes de comenzar a codificar vistas complejas (como formularios principales o dashboards), **DEBE** existir un acuerdo claro sobre la estructura del frontend (boceto provisto por Santi). La Arquitecta no debe asumir cómo distribuir la interfaz. Si no hay un norte estructural claro, es obligatorio detenerse y solicitar el boceto estructural físico o bosquejo antes de diseñar el plan.
-3. **Protocolo de Comunicación con el Director**: Siempre explicar "Qué se hizo" y "Cómo afecta al negocio" usando analogías o ejemplos, evitando jerga técnica (o explicándola entre paréntesis si es vital).
-4. **Protocolo de Asignación**: Todo trabajo se basa en un plan en `.agent/planes/`. Se debe referenciar obligatoriamente la `GUIA_ESTILOS.md` y `Skills` relevantes.
-5. **Privacidad y Seguridad — Credenciales Sensibles (⚠️ CRÍTICO)**:
+2. **Mandato de Lectura de Skills (Paso Cero)**: ANTES de empezar a programar, modificar base de datos o ejecutar cualquier tarea, es **OBLIGATORIO** buscar y leer el archivo de la Skill correspondiente en `.agent/skills/`. Ignorar esto causa redundancia y rompe la arquitectura.
+3. **Protocolo de Diseño Visual (Cero Asunciones)**: Antes de comenzar a codificar vistas complejas (como formularios principales o dashboards), **DEBE** existir un acuerdo claro sobre la estructura del frontend (boceto provisto por Santi). La Arquitecta no debe asumir cómo distribuir la interfaz. Si no hay un norte estructural claro, es obligatorio detenerse y solicitar el boceto estructural físico o bosquejo antes de diseñar el plan.
+4. **Protocolo de Comunicación con el Director**: Siempre explicar "Qué se hizo" y "Cómo afecta al negocio" usando analogías o ejemplos, evitando jerga técnica (o explicándola entre paréntesis si es vital).
+5. **Protocolo de Asignación**: Todo trabajo se basa en un plan en `.agent/planes/`. Se debe referenciar obligatoriamente la `GUIA_ESTILOS.md` y `Skills` relevantes.
+6. **Privacidad y Seguridad — Credenciales Sensibles (⚠️ CRÍTICO)**:
    - **NUNCA** escribir en código fuente, chats, planes, PRs, ni walkthroughs: contraseñas, API keys, JWT secrets, Client IDs/Secrets de OAuth, llaves de R2/Cloudflare, o cadenas de conexión a BD.
    - La **única residencia permitida** de credenciales es el archivo `.env` de cada ambiente (protegido por `.gitignore`).
    - Si un agente necesita una credencial para operar, debe pedírsela a Santi para que él la configure en el `.env` local. El agente nunca debe recibir credenciales en el chat ni hardcodearlas.

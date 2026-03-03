@@ -28,10 +28,14 @@ class ListarProductos
 
         $sql = "SELECT p.uid, p.nombre, p.categoria, p.marca, p.precio_regular,
                 p.estado, p.estado_publicacion, p.producto_principal_variacion,
+                p.nombre_atributo_variacion, p.valor_atributo_variacion,
                 p.empresa, p.fecha_creacion,
                 (SELECT archivo_local FROM com_productos_multimedia
                  WHERE uid_producto = p.uid AND uso = 'Principal' AND estado = 'Activo'
-                 LIMIT 1) AS foto_principal_local
+                 LIMIT 1) AS foto_principal_local,
+                (SELECT archivo_local FROM com_productos_multimedia
+                 WHERE uid_producto = p.uid AND uso = 'Variacion' AND estado = 'Activo'
+                 LIMIT 1) AS miniatura_local
                 FROM com_productos p
                 WHERE p.empresa = :empresa";
 
@@ -58,7 +62,7 @@ class ListarProductos
         }
 
         if ($soloMaestros) {
-            $sql .= " AND p.producto_principal_variacion IS NULL";
+            $sql .= " AND (p.producto_principal_variacion IS NULL OR p.producto_principal_variacion = '')";
         }
 
         $sql .= " ORDER BY p.fecha_creacion DESC";
@@ -81,6 +85,12 @@ class ListarProductos
                 ? $r2BaseUrl . '/' . $item['foto_principal_local']
                 : null;
             unset($item['foto_principal_local']);
+
+            // Miniatura de variación (usada en el panel de variaciones del Detalle)
+            $item['miniatura_url'] = !empty($item['miniatura_local'])
+                ? $r2BaseUrl . '/' . $item['miniatura_local']
+                : null;
+            unset($item['miniatura_local']);
         }
         unset($item);
 

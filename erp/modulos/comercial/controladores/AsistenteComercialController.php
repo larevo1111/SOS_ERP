@@ -108,30 +108,21 @@ function llamarGemini(array $contexto): array
         ];
     }
 
-    // Construir prompt con el contexto recibido
-    $nombreAtributo = $contexto['nombre_atributo_variacion'] ?? '';
-    $valorAtributo = $contexto['valor_atributo_variacion'] ?? '';
-    $nombreProductoCostos = $contexto['uid_producto_padre_nombre'] ?? '';
-    $nombreActual = $contexto['nombre_actual'] ?? '';
-    $campoObjetivo = $contexto['campo_peticion'] ?? 'nombre';
+    // Extraer la instrucción rica provista por el frontend
+    $instruccionCustom = $contexto['instruccion'] ?? 'Sugiere los mejores datos para este campo.';
 
     $prompt = <<<PROMPT
-Eres un asistente de datos experto para Origen Silvestre, una empresa colombiana de alimentos artesanales y naturales.
-Tu tarea es sugerir valores coherentes para campos de productos basados en el contexto de su "Matriz de Costos" de origen.
+Eres un asistente experto para el ERP de Origen Silvestre.
+Instrucciones específicas para esta tarea:
+{$instruccionCustom}
 
-Contexto actual:
-- Producto base (Matriz de Costos): "{$nombreProductoCostos}"
-- Nombre escrito por el usuario: "{$nombreActual}"
-- Atributo: "{$nombreAtributo}" | Valor: "{$valorAtributo}"
-
-Campo que debes sugerir: "{$campoObjetivo}"
-
-Reglas de Sugerencia:
-1. CRÍTICO: Si "Producto base" está vacío o no se provee, tu sugerencia debe estar vacía y la "nota" debe pedirle al usuario amigablemente que primero seleccione un "Producto de costos".
-2. Si pido "nombre": Combina el producto base con el valor/atributo. Ej: "Miel Silvestre" + "500g" -> "Miel Silvestre 500g".
-3. Si pido "nombre_grupo_catalogo": Debe ser el nombre del grupo/familia General, sin pesos ni medidas específicas. Ej: "Miel Silvestre 300g" -> "Miel Silvestre". "Miel de Abejas con Jengibre 250ml" -> "Miel de Abejas con Jengibre".
-4. Si pido "valor_atributo_variacion": Normaliza unidades eliminando puntos y estandarizando. Ej: "grs" -> "g", "ml." -> "ml", "500 gr" -> "500g".
-5. Responde ÚNICAMENTE en JSON válido con esta estructura estricta: {"sugerencia":"...", "nota":"..."}. Nada de texto adicional antes ni después.
+REGLA DE FORMATO ESTRICTA:
+Responde ÚNICAMENTE en JSON válido con esta estructura exacta:
+{
+  "sugerencia": "(la sugerencia final aquí)",
+  "nota": "(breve motivación de tu respuesta o mensaje amigable, puedes dejarlo vacío)"
+}
+Nada de texto adicional antes ni después.
 PROMPT;
 
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . urlencode($apiKey);

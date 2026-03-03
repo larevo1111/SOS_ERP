@@ -1,0 +1,1 @@
+import{b as t}from"./index-3fevySbJ.js";import{L as e}from"./index.esm-BfKjwhX4.js";import"./index-CwOH10U-.js";const m=t(({app:o})=>{o.use(e,{clientId:"290093919454-j2l1el0p624v65cada556pdc3r2gm6k7.apps.googleusercontent.com"})});export{m as default};
