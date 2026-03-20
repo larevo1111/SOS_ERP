@@ -1,5 +1,31 @@
 # Manifiesto Operativo: Protocolo de Agentes ERP Origen Silvestre [5S]
 
+---
+
+## ⚠️ REPO DESCARTADO — 2026-03-20
+
+Este proyecto fue **abandonado formalmente** el 2026-03-20.
+
+**Motivo:** El stack PHP + entornos dev/prod separados en Hostinger resultó demasiado complejo para la operación real. Se decidió migrar a Python (igual que Integraciones_OS), corriendo scripts directamente en el servidor local con acceso a BDs locales y de Hostinger. Sin bifurcación de ambientes.
+
+**Lo que se rescató (llevado al nuevo repo del ERP):**
+- Schema SQL de `com_productos`, `com_marcas`, `com_productos_multimedia`
+- Arquitectura de variaciones Master/Hijo (`nombre_grupo_catalogo`, `producto_principal_variacion`)
+- Filosofía de multimedia: rutas relativas en BD + Cloudflare R2 (ver `skills/skill_multimedia_r2.md`)
+- Patrón UX de edición in-situ de variaciones (ver `skills/skill_subregistros_variaciones.md`)
+
+**Nombres actuales de todos los artefactos:**
+
+| Artefacto | Nombre anterior | Nombre actual |
+|---|---|---|
+| Repo GitHub | `larevo1111/SOS_ERP` | `larevo1111/SOS_ERP_descartado` |
+| Carpeta local | `Proyectos_Antigravity/SOS_ERP/` | `Proyectos_Antigravity/SOS_ERP_descartado/` |
+| Carpeta Hostinger | `public_html/erp/` | `public_html/erp_descartado/` |
+
+**Continuación:** El nuevo ERP se construye en un repo separado, stack Python + Node + Quasar, mismo ADN que Integraciones_OS.
+
+---
+
 ## 1. Identidad y Jerarquía (Autoridad Operativa)
 - **Santi (Santiago)**: **Director y Dueño**. Su aprobación es la ley. Tiene autonomía total para operar el sistema siguiendo el **[Manual de Uso Autónomo](./skills/skill_navegacion_autonoma.md)** y publicar versiones mediante el **[Manual de Despliegue](./skills/skill_despliegue_produccion.md)**.
 - **Arquitecta (AntiGravity/Madrina)**: **Autoridad de Diseño**. Única autorizada para crear planes, definir estructuras (DB, API, carpetas) y tomar decisiones técnicas. Los constructores no pueden alterar el diseño sin su aval.
@@ -87,39 +113,53 @@ Para garantizar que el ecosistema (Hostinger, Ubuntu Local, Windows 11) se mante
 
 ---
 
-## 7. Protocolo de trabajo por tareas
+## 7. Protocolo de Trabajo y Responsabilidad Autónoma de Agentes
 
-### Flujo estándar
+El flujo de trabajo es colaborativo e incremental. Todo agente (Claude Code, Codex, AntiGravity) tiene la **OBLIGACIÓN ESTRICTA** de gestionar su propio rastro temporal y documental.
 
-1. **AntiGravity** crea el plan en un archivo `PLAN_nombre.md` con tareas usando `- [ ]`.
-2. **Santi aprueba** el plan en el chat antes de que cualquier constructor ejecute.
-3. **Claude Code** lee el plan, revisa el repositorio y construye el código.
-4. Al completar cada tarea, Claude Code (o Codex):
-   - Marca el checkbox como `- [x]`
-   - Actualiza `CONTEXTO_ACTIVO.md` (incluyendo su nombre en el historial y en 'Madrina a cargo')
-   - Entrega: archivo principal + SQL si aplica + rutas actualizadas
+### 7.1 Responsabilidades Ineludibles de CADA Agente (Incluyendo a la Arquitecta)
 
-5. **Regla de Sincronización Estricta (Bloqueo de Falsas Esperanzas)**: Ningún agente (especialmente la Madrina Arquitecta) puede dar instrucciones, "luz verde" o comandos para otros agentes si el código o los planes **no han sido subidos exitosamente al repositorio remoto mediante `git push`**. El agente debe esperar a verificar la salida exitosa del comando push ANTES de decirle a Santi "ya puedes activar al otro agente".
+1. **Checklist de Planes**: A medida que un agente ejecuta una tarea de un plan (`PLAN_nombre.md` o `PLAN_GENERAL_2026.md`), es SU responsabilidad directa editar el archivo del plan y marcar la tarea como completada (`- [x]`) inmediatamente después de probar que funciona.
+2. **Actualización del `CONTEXTO_ACTIVO.md`**: 
+   - El agente debe registrar qué hizo, de forma corta y concisa.
+   - **Regla de Respeto**: Leer antes de escribir. NUNCA borrar el contexto o anotaciones útiles dejadas por otro agente, a menos que la tarea esté 100% finalizada y se requiera limpieza de fin de ciclo.
+   - Colocar la información donde pertenece (tareas en planes, errores en bitácora, estado actual en contexto).
+3. **El Mandamiento de Git Push**: NINGÚN agente termina su turno de trabajo sin ejecutar `git add`, `git commit` y `git push` a la rama principal. Todo código, documentación o contexto modificado debe ser respaldado en Git inmediatamente. Esto aplica para **todos**, incluida la Madrina Arquitecta.
+4. **Bitácora de Transferencia (Entrega de Turno)**: En el `CONTEXTO_ACTIVO.md`, el agente saliente debe dejar una sección clara para el siguiente agente indicando: qué falta, quién asume (el nombre del siguiente agente de ser aplicable) y cualquier bloqueo actual.
 
-6. **Confianza en la Arquitectura (Regla 5S)**: Si la Madrina Arquitecta ya detalló estructuras de tablas, estados del entorno o variables en el `PLAN_nombre.md` o `CONTEXTO_ACTIVO.md`, el Constructor debe confiar en esa investigación. Está prohibido ejecutar comandos de verificación redundantes que interrumpan al usuario con permisos de Bash innecesarios o consuman tokens repitiendo lo que ya se documentó.
+### 7.2 El Manifiesto es Sagrado (Regla de Modificación)
 
-### Estados de tarea
+> ⚠️ **NORMA DE INVIOLABILIDAD:** Los agentes constructores (Claude Code, Codex, etc.) tienen **PROHIBIDO** modificar este archivo `MANIFESTO.md`. 
+- Este documento es de autoridad exclusiva de la **Arquitecta (AntiGravity)** y Santi.
+- Si un agente detecta que el Manifiesto necesita una actualización (nuevas reglas, convenciones descubiertas), debe crear un punto en el `CONTEXTO_ACTIVO.md` bajo el título **"Solicitud de Actualización de Manifiesto"** explicando la necesidad, para que la Arquitecta o Santi lo aprueben y ejecuten.
 
-- `- [ ]` → Pendiente, definida por el Arquitecto, esperando aprobación o ejecución.
-- `- [x]` → Completada. Solo se marca si el código está implementado y sin errores sintácticos.
-- `> BLOQUEO: descripción` → El constructor encontró un impedimento. No marca la tarea. El Arquitecto resuelve en la siguiente iteración.
+### Flujo Estándar de Ejecución
 
-### Regla de bloqueos
+1. **AntiGravity** crea/refina el plan (`PLAN_nombre.md`).
+2. **Santi aprueba**.
+3. **Agente Asignado (Claude Code/etc.)**:
+   - Lee: `MANIFESTO.md`, `CONTEXTO_ACTIVO.md`, Plan y Skills relevantes.
+   - Ejecuta el código.
+   - Marca `- [x]` en el plan.
+   - Actualiza `CONTEXTO_ACTIVO.md` (Registra el éxito y el próximo paso).
+   - Documenta en `.agent/bitacora_errores.md` si hubo problemas.
+   - Ejecuta `git add .`, `git commit -m "..."`, `git push`.
+   - Reporta a Santi el éxito de la subida a Git.
 
-Cuando un constructor encuentra un problema que no puede resolver solo, agrega debajo de la tarea:
+4. **Regla de Sincronización Estricta (Bloqueo de Falsas Esperanzas)**: Ningún agente puede dar instrucciones, "luz verde" o comandos para otros agentes si el código o los planes **no han sido subidos exitosamente al repositorio remoto mediante `git push`**. 
 
-```
-> BLOQUEO: [explicación clara en español, sin tecnicismos, con ejemplo si aplica]
-```
+5. **Confianza en la Arquitectura (Regla 5S)**: Si la Madrina ya detalló estructuras en el plan o contexto, el Constructor debe confiar. Está prohibido ejecutar comandos de verificación redundantes que interrumpan o consuman tokens repitiendo cosas.
+
+### Estados de Tarea en Planes
+
+- `- [ ]` → Pendiente.
+- `- [/]` → En progreso por un agente específico.
+- `- [x]` → Completada y subida a Git.
+- `> BLOQUEO: descripción` → El agente encontró un impedimento. El Arquitecto resuelve en la siguiente iteración.
 
 ---
 
-## 8. Protocolo de conflictos
+## 8. Protocolo de Conflictos
 
 Si Claude Code encuentra que lo que AntiGravity diseñó no encaja con lo que existe en el repositorio:
 
@@ -140,7 +180,19 @@ Ventas, Compras, Inventario, Producción, Costos, CRM, Logística, Tareas.
 Seguridad y Empresas como módulos transversales en infraestructura.
 
 > **Nota:** Costos y Producción permanecen en AppSheet sin modificaciones.
-> El desarrollo activo comienza con la integración WooCommerce, luego el módulo Ventas.
+## 10. Visión Tecnológica 2026 (Roadmap Pre-ERP y BI)
+
+> ⚠️ **ACLARACIÓN CRÍTICA DE FASE:** Actualmente **NO** se está desarrollando el ERP completo. Estamos en una fase de **Pre-ERP**, cuyo objetivo único es la centralización de información dispersa para Inteligencia de Negocios (BI) e integración operativa.
+
+El sistema evoluciona según el **[PLAN_GENERAL_2026.md](./planes/PLAN_GENERAL_2026.md)** y la **[Arquitectura 2026](./diseno/arquitectura_2026.md)** hacia una infraestructura más robusta:
+
+1. **Soberanía de Datos y Stack Híbrido (Adiós N8N)**: Las automatizaciones complejas se migran de N8N a un orquestador central en **Python**. Sin embargo, para tareas de extracción de datos (scraping/automatización de UI) con Playwright, se utilizará estrictamente **JavaScript (JS)**, aprovechando que es su SDK principal y ha demostrado alta estabilidad funcional en el ecosistema. Python orquestará la ejecución de estos scripts JS y procesará la información.
+2. **Integración CRM-ERP (EspoCRM ↔ EFI)**: Sincronización bidireccional de contactos y clientes. Los datos creados en EspoCRM deben fluir hacia EFI y viceversa mediante scripts de Python.
+3. **Capa de Inteligencia de Negocio (BI)**:
+   - **Vistas SQL**: La base de datos MariaDB es el motor central. Se crean vistas especializadas para Ventas, Producción y Costos.
+   - **AppSheet**: Se utiliza como la interfaz principal de visualización rápida y toma de datos en campo.
+   - **Metabase**: Herramienta de BI para dashboards complejos y análisis profundo de datos.
+4. **Asistente Digital (Bot de Telegram)**: El bot evoluciona de ser una herramienta de notificaciones a un asistente inteligente conectado a la base de datos y potenciado por IA (Claude/ChatGPT) para consultas en lenguaje natural.
 
 ---
 
@@ -154,6 +206,7 @@ Antes de proponer o ejecutar cualquier cosa, leer en este orden:
 4. Los archivos del repositorio relevantes a la tarea
 5. `.agent/diseno/GUIA_ESTILOS.md` → obligatorio antes de tocar cualquier archivo del frontend
 6. **[README_SKILLS.md](./skills/README_SKILLS.md)** → Catálogo Maestro de Skills (Obligatorio)
+7. **[skill_base_datos_effi.md](./skills/skill_base_datos_effi.md)** → Obligatorio si la tarea involucra datos de EFI (ventas, compras, inventario, clientes)
 ---
 
 ## 6.1 Prefijos de tablas por módulo
